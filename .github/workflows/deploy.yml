@@ -2,7 +2,8 @@ name: Deploy MyHireShield
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -15,9 +16,15 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            # Project folder mein jana
             cd /var/www/myhireshield
+            
+            # GitHub se naya code khinchna
             git pull origin main
+            
+            # Server setup
             cd server
             npm install
-            # Backend restart ke liye
-            pm2 restart all || pm2 start server.js --name "hireshield-server"
+            
+            # PM2 se restart karna
+            pm2 restart hireshield-api || pm2 start server.js --name "hireshield-api"
