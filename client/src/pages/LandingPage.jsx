@@ -79,7 +79,7 @@ const LandingPage = () => {
             <div className="animate-on-scroll">
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                 Empowering Employers.
-                <span className="block text-gradient">Protecting Futures sTu.</span>
+                <span className="block text-gradient">Protecting Futures.</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 Make smarter hiring decisions with verified employee backgrounds, authentic reviews, 
