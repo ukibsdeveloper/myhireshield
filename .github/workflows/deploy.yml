@@ -1,0 +1,35 @@
+name: Deploy MERN App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # 1. Project folder mein jana
+            cd /var/www/myhireshield || mkdir -p /var/www/myhireshield && cd /var/www/myhireshield
+            
+            # 2. Agar folder khali hai toh clone karein, warna pull karein
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git clone https://github.com/ukibsdeveloper/myhireshield-mern.git .
+            fi
+            
+            # 3. Backend setup aur restart
+            cd server
+            npm install
+            pm2 restart myhireshield-api || pm2 start server.js --name "myhireshield-api"
