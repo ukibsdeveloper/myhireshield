@@ -88,7 +88,7 @@ export const emailTemplates = {
             <p>If you have any questions, feel free to reach out to our support team.</p>
           </div>
           <div class="footer">
-            <p>&copy; 2025 MyHireShield. All rights reserved.</p>
+            <p>&copy; 2026 MyHireShield. All rights reserved.</p>
             <p>Empowering Employers. Protecting Futures.</p>
           </div>
         </div>
@@ -133,7 +133,7 @@ export const emailTemplates = {
             </div>
           </div>
           <div class="footer">
-            <p>&copy; 2025 MyHireShield. All rights reserved.</p>
+            <p>&copy; 2026 MyHireShield. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -177,7 +177,7 @@ export const emailTemplates = {
             </div>
           </div>
           <div class="footer">
-            <p>&copy; 2025 MyHireShield. All rights reserved.</p>
+            <p>&copy; 2026 MyHireShield. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -223,7 +223,7 @@ export const emailTemplates = {
             <a href="${process.env.FRONTEND_URL}/dashboard/employee" class="button">View Review</a>
           </div>
           <div class="footer">
-            <p>&copy; 2025 MyHireShield. All rights reserved.</p>
+            <p>&copy; 2026 MyHireShield. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -265,7 +265,7 @@ export const emailTemplates = {
             <a href="${process.env.FRONTEND_URL}/dashboard/employee" class="button">View Dashboard</a>
           </div>
           <div class="footer">
-            <p>&copy; 2025 MyHireShield. All rights reserved.</p>
+            <p>&copy; 2026 MyHireShield. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -313,7 +313,7 @@ export const emailTemplates = {
             <a href="${process.env.FRONTEND_URL}/verification/upload" class="button">Upload New Document</a>
           </div>
           <div class="footer">
-            <p>&copy; 2025 MyHireShield. All rights reserved.</p>
+            <p>&copy; 2026 MyHireShield. All rights reserved.</p>
           </div>
         </div>
       </body>

@@ -2,23 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-/* MyHireShield - Custom Styles */
-
 @layer base {
-  * {
-    @apply box-border;
-  }
-  
-  html {
-    @apply scroll-smooth;
-  }
-  
   body {
-    @apply font-sans text-gray-900 bg-gray-50;
+    @apply font-sans text-slate-900 bg-[#f8fafc];
   }
 }
 
 @layer components {
+  /* ADVANCED GLASS CARD */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-2xl;
+  }
+
+  /* NEW BUTTON THEME (Matching Logo) */
+  .btn-premium-green {
+    @apply bg-[#4CAF50] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#43a047] transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-[#4CAF50]/30;
+  }
+
+  .btn-premium-red {
+    @apply bg-[#EF5350] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#e53935] transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-[#EF5350]/30;
+  }
+
+  /* TEXT GRADIENT */
+  .text-trust {
+    @apply bg-gradient-to-r from-[#4CAF50] to-[#EF5350] bg-clip-text text-transparent;
+  }
+
   /* Buttons */
   .btn {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 inline-flex items-center justify-center gap-2;
