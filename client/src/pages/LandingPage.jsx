@@ -43,7 +43,7 @@ const LandingPage = () => {
 
             {/* Desktop Menu */}
             <ul className="hidden md:flex items-center gap-8">
-              <li><a href="#features" className="navbar-link">Feature</a></li>
+              <li><a href="#features" className="navbar-link">Features</a></li>
               <li><a href="#how-it-works" className="navbar-link">How It Works</a></li>
               <li><a href="#pricing" className="navbar-link">Pricing</a></li>
               {isAuthenticated ? (
@@ -83,7 +83,7 @@ const LandingPage = () => {
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 Make smarter hiring decisions with verified employee backgrounds, authentic reviews, 
-                and comprehensive verification reports. Like CIBIL score for employment.
+                and comprehensive verification reports. Like CIBIL score for employ.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
