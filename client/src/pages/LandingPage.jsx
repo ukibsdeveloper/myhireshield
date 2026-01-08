@@ -43,7 +43,7 @@ const LandingPage = () => {
 
             {/* Desktop Menu */}
             <ul className="hidden md:flex items-center gap-8">
-              <li><a href="#features" className="navbar-link">Features</a></li>
+              <li><a href="#features" className="navbar-link">Feature</a></li>
               <li><a href="#how-it-works" className="navbar-link">How It Works</a></li>
               <li><a href="#pricing" className="navbar-link">Pricing</a></li>
               {isAuthenticated ? (
