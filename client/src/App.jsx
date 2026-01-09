@@ -84,8 +84,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register/company" element={<PublicRoute><RegisterCompany /></PublicRoute>} />
-        <Route path="/register/employee" element={<PublicRoute><RegisterEmployee /></PublicRoute>} />
-        
+        <Route 
+          path="/add-employee" 
+          element={<ProtectedRoute allowedRoles={['company']}><AddEmployee /></ProtectedRoute>} 
+        />
         {/* Legal & Shared Pages */}
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />

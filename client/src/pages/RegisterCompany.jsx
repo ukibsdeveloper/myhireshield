@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authAPI } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 const RegisterCompany = () => {
   const navigate = useNavigate();
+  const { registerCompany } = useAuth(); // Context se method liya
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // ORIGINAL BACKEND INTEGRATED STATE
+  // FLAT STATE FOR EASY INPUT HANDLING
   const [formData, setFormData] = useState({
     companyName: '',
     email: '',
@@ -40,14 +41,17 @@ const RegisterCompany = () => {
     setError('');
   };
 
-  // ORIGINAL VALIDATION LOGIC
+  // VALIDATION LOGIC
   const validateStep1 = () => {
     if (!formData.companyName.trim()) { setError('Company name is required'); return false; }
     if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) { setError('Valid company email is required'); return false; }
+    
+    // Optional: Personal email restriction
     const personalDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
     const domain = formData.email.split('@')[1];
     if (personalDomains.includes(domain)) { setError('Please use company email, not personal email'); return false; }
-    if (formData.password.length < 8) { setError('Password must be at least 8 characters'); return false; }
+    
+    if (formData.password.length < 6) { setError('Password must be at least 6 characters'); return false; }
     if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return false; }
     if (!formData.industry) { setError('Please select an industry'); return false; }
     if (!formData.companySize) { setError('Please select company size'); return false; }
@@ -63,10 +67,8 @@ const RegisterCompany = () => {
 
   const validateStep3 = () => {
     if (!formData.contactName.trim()) { setError('Contact person name is required'); return false; }
-    if (!formData.contactDesignation.trim()) { setError('Contact person designation is required'); return false; }
     if (!formData.contactPhone.trim() || !/^\d{10}$/.test(formData.contactPhone)) { setError('Valid 10-digit phone number is required'); return false; }
-    if (!formData.contactEmail.trim() || !/^\S+@\S+\.\S+$/.test(formData.contactEmail)) { setError('Valid contact email is required'); return false; }
-    if (!formData.agreeToTerms) { setError('You must agree to the terms and conditions'); return false; }
+    if (!formData.agreeToTerms) { setError('You must agree to the terms node'); return false; }
     return true;
   };
 
@@ -82,7 +84,7 @@ const RegisterCompany = () => {
     window.scrollTo(0, 0);
   };
 
-  // ORIGINAL SUBMIT LOGIC
+  // SUBMIT LOGIC SYNCED WITH BACKEND SCHEMA
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep3()) return;
@@ -90,8 +92,8 @@ const RegisterCompany = () => {
     setError('');
 
     try {
-      // Corrected API Payload mapping
-      const response = await authAPI.registerCompany({
+      // Corrected Payload Mapping to Nested Objects
+      const payload = {
         companyName: formData.companyName,
         email: formData.email,
         password: formData.password,
@@ -109,18 +111,22 @@ const RegisterCompany = () => {
           name: formData.contactName,
           designation: formData.contactDesignation,
           phone: formData.contactPhone,
-          email: formData.contactEmail
+          email: formData.contactEmail || formData.email
         },
         gstin: formData.gstin,
         cin: formData.cin
-      });
+      };
 
-      if (response.data.success) {
-        alert('Registration successful! Please check your email to verify your account.');
+      const result = await registerCompany(payload);
+
+      if (result.success) {
+        alert('Registration successful! Please check your email to verify.');
         navigate('/login');
+      } else {
+        setError(result.error);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError('Connection failed. Please check network nodes.');
     } finally {
       setLoading(false);
     }
@@ -130,7 +136,7 @@ const RegisterCompany = () => {
 
   return (
     <div className="min-h-screen flex bg-white overflow-hidden selection:bg-[#dd8d88]/30 font-sans antialiased">
-      {/* 1. LEFT SIDE */}
+      {/* 1. LEFT SIDE (BRANDING) */}
       <div className="hidden lg:flex w-1/2 relative bg-[#496279] items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#4c8051] rounded-full blur-[120px] opacity-30"></div>
@@ -157,8 +163,8 @@ const RegisterCompany = () => {
           <div className="space-y-10">
             {[
               { s: 1, l: 'Entity Detail', d: 'Enterprise identity setup' },
-              { s: 2, l: 'Operational Hub', d: 'Physical headquarters verification' },
-              { s: 3, l: 'Compliance Node', d: 'Authorized person & legal commit' }
+              { s: 2, l: 'Operational Hub', d: 'Headquarters verification' },
+              { s: 3, l: 'Compliance Node', d: 'Legal authorization stage' }
             ].map((item) => (
               <div key={item.s} className={`flex items-start gap-6 transition-all duration-700 ${step >= item.s ? 'opacity-100' : 'opacity-30'}`}>
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all ${
@@ -176,16 +182,8 @@ const RegisterCompany = () => {
         </div>
       </div>
 
-      {/* 2. RIGHT SIDE */}
+      {/* 2. RIGHT SIDE (FORM) */}
       <div className="w-full lg:w-1/2 flex flex-col bg-[#fcfaf9] relative overflow-y-auto">
-        <div className="lg:hidden p-6 flex justify-between items-center bg-white border-b border-slate-100 sticky top-0 z-50">
-           <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.jpg" className="h-8 w-8 rounded-lg" alt="logo" />
-              <span className="text-sm font-black text-[#496279] uppercase tracking-tighter">HireShield</span>
-           </Link>
-           <span className="text-[10px] font-black uppercase text-[#4c8051]">Node {step}/3</span>
-        </div>
-
         <div className="flex-grow flex items-center justify-center px-6 md:px-12 lg:px-20 py-16">
           <div className="w-full max-w-lg">
             <div className="mb-10 text-center lg:text-left">
@@ -199,50 +197,50 @@ const RegisterCompany = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* STEP 1 */}
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
               {step === 1 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Entity Name *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Entity Name *</label>
                       <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} className={inputClass} placeholder="Legal Name" required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Work Domain *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Work Domain *</label>
                       <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="hr@domain.com" required />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Access Key *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Access Key *</label>
                       <input type="password" name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="8+ Characters" required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Verify Key *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Verify Key *</label>
                       <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Re-type Key" required />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Sector</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Sector</label>
                       <select name="industry" value={formData.industry} onChange={handleChange} className={inputClass} required>
                         <option value="">Select</option>
                         <option value="IT & Software">IT & Software</option>
                         <option value="Finance">Finance</option>
-                        <option value="Health">Healthcare</option>
                         <option value="Manufacturing">Manufacturing</option>
+                        <option value="Retail">Retail</option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Asset Size</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Asset Size</label>
                       <select name="companySize" value={formData.companySize} onChange={handleChange} className={inputClass} required>
                         <option value="">Select</option>
                         <option value="1-10">1-10 Members</option>
                         <option value="11-50">11-50 Members</option>
                         <option value="51-200">51-200 Members</option>
-                        <option value="200+">200+ Members</option>
+                        <option value="201-500">201-500 Members</option>
+                        <option value="500+">500+ Members</option>
                       </select>
                     </div>
                   </div>
@@ -252,28 +250,25 @@ const RegisterCompany = () => {
                 </div>
               )}
 
-              {/* STEP 2 */}
               {step === 2 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Physical Address Node</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Physical Address Node</label>
                     <input type="text" name="street" value={formData.street} onChange={handleChange} className={inputClass} placeholder="Building, Street" />
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">City Node *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">City Node *</label>
                       <input type="text" name="city" value={formData.city} onChange={handleChange} className={inputClass} required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">State Node *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">State Node *</label>
                       <input type="text" name="state" value={formData.state} onChange={handleChange} className={inputClass} required />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Zip Code *</label>
-                      <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
-                    </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Zip Code *</label>
+                    <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
                   </div>
                   <div className="flex gap-4">
                     <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Return</button>
@@ -284,32 +279,29 @@ const RegisterCompany = () => {
                 </div>
               )}
 
-              {/* STEP 3 */}
               {step === 3 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Admin Name *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Admin Name *</label>
                       <input type="text" name="contactName" value={formData.contactName} onChange={handleChange} className={inputClass} required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Audit Email *</label>
-                      <input type="email" name="contactEmail" value={formData.contactEmail} onChange={handleChange} className={inputClass} required />
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Audit Phone *</label>
+                      <input type="tel" name="contactPhone" value={formData.contactPhone} onChange={handleChange} className={inputClass} required maxLength="10" />
                     </div>
                   </div>
-
                   <div className="p-5 bg-[#4c8051]/5 rounded-2xl border border-[#4c8051]/10">
                     <div className="flex items-start gap-3">
-                      <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#4c8051] rounded" required />
+                      <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#4c8051] rounded cursor-pointer" required />
                       <label className="text-[10px] font-black text-slate-500 uppercase leading-relaxed tracking-wider">
-                        Commit to the <Link to="/terms" className="text-[#4c8051] underline">Terms of Protocol</Link> and <Link to="/privacy" className="text-[#4c8051] underline">Data Privacy Node</Link>
+                        I COMMIT TO THE <Link to="/terms" className="text-[#4c8051] underline">TERMS OF PROTOCOL</Link> AND <Link to="/privacy" className="text-[#4c8051] underline">DATA PRIVACY NODE</Link>
                       </label>
                     </div>
                   </div>
-
                   <div className="flex gap-4">
                     <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Return</button>
-                    <button type="submit" disabled={loading} className="w-2/3 bg-[#4c8051] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3d6641] transition-all disabled:opacity-50 active:scale-95">
+                    <button type="button" onClick={handleSubmit} disabled={loading} className="w-2/3 bg-[#4c8051] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3d6641] transition-all disabled:opacity-50 active:scale-95">
                       {loading ? 'Deploying Node...' : 'Deploy Hub Account'}
                     </button>
                   </div>

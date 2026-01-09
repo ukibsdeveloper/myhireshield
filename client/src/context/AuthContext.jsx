@@ -16,25 +16,43 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Configure axios defaults for all requests
+  // 1. Axios Security: Token Injection & Auto-Logout Logic
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
+    // Request Interceptor: Token automatically attach karna
+    const requestInterceptor = axios.interceptors.request.use((config) => {
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    // Response Interceptor: Agar token expire ho jaye (401) toh logout karna
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
   }, [token]);
 
-  // Check authentication status on mount
+  // 2. Check Auth Status on Startup
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
         try {
-          // Note: Backend URL matches your existing setup
           const response = await axios.get('/api/auth/me');
-          setUser(response.data.user);
+          if (response.data.success) {
+            setUser(response.data.user);
+          }
         } catch (error) {
-          console.error('Auth check failed:', error);
           localStorage.removeItem('token');
           setToken(null);
           setUser(null);
@@ -42,16 +60,19 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     };
-
     checkAuth();
   }, [token]);
 
-  // Login function
-  const login = async (email, password, role) => {
+  /**
+   * Universal Login Function
+   * @param {Object} credentials - Can contain email/password OR firstName/dob
+   * @param {String} role - 'company' or 'employee'
+   */
+  const login = async (credentials, role) => {
     try {
+      // Backend expects: { email, password, role } OR { firstName, dateOfBirth, role }
       const response = await axios.post('/api/auth/login', {
-        email,
-        password,
+        ...credentials,
         role
       });
 
@@ -63,72 +84,42 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: userData };
     } catch (error) {
-      console.error('Login error:', error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed'
+        error: error.response?.data?.message || 'Authentication Protocol Failed'
       };
     }
   };
 
-  // Register company
+  // Logout
+  const logout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setUser(null);
+    window.location.href = '/login'; // Force clear app state
+  };
+
+  // Other functions remain robust but synced with backend paths
   const registerCompany = async (companyData) => {
     try {
       const response = await axios.post('/api/auth/register/company', companyData);
       return { success: true, message: response.data.message };
     } catch (error) {
-      console.error('Registration error:', error);
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Registration failed'
-      };
+      return { success: false, error: error.response?.data?.message || 'Registration failed' };
     }
   };
 
-  // Register employee
   const registerEmployee = async (employeeData) => {
     try {
       const response = await axios.post('/api/auth/register/employee', employeeData);
       return { success: true, message: response.data.message };
     } catch (error) {
-      console.error('Registration error:', error);
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Registration failed'
-      };
+      return { success: false, error: error.response?.data?.message || 'Registration failed' };
     }
   };
 
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
-    // Redirection is handled by App.jsx or the component calling logout
-  };
-
-  // Update user profile (Shared between Company & Employee)
-  const updateProfile = async (updates) => {
-    try {
-      const response = await axios.put('/api/auth/profile', updates);
-      setUser(response.data.user);
-      return { success: true };
-    } catch (error) {
-      console.error('Update profile error:', error);
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Update failed'
-      };
-    }
-  };
-
-  // --- BUREAU MODEL HELPER ---
-  // Payment success hone par local state update karne ke liye
   const setPaymentStatus = (status) => {
-    if (user) {
-      setUser({ ...user, isPaid: status });
-    }
+    if (user) setUser({ ...user, isPaid: status });
   };
 
   const value = {
@@ -139,13 +130,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     registerCompany,
     registerEmployee,
-    updateProfile,
-    setPaymentStatus, // Added for Checkout logic
+    setPaymentStatus,
     isAuthenticated: !!user,
     isCompany: user?.role === 'company',
     isEmployee: user?.role === 'employee',
-    isAdmin: user?.role === 'admin',
-    // CIBIL style report unlock check
     hasPaidForReport: user?.isPaid || false 
   };
 

@@ -4,15 +4,20 @@ import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated, user } = useAuth(); // AuthContext integration
+  const { login, isAuthenticated, user } = useAuth();
   
   const [role, setRole] = useState('company');
-  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
+  const [formData, setFormData] = useState({ 
+    email: '', 
+    password: '', 
+    firstName: '', 
+    dateOfBirth: '', 
+    rememberMe: false 
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // If already authenticated, redirect to terminal
   useEffect(() => {
     if (isAuthenticated && user) {
       navigate(user.role === 'company' ? '/dashboard/company' : '/dashboard/employee');
@@ -29,14 +34,33 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     try {
-      // Calling logic from AuthContext
-      const result = await login(formData.email, formData.password, role);
+      // Step 1: Backend ke naye AuthContext function ke hisaab se payload taiyaar karna
+      let credentials = {};
+      
+      if (role === 'company') {
+        credentials = { 
+          email: formData.email, 
+          password: formData.password 
+        };
+      } else {
+        // Employee login: Name + DOB + DOB as password (as per backend logic)
+        credentials = { 
+          firstName: formData.firstName.trim().toUpperCase(), 
+          dateOfBirth: formData.dateOfBirth,
+          password: formData.dateOfBirth // Backend validation needs this
+        };
+      }
+
+      // Step 2: Login call
+      const result = await login(credentials, role);
+      
       if (result.success) {
-        // Dynamic routing based on node type
+        // Navigation handled by useEffect, but adding fallback
         navigate(result.user.role === 'company' ? '/dashboard/company' : '/dashboard/employee');
       } else {
-        setError(result.error || 'Invalid credentials');
+        setError(result.error || 'Identity credentials mismatch');
       }
     } catch (err) {
       setError('Connection failed. Please try again.');
@@ -49,7 +73,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex bg-white overflow-hidden selection:bg-[#4c8051]/20">
-      {/* 1. LEFT SIDE: Visual Brand Portal (50%) */}
+      {/* LEFT SIDE: Visual Brand Portal */}
       <div className="hidden lg:flex w-1/2 relative bg-[#496279] items-center justify-center p-12">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#4c8051] rounded-full blur-[120px] opacity-30"></div>
@@ -67,31 +91,11 @@ const Login = () => {
           <p className="text-white/60 text-lg font-bold uppercase tracking-widest leading-relaxed">
             Standardizing integrity nodes for the modern enterprise ecosystem.
           </p>
-          
-          <div className="mt-16 pt-12 border-t border-white/10 flex justify-center gap-12 text-center">
-            <div>
-              <p className="text-2xl font-black text-white uppercase tracking-tighter">100%</p>
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Encrypted</p>
-            </div>
-            <div className="w-px h-10 bg-white/10"></div>
-            <div>
-              <p className="text-2xl font-black text-white uppercase tracking-tighter">ISO</p>
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Compliant</p>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* 2. RIGHT SIDE: Login Interface (50%) */}
+      {/* RIGHT SIDE: Login Interface */}
       <div className="w-full lg:w-1/2 flex flex-col bg-[#fcfaf9] relative">
-        <div className="lg:hidden p-6 flex justify-between items-center bg-white border-b border-slate-100">
-           <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.jpg" className="h-8 w-8 rounded-lg" alt="logo" />
-              <span className="text-sm font-black text-[#496279] uppercase tracking-tighter">HireShield</span>
-           </Link>
-           <Link to="/" className="text-[10px] font-black uppercase text-slate-400">Back Home</Link>
-        </div>
-
         <div className="flex-grow flex items-center justify-center px-6 md:px-12 lg:px-24 py-12">
           <div className="w-full max-w-md">
             <div className="mb-10 text-center lg:text-left">
@@ -99,69 +103,72 @@ const Login = () => {
               <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Authorized credentials required</p>
             </div>
 
-            {/* Role Switcher Node */}
+            {/* Role Switcher */}
             <div className="flex p-1 bg-slate-200/50 rounded-2xl mb-8 border border-slate-200">
               {['company', 'employee'].map((r) => (
                 <button
                   key={r}
                   type="button"
-                  onClick={() => setRole(r)}
+                  onClick={() => { setRole(r); setError(''); }}
                   className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
                     role === r ? 'bg-white text-[#496279] shadow-md' : 'text-slate-500 hover:text-[#496279]'
                   }`}
                 >
-                  {r === 'company' ? <><i className="fas fa-building mr-2"></i>Enterprise</> : <><i className="fas fa-user-tie mr-2"></i>Professional</>}
+                  {r === 'company' ? 'Enterprise' : 'Professional'}
                 </button>
               ))}
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in slide-in-from-left duration-300">
+              <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in duration-300">
                 <i className="fas fa-shield-virus"></i> {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Corporate ID / Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="node@enterprise.com" required />
-              </div>
+              {role === 'company' ? (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Corporate ID / Email</label>
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="node@enterprise.com" required />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-2 ml-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Access Key</label>
+                    </div>
+                    <div className="relative">
+                      <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="••••••••" required />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">First Name (As per Aadhar)</label>
+                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="EX: RAHUL" required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Date of Birth</label>
+                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClass} required />
+                  </div>
+                  <div className="p-4 bg-[#4c8051]/5 rounded-xl border border-[#4c8051]/10">
+                    <p className="text-[9px] font-bold text-[#4c8051] uppercase leading-tight tracking-wider">
+                      <i className="fas fa-info-circle mr-1"></i> Access is only granted to employees registered by verified enterprises.
+                    </p>
+                  </div>
+                </>
+              )}
 
-              <div>
-                <div className="flex justify-between items-center mb-2 ml-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Access Key</label>
-                  <Link to="/forgot-password" size="sm" className="text-[9px] font-black text-[#4c8051] uppercase tracking-widest hover:text-[#3d6641]">Recovery Node?</Link>
-                </div>
-                <div className="relative">
-                  <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="••••••••" required />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#496279]">
-                    <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mb-2 ml-1">
-                <input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleChange} className="w-4 h-4 accent-[#496279] rounded border-slate-300" />
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Maintain Active Session</span>
-              </div>
-
-              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 ${
-                loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#496279] text-white hover:bg-[#3a4e61] shadow-[#496279]/20'
+              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 ${
+                loading ? 'bg-slate-200 text-slate-400' : 'bg-[#496279] text-white hover:bg-[#3a4e61]'
               }`}>
-                {loading ? <><i className="fas fa-circle-notch fa-spin"></i> Verifying Node...</> : 'Authenticate Access'}
+                {loading ? 'Verifying Node...' : 'Authenticate Access'}
               </button>
             </form>
-
-            <div className="mt-12 text-center border-t border-slate-100 pt-8">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                New User Node? <Link to={role === 'company' ? '/register/company' : '/register/employee'} className="text-[#4c8051] ml-2 hover:underline underline-offset-4">Register Hub Account</Link>
-              </p>
-            </div>
           </div>
-        </div>
-
-        <div className="p-8 text-center lg:text-left opacity-30">
-           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Intelligence Network // Standardized Protocols</p>
         </div>
       </div>
     </div>

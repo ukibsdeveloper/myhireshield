@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authAPI } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 const RegisterEmployee = () => {
   const navigate = useNavigate();
+  const { registerEmployee } = useAuth(); // AuthContext ka method use karenge
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // ORIGINAL BACKEND INTEGRATED STATE
+  // ORIGINAL STATE MAINTAINED
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,6 +18,7 @@ const RegisterEmployee = () => {
     phone: '',
     dateOfBirth: '',
     gender: '',
+    street: '', // Added for full address support
     city: '',
     state: '',
     pincode: '',
@@ -37,7 +39,7 @@ const RegisterEmployee = () => {
     setError('');
     setLoading(true);
 
-    // ORIGINAL CLIENT-SIDE VALIDATION
+    // CLIENT-SIDE VALIDATION
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -49,28 +51,44 @@ const RegisterEmployee = () => {
       return;
     }
     if (!formData.agreeToTerms) {
-      setError('You must agree to the Terms of Service');
+      setError('You must agree to the Terms of Protocol');
       setLoading(false);
       return;
     }
 
     try {
-      // API call to backend service
-      const response = await authAPI.registerEmployee(formData);
+      // BACKEND SYNC: Nested address object taiyaar karna
+      const payload = {
+        firstName: formData.firstName.trim().toUpperCase(),
+        lastName: formData.lastName.trim().toUpperCase(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        address: {
+          street: formData.street || 'Not Provided',
+          city: formData.city,
+          state: formData.state,
+          country: 'India',
+          pincode: formData.pincode
+        }
+      };
+
+      // API call via AuthContext
+      const result = await registerEmployee(payload);
       
-      // Robust success handling
-      if (response.data?.success || response.success) {
-        alert('Registration successful! Please check your email to verify your account.');
+      if (result.success) {
+        alert('Node Initialized! Please verify your identity via email link.');
         navigate('/login');
       } else {
-        setError(response.data?.message || response.message || 'Registration failed');
+        setError(result.error || 'Identity registration protocol failed');
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Registration failed. Please try again.';
-      setError(errorMessage);
+      setError('Network synchronization failed. Please try again.');
     } finally {
       setLoading(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll up on error for visibility
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -78,7 +96,6 @@ const RegisterEmployee = () => {
 
   return (
     <div className="min-h-screen flex bg-white overflow-hidden selection:bg-[#dd8d88]/30 font-sans antialiased">
-      {/* Sharp Noise Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
       {/* 1. LEFT SIDE: Visual Brand Portal */}
@@ -142,33 +159,33 @@ const RegisterEmployee = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">First Name *</label>
-                  <input type="text" name="firstName" autoComplete="given-name" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="First Name" required />
+                  <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="First Name" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Last Name *</label>
-                  <input type="text" name="lastName" autoComplete="family-name" value={formData.lastName} onChange={handleChange} className={inputClass} placeholder="Last Name" required />
+                  <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className={inputClass} placeholder="Last Name" required />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Node *</label>
-                  <input type="email" name="email" autoComplete="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="name@domain.com" required />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="name@domain.com" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Phone Node *</label>
-                  <input type="tel" name="phone" autoComplete="tel" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="10 Digits" required maxLength="10" />
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="10 Digits" required maxLength="10" />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Access Key *</label>
-                  <input type="password" name="password" autoComplete="new-password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="6+ Characters" required />
+                  <input type="password" name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="6+ Characters" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Key *</label>
-                  <input type="password" name="confirmPassword" autoComplete="new-password" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Verify Key" required />
+                  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Verify Key" required />
                 </div>
               </div>
 
@@ -191,15 +208,15 @@ const RegisterEmployee = () => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">City *</label>
-                  <input type="text" name="city" autoComplete="address-level2" value={formData.city} onChange={handleChange} className={inputClass} required />
+                  <input type="text" name="city" value={formData.city} onChange={handleChange} className={inputClass} required />
                 </div>
                 <div className="col-span-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">State *</label>
-                  <input type="text" name="state" autoComplete="address-level1" value={formData.state} onChange={handleChange} className={inputClass} required />
+                  <input type="text" name="state" value={formData.state} onChange={handleChange} className={inputClass} required />
                 </div>
                 <div className="col-span-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Zip *</label>
-                  <input type="text" name="pincode" autoComplete="postal-code" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
+                  <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
                 </div>
               </div>
 

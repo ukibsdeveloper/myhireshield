@@ -57,6 +57,14 @@ const CompanyDashboard = () => {
               <Link to="/review/submit" className="bg-[#4c8051] text-white px-10 py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all whitespace-nowrap">
                 <i className="fas fa-plus mr-2"></i> Deploy New Audit
               </Link>
+
+              <Link to="/add-employee" className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl hover:scale-105 transition-all group">
+                <div className="w-14 h-14 bg-[#4c8051]/10 rounded-2xl flex items-center justify-center text-[#4c8051] mb-6">
+                  <i className="fas fa-user-plus text-2xl"></i>
+                </div>
+                <h3 className="text-sm font-black text-[#496279] uppercase tracking-tighter">Register New Employee</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Initialize new professional identity</p>
+              </Link>
             </div>
           </div>
 
