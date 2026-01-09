@@ -2,10 +2,12 @@ import Employee from '../models/Employee.model.js';
 import Review from '../models/Review.model.js';
 import Document from '../models/Document.model.js';
 import AuditLog from '../models/AuditLog.model.js';
+import User from '../models/User.model.js';
+import mongoose from 'mongoose';
 
-// @desc    Search employees with filters
-// @route   GET /api/employees/search
-// @access  Public (semi-public based on consent)
+// @desc    Search employees with filters
+// @route   GET /api/employees/search
+// @access  Public (semi-public based on consent)
 export const searchEmployees = async (req, res) => {
   try {
     const {
@@ -131,9 +133,9 @@ export const searchEmployees = async (req, res) => {
   }
 };
 
-// @desc    Get employee by ID
-// @route   GET /api/employees/:id
-// @access  Public (semi-public based on consent)
+// @desc    Get employee by ID
+// @route   GET /api/employees/:id
+// @access  Public (semi-public based on consent)
 export const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id)
@@ -206,9 +208,9 @@ export const getEmployeeById = async (req, res) => {
   }
 };
 
-// @desc    Get current employee profile
-// @route   GET /api/employees/profile
-// @access  Private (Employee only)
+// @desc    Get current employee profile
+// @route   GET /api/employees/profile
+// @access  Private (Employee only)
 export const getMyProfile = async (req, res) => {
   try {
     const employee = await Employee.findOne({ userId: req.user._id })
@@ -248,9 +250,9 @@ export const getMyProfile = async (req, res) => {
   }
 };
 
-// @desc    Update employee profile
-// @route   PUT /api/employees/profile
-// @access  Private (Employee only)
+// @desc    Update employee profile
+// @route   PUT /api/employees/profile
+// @access  Private (Employee only)
 export const updateProfile = async (req, res) => {
   try {
     const employee = await Employee.findOne({ userId: req.user._id });
@@ -313,9 +315,9 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// @desc    Update profile visibility
-// @route   PUT /api/employees/visibility
-// @access  Private (Employee only)
+// @desc    Update profile visibility
+// @route   PUT /api/employees/visibility
+// @access  Private (Employee only)
 export const updateVisibility = async (req, res) => {
   try {
     const { profileVisible } = req.body;
@@ -368,9 +370,9 @@ export const updateVisibility = async (req, res) => {
   }
 };
 
-// @desc    Give consent for data sharing
-// @route   POST /api/employees/consent
-// @access  Private (Employee only)
+// @desc    Give consent for data sharing
+// @route   POST /api/employees/consent
+// @access  Private (Employee only)
 export const giveConsent = async (req, res) => {
   try {
     const { consentGiven, dataRetentionConsent } = req.body;
@@ -422,9 +424,9 @@ export const giveConsent = async (req, res) => {
   }
 };
 
-// @desc    Export employee data (GDPR)
-// @route   GET /api/employees/export
-// @access  Private (Employee only)
+// @desc    Export employee data (GDPR)
+// @route   GET /api/employees/export
+// @access  Private (Employee only)
 export const exportData = async (req, res) => {
   try {
     const employee = await Employee.findOne({ userId: req.user._id });
@@ -468,9 +470,9 @@ export const exportData = async (req, res) => {
   }
 };
 
-// @desc    Delete employee account (GDPR)
-// @route   DELETE /api/employees/account
-// @access  Private (Employee only)
+// @desc    Delete employee account (GDPR)
+// @route   DELETE /api/employees/account
+// @access  Private (Employee only)
 export const deleteAccount = async (req, res) => {
   try {
     const { password } = req.body;
@@ -519,9 +521,9 @@ export const deleteAccount = async (req, res) => {
   }
 };
 
-// @desc    Get employee statistics
-// @route   GET /api/employees/:id/stats
-// @access  Public
+// @desc    Get employee statistics
+// @route   GET /api/employees/:id/stats
+// @access  Public
 export const getEmployeeStats = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
@@ -533,7 +535,7 @@ export const getEmployeeStats = async (req, res) => {
       });
     }
 
-    const reviews = await Review.find({ employeeId: employee._id });
+    const reviews = await Review.find({ employeeId: employee._id, isActive: true });
     
     // Calculate parameter averages
     const parameterAverages = {
@@ -550,7 +552,7 @@ export const getEmployeeStats = async (req, res) => {
     if (reviews.length > 0) {
       reviews.forEach(review => {
         Object.keys(parameterAverages).forEach(param => {
-          parameterAverages[param] += review.ratings[param];
+          parameterAverages[param] += review.ratings[param] || 0;
         });
       });
 

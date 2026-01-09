@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Load environment variables
+// --- CONFIGURATION ---
 dotenv.config();
 
 // Get __dirname in ES modules
@@ -28,15 +28,25 @@ import analyticsRoutes from './routes/analytics.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 
+// Handle Uncaught Exceptions (Error in code outside of requests)
+process.on('uncaughtException', (err) => {
+  console.error('❌ UNCAUGHT EXCEPTION! Shutting down...');
+  console.error(err.name, err.message);
+  process.exit(1);
+});
+
 // Initialize express app
 const app = express();
 
-// Security middleware
+// --- MIDDLEWARES ---
+
+// 1. Security Middleware
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false // Development mein ease ke liye
 }));
 
-// CORS configuration
+// 2. CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? process.env.PRODUCTION_URL 
@@ -46,31 +56,33 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Body parser middleware
+// 3. Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging middleware
+// 4. Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
   app.use(morgan('combined'));
 }
 
-// Serve static files (uploads)
+// 5. Static Files Security
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Health check route
+// --- ROUTES ---
+
+// Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'MyHireShield API is running',
+    message: 'MyHireShield API is active',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV
   });
 });
 
-// API Routes
+// Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/companies', companyRoutes);
@@ -78,24 +90,40 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// Error handling middleware
+// --- ERROR HANDLING ---
 app.use(notFound);
 app.use(errorHandler);
 
-// Connect to database
-connectDB();
+// --- STARTUP ---
 
-// Start server
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`
-🚀 MyHireShield Server Running`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 Server: http://localhost:${PORT}`);
-  console.log(`💚 API Health: http://localhost:${PORT}/api/health`);
-  console.log(`
-⏰ Started at: ${new Date().toLocaleString()}
-`);
-});
 
-// Handle unhandled promise rejections
+// Connect to DB and then start server
+const startServer = async () => {
+  try {
+    await connectDB();
+    const server = app.listen(PORT, () => {
+      console.log(`
+🚀 MyHireShield Server Running
+📍 Environment: ${process.env.NODE_ENV}
+🌐 Server: http://localhost:${PORT}
+💚 Health: http://localhost:${PORT}/api/health
+      `);
+    });
+
+    // Handle Unhandled Promise Rejections (e.g. DB connection issues)
+    process.on('unhandledRejection', (err) => {
+      console.error('❌ UNHANDLED REJECTION! Shutting down server...');
+      console.error(err.name, err.message);
+      server.close(() => {
+        process.exit(1);
+      });
+    });
+
+  } catch (error) {
+    console.error(`❌ DB Connection failed: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+startServer();

@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters'],
+    minlength: [6, 'Password must be at least 6 characters'], // Sync with RegisterEmployee validation
     select: false
   },
   role: {
@@ -21,6 +21,16 @@ const userSchema = new mongoose.Schema({
     enum: ['company', 'employee', 'admin'],
     required: [true, 'User role is required']
   },
+  
+  // --- BUREAU MODEL EXTENSIONS ---
+  // Identity Nodes (For Employee Login via Name + DOB)
+  firstName: { type: String, trim: true, uppercase: true }, // Uppercase for standardized matching
+  dateOfBirth: { type: String }, // Stored as YYYY-MM-DD from frontend
+  
+  // Payment Status (For Reputation Report Unlock)
+  isPaid: { type: Boolean, default: false },
+  
+  // --- CORE SECURITY & AUTH ---
   emailVerified: { type: Boolean, default: false },
   emailVerificationToken: String,
   emailVerificationExpires: Date,
@@ -55,8 +65,9 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Fix: Duplicate indexes remove kar diye (Terminal warnings hat jayengi)
+// Indexes for high-speed node verification
 userSchema.index({ role: 1 });
+userSchema.index({ firstName: 1, dateOfBirth: 1 }); // New: Optimized search for Name+DOB login
 userSchema.index({ emailVerified: 1 });
 userSchema.index({ isActive: 1 });
 
@@ -64,25 +75,20 @@ userSchema.virtual('isLocked').get(function() {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
+// Pre-save middleware to hash password
 userSchema.pre('save', async function() {
-  // Only hash if password is modified
-  if (!this.isModified('password')) {
-    return;
-  }
-
+  if (!this.isModified('password')) return;
   try {
     const rounds = parseInt(process.env.BCRYPT_ROUNDS) || 10;
     const salt = await bcrypt.genSalt(rounds);
     this.password = await bcrypt.hash(this.password, salt);
-    // Yahan next() ki zarurat nahi hai agar function 'async' hai
   } catch (error) {
-    throw error; // Mongoose automatically isse catch kar lega
+    throw error;
   }
 });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {
   try {
-    // this.password tabhi milega agar .select('+password') use kiya ho query mein
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
     throw new Error('Password comparison failed');
@@ -103,34 +109,6 @@ userSchema.methods.incLoginAttempts = function() {
     updates.$set = { lockUntil: Date.now() + lockTime };
   }
   return this.updateOne(updates);
-};
-
-userSchema.methods.resetLoginAttempts = function() {
-  return this.updateOne({
-    $set: { loginAttempts: 0 },
-    $unset: { lockUntil: 1 }
-  });
-};
-
-userSchema.methods.generateEmailVerificationToken = function() {
-  const token = Math.random().toString(36).substring(2, 15);
-  this.emailVerificationToken = token;
-  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
-  return token;
-};
-
-userSchema.methods.generatePasswordResetToken = function() {
-  const token = Math.random().toString(36).substring(2, 15);
-  this.passwordResetToken = token;
-  this.passwordResetExpires = Date.now() + 60 * 60 * 1000;
-  return token;
-};
-
-userSchema.methods.updateLastLogin = function(ipAddress, device, browser) {
-  this.lastLogin = Date.now();
-  this.ipAddresses.push({ ip: ipAddress, timestamp: Date.now() });
-  if (this.ipAddresses.length > 10) this.ipAddresses = this.ipAddresses.slice(-10);
-  return this.save();
 };
 
 userSchema.methods.toJSON = function() {

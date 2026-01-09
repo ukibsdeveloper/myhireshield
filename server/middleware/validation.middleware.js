@@ -1,9 +1,10 @@
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 
-// Handle validation errors
+/**
+ * Global Validation Error Handler
+ */
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
-  
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
@@ -14,213 +15,91 @@ export const validate = (req, res, next) => {
       }))
     });
   }
-  
   next();
 };
 
-// Validation rules for company registration
+/**
+ * 1. Company Registration Rules
+ */
 export const validateCompanyRegistration = [
-  body('companyName')
-    .trim()
-    .notEmpty().withMessage('Company name is required')
-    .isLength({ min: 2, max: 100 }).withMessage('Company name must be 2-100 characters'),
-  
-  body('email')
-    .trim()
-    .notEmpty().withMessage('Email is required')
-    .isEmail().withMessage('Please provide a valid email'),
-    // Removed company email restriction for development ease
-  
-  body('password')
-    .notEmpty().withMessage('Password is required')
-    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    // Removed strict regex for development ease
-  
-  body('website')
-    .optional({ checkFalsy: true })
-    .isURL().withMessage('Please provide a valid website URL'),
-  
-  body('industry')
-    .notEmpty().withMessage('Industry is required'),
-  
-  body('companySize')
-    .notEmpty().withMessage('Company size is required')
-    .isIn(['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'])
-    .withMessage('Invalid company size'),
-  
-  body('contactPerson.name')
-    .trim()
-    .notEmpty().withMessage('Contact person name is required'),
-  
-  body('contactPerson.phone')
-    .trim()
-    .notEmpty().withMessage('Contact person phone is required')
-    .matches(/^[6-9]\d{9}$/).withMessage('Please provide a valid Indian phone number'),
-  
-  body('contactPerson.designation')
-    .trim()
-    .notEmpty().withMessage('Contact person designation is required'),
-
-  body('contactPerson.email')
-    .trim()
-    .notEmpty().withMessage('Contact person email is required')
-    .isEmail().withMessage('Please provide a valid contact email'),
-  
+  body('companyName').trim().notEmpty().withMessage('Company name is required'),
+  body('email').trim().isEmail().withMessage('Valid email is required').normalizeEmail(),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('industry').notEmpty().withMessage('Industry type is required'),
+  body('companySize').isIn(['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+']).withMessage('Invalid size'),
+  body('contactPerson.phone').matches(/^[6-9]\d{9}$/).withMessage('Valid 10-digit Indian phone required'),
   validate
 ];
 
-// Validation rules for employee registration
+/**
+ * 2. Employee Registration Rules
+ */
 export const validateEmployeeRegistration = [
-  body('firstName')
-    .trim()
-    .notEmpty().withMessage('First name is required')
-    .isLength({ min: 2, max: 50 }).withMessage('First name must be 2-50 characters'),
-  
-  body('lastName')
-    .trim()
-    .notEmpty().withMessage('Last name is required')
-    .isLength({ min: 2, max: 50 }).withMessage('Last name must be 2-50 characters'),
-  
-  body('email')
-    .trim()
-    .notEmpty().withMessage('Email is required')
-    .isEmail().withMessage('Please provide a valid email'),
-  
-  body('password')
-    .notEmpty().withMessage('Password is required')
-    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    // Removed strict regex for development ease
-  
-  body('phone')
-    .trim()
-    .notEmpty().withMessage('Phone number is required')
-    .matches(/^[6-9]\d{9}$/).withMessage('Please provide a valid Indian phone number'),
-  
-  body('dateOfBirth')
-    .notEmpty().withMessage('Date of birth is required')
-    .isISO8601().withMessage('Please provide a valid date')
+  body('firstName').trim().notEmpty().withMessage('First name is required'),
+  body('lastName').trim().notEmpty().withMessage('Last name is required'),
+  body('email').trim().isEmail().withMessage('Valid email required').normalizeEmail(),
+  body('password').isLength({ min: 6 }).withMessage('Minimum 6 characters required'),
+  body('phone').matches(/^[6-9]\d{9}$/).withMessage('Invalid Indian phone number'),
+  body('dateOfBirth').isISO8601().withMessage('DOB must be a valid date (YYYY-MM-DD)')
     .custom((value) => {
-      const age = (new Date() - new Date(value)) / (1000 * 60 * 60 * 24 * 365);
-      if (age < 18) {
-        throw new Error('You must be at least 18 years old');
-      }
+      const age = (new Date() - new Date(value)) / (1000 * 60 * 60 * 24 * 365.25);
+      if (age < 18) throw new Error('Employee must be at least 18 years old');
       return true;
     }),
-  
-  body('gender')
-    .notEmpty().withMessage('Gender is required')
-    .isIn(['male', 'female', 'other']).withMessage('Invalid gender'),
-  
+  body('gender').isIn(['male', 'female', 'other']).withMessage('Invalid gender selection'),
   validate
 ];
 
-// Validation rules for login
+/**
+ * 3. Login Rules (Updated for Name+DOB support)
+ */
 export const validateLogin = [
-  body('email')
-    .trim()
-    .notEmpty().withMessage('Email is required')
-    .isEmail().withMessage('Please provide a valid email'),
+  body('role').isIn(['company', 'employee', 'admin']).withMessage('Role is required'),
+  body('password').notEmpty().withMessage('Password is required'),
   
-  body('password')
-    .notEmpty().withMessage('Password is required'),
+  // Conditional validation: If role is company, email is required
+  body('email').if(body('role').equals('company')).isEmail().withMessage('Email required for company login'),
   
-  body('role')
-    .notEmpty().withMessage('Role is required')
-    .isIn(['company', 'employee', 'admin']).withMessage('Invalid role'),
+  // Conditional validation: If role is employee, firstName and DOB are required
+  body('firstName').if(body('role').equals('employee')).notEmpty().withMessage('First name required for employee login'),
+  body('dateOfBirth').if(body('role').equals('employee')).isISO8601().withMessage('DOB required for employee login'),
   
   validate
 ];
 
-// Validation rules for review submission
+/**
+ * 4. Review Submission Rules
+ */
 export const validateReview = [
-  body('employeeId')
-    .notEmpty().withMessage('Employee ID is required')
-    .isMongoId().withMessage('Invalid employee ID'),
-  
-  body('ratings.workQuality')
-    .isInt({ min: 1, max: 10 }).withMessage('Work quality rating must be 1-10'),
-  
-  body('ratings.punctuality')
-    .isInt({ min: 1, max: 10 }).withMessage('Punctuality rating must be 1-10'),
-  
-  body('ratings.behavior')
-    .isInt({ min: 1, max: 10 }).withMessage('Behavior rating must be 1-10'),
-  
-  body('ratings.teamwork')
-    .isInt({ min: 1, max: 10 }).withMessage('Teamwork rating must be 1-10'),
-  
-  body('ratings.communication')
-    .isInt({ min: 1, max: 10 }).withMessage('Communication rating must be 1-10'),
-  
-  body('ratings.technicalSkills')
-    .isInt({ min: 1, max: 10 }).withMessage('Technical skills rating must be 1-10'),
-  
-  body('ratings.problemSolving')
-    .isInt({ min: 1, max: 10 }).withMessage('Problem solving rating must be 1-10'),
-  
-  body('ratings.reliability')
-    .isInt({ min: 1, max: 10 }).withMessage('Reliability rating must be 1-10'),
-  
-  body('comment')
-    .trim()
-    .notEmpty().withMessage('Review comment is required')
-    .isLength({ min: 50, max: 2000 }).withMessage('Comment must be 50-2000 characters'),
-  
-  body('wouldRehire')
-    .isBoolean().withMessage('Would rehire must be true or false'),
-  
-  body('employmentDetails.designation')
-    .trim()
-    .notEmpty().withMessage('Designation is required'),
-  
-  body('employmentDetails.startDate')
-    .notEmpty().withMessage('Start date is required')
-    .isISO8601().withMessage('Invalid start date'),
-  
-  body('employmentDetails.endDate')
-    .notEmpty().withMessage('End date is required')
-    .isISO8601().withMessage('Invalid end date')
+  body('employeeId').isMongoId().withMessage('Invalid Employee ID format'),
+  body('ratings.*').isInt({ min: 1, max: 10 }).withMessage('All ratings must be between 1 and 10'),
+  body('comment').trim().isLength({ min: 20 }).withMessage('Comment should be at least 20 characters'),
+  body('wouldRehire').isBoolean().withMessage('Rehire status must be true or false'),
+  body('employmentDetails.startDate').isISO8601().withMessage('Invalid start date'),
+  body('employmentDetails.endDate').isISO8601().withMessage('Invalid end date')
     .custom((value, { req }) => {
       if (new Date(value) <= new Date(req.body.employmentDetails.startDate)) {
-        throw new Error('End date must be after start date');
+        throw new Error('End date cannot be before or same as start date');
       }
       return true;
     }),
-  
   validate
 ];
 
-// Validation rules for document upload
+/**
+ * 5. Document Upload Rules
+ */
 export const validateDocumentUpload = [
-  body('documentType')
-    .notEmpty().withMessage('Document type is required')
-    .isIn([
-      'aadhaar', 'pan', 'passport', 'driving_license',
-      'educational_certificate', 'experience_letter',
-      'police_verification', 'address_proof', 'bank_statement', 'other'
-    ]).withMessage('Invalid document type'),
-  
-  body('documentNumber')
-    .optional()
-    .trim(),
-  
+  body('documentType').isIn(['aadhaar', 'pan', 'passport', 'driving_license', 'other']).withMessage('Invalid document type'),
+  body('documentNumber').optional().trim().notEmpty().withMessage('Document number cannot be empty if provided'),
   validate
 ];
 
-// Validation rules for employee search
+/**
+ * 6. Search Rules (Query params validation)
+ */
 export const validateEmployeeSearch = [
-  body('query')
-    .optional()
-    .trim()
-    .isLength({ max: 100 }).withMessage('Search query too long'),
-  
-  body('scoreMin')
-    .optional()
-    .isInt({ min: 0, max: 100 }).withMessage('Score min must be 0-100'),
-  
-  body('scoreMax')
-    .optional()
-    .isInt({ min: 0, max: 100 }).withMessage('Score max must be 0-100'),
-  
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be 1-100'),
   validate
 ];

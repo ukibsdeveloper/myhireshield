@@ -11,12 +11,14 @@ const employeeSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: [true, 'First name is required'],
-    trim: true
+    trim: true,
+    uppercase: true // Fix: Standardizing for Search and Login
   },
   lastName: {
     type: String,
     required: [true, 'Last name is required'],
-    trim: true
+    trim: true,
+    uppercase: true // Fix: Standardizing for Search and Login
   },
   email: {
     type: String,
@@ -29,7 +31,7 @@ const employeeSchema = new mongoose.Schema({
     required: [true, 'Phone number is required']
   },
   dateOfBirth: {
-    type: Date,
+    type: String, // Fix: Changed from Date to String to match Frontend YYYY-MM-DD
     required: [true, 'Date of birth is required']
   },
   gender: {
@@ -160,38 +162,21 @@ const employeeSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexes
+// Fix: Robust Indexing for EmployeeSearch.jsx logic
 employeeSchema.index({ userId: 1 });
 employeeSchema.index({ email: 1 });
+employeeSchema.index({ firstName: 1, lastName: 1, dateOfBirth: 1 }); // Multi-key index for search
 employeeSchema.index({ firstName: 'text', lastName: 'text' });
 employeeSchema.index({ overallScore: -1 });
-employeeSchema.index({ verified: 1 });
-employeeSchema.index({ profileVisible: 1, consentGiven: 1 });
-employeeSchema.index({ skills: 1 });
-employeeSchema.index({ 'address.city': 1 });
 
 // Virtual for full name
 employeeSchema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Virtual for age
-employeeSchema.virtual('age').get(function() {
-  if (!this.dateOfBirth) return null;
-  const today = new Date();
-  const birthDate = new Date(this.dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return age;
-});
-
 // Update overall score based on reviews
 employeeSchema.methods.updateScore = async function() {
   const Review = mongoose.model('Review');
-  
   const reviews = await Review.find({ employeeId: this._id });
   
   if (reviews.length === 0) {
@@ -204,7 +189,7 @@ employeeSchema.methods.updateScore = async function() {
       return sum + avgRating;
     }, 0);
     
-    this.overallScore = Math.round((totalScore / reviews.length) * 10); // Convert to 0-100
+    this.overallScore = Math.round((totalScore / reviews.length) * 10); 
     this.totalReviews = reviews.length;
   }
   
@@ -212,28 +197,5 @@ employeeSchema.methods.updateScore = async function() {
   return this.overallScore;
 };
 
-// Check if profile is complete
-employeeSchema.methods.isProfileComplete = function() {
-  return !!(
-    this.firstName &&
-    this.lastName &&
-    this.email &&
-    this.phone &&
-    this.dateOfBirth &&
-    this.address.city &&
-    this.address.state &&
-    this.skills.length > 0 &&
-    this.education.length > 0
-  );
-};
-
-// Increment profile views
-employeeSchema.methods.incrementViews = async function() {
-  this.profileViews += 1;
-  this.lastViewedAt = new Date();
-  await this.save();
-};
-
 const Employee = mongoose.model('Employee', employeeSchema);
-
 export default Employee;

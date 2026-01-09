@@ -28,14 +28,15 @@ const companySchema = new mongoose.Schema({
   },
   companySize: {
     type: String,
-    enum: ['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'],
+    // Fix: Added '200+' to sync with RegisterCompany.jsx frontend options
+    enum: ['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+', '200+'], 
     required: [true, 'Company size is required']
   },
   address: {
     street: String,
     city: String,
     state: String,
-    country: String,
+    country: { type: String, default: 'India' },
     pincode: String
   },
   contactPerson: {
@@ -90,21 +91,18 @@ const companySchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  // Reputation score
   reputationScore: {
     type: Number,
     default: 0,
     min: 0,
     max: 100
   },
-  // Subscription (for future)
   subscriptionPlan: {
     type: String,
     enum: ['free', 'basic', 'premium', 'enterprise'],
     default: 'free'
   },
   subscriptionExpires: Date,
-  // Settings
   settings: {
     emailNotifications: {
       type: Boolean,
@@ -120,7 +118,6 @@ const companySchema = new mongoose.Schema({
       default: 'public'
     }
   },
-  // Metadata
   lastActive: Date,
   isActive: {
     type: Boolean,
@@ -137,19 +134,14 @@ companySchema.index({ companyName: 'text' });
 companySchema.index({ verified: 1 });
 companySchema.index({ reputationScore: -1 });
 
-// Update statistics
+// Update statistics method
 companySchema.methods.updateStatistics = async function() {
   const Review = mongoose.model('Review');
-  
   const reviews = await Review.find({ companyId: this._id });
-  
   this.totalReviewsSubmitted = reviews.length;
-  
-  // Count unique employees
   const uniqueEmployees = [...new Set(reviews.map(r => r.employeeId.toString()))];
   this.totalEmployeesReviewed = uniqueEmployees.length;
-  
-  // Calculate average rating given
+
   if (reviews.length > 0) {
     const totalRating = reviews.reduce((sum, review) => {
       const ratings = Object.values(review.ratings);
@@ -158,32 +150,18 @@ companySchema.methods.updateStatistics = async function() {
     }, 0);
     this.averageRatingGiven = Math.round((totalRating / reviews.length) * 10) / 10;
   }
-  
   await this.save();
 };
 
-// Calculate reputation score
+// Reputation algorithm logic
 companySchema.methods.calculateReputationScore = async function() {
   const Review = mongoose.model('Review');
-  
-  // Factors for reputation:
-  // 1. Number of reviews (more = better)
-  // 2. Consistency of ratings
-  // 3. Recency of reviews
-  // 4. Verification status
-  
   const reviews = await Review.find({ companyId: this._id });
-  
   let score = 0;
-  
-  // Base score from verification
   if (this.verified) score += 20;
-  
-  // Score from number of reviews (max 30 points)
   const reviewCount = Math.min(reviews.length, 50);
   score += (reviewCount / 50) * 30;
-  
-  // Score from review consistency (max 30 points)
+
   if (reviews.length > 0) {
     const ratings = reviews.map(r => {
       const vals = Object.values(r.ratings);
@@ -194,20 +172,17 @@ companySchema.methods.calculateReputationScore = async function() {
     const consistency = Math.max(0, 10 - variance);
     score += (consistency / 10) * 30;
   }
-  
-  // Score from recency (max 20 points)
+
   const recentReviews = reviews.filter(r => {
     const daysSince = (Date.now() - new Date(r.createdAt)) / (1000 * 60 * 60 * 24);
-    return daysSince <= 180; // Last 6 months
+    return daysSince <= 180; 
   });
   score += (recentReviews.length / Math.max(reviews.length, 1)) * 20;
   
   this.reputationScore = Math.round(Math.min(score, 100));
   await this.save();
-  
   return this.reputationScore;
 };
 
 const Company = mongoose.model('Company', companySchema);
-
 export default Company;

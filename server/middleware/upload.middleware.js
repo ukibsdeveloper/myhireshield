@@ -2,88 +2,95 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Ensure upload directories exist
+/**
+ * UPLOAD CONFIGURATION
+ * Handles file storage, naming, and security filtering
+ */
+
+// 1. Directory Creator Helper (Ensure folders exist)
 const ensureDirectoryExists = (dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 };
 
-// Configure storage
+// 2. Storage Strategy
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let uploadPath = 'uploads/';
     
-    // Determine upload path based on file type
-    if (file.fieldname === 'document') {
-      uploadPath = 'uploads/documents/';
-    } else if (file.fieldname === 'profilePicture') {
-      uploadPath = 'uploads/profile_pictures/';
-    } else if (file.fieldname === 'companyLogo') {
-      uploadPath = 'uploads/company_logos/';
-    }
+    // Dynamic path selection based on fieldname
+    const folderMap = {
+      'document': 'uploads/documents/',
+      'profilePicture': 'uploads/profile_pictures/',
+      'companyLogo': 'uploads/company_logos/'
+    };
+
+    uploadPath = folderMap[file.fieldname] || 'uploads/misc/';
     
     ensureDirectoryExists(uploadPath);
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    const nameWithoutExt = path.basename(file.originalname, ext);
-    cb(null, `${nameWithoutExt}-${uniqueSuffix}${ext}`);
+    // Sanitize filename and add unique timestamp to prevent overwriting
+    const nameWithoutExt = path.parse(file.originalname).name.replace(/\s/g, '_');
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const extension = path.extname(file.originalname).toLowerCase();
+    
+    cb(null, `${nameWithoutExt}-${uniqueSuffix}${extension}`);
   }
 });
 
-// File filter
+// 3. Security: File Filter
 const fileFilter = (req, file, cb) => {
-  // Allowed file types
-  const allowedTypes = process.env.ALLOWED_FILE_TYPES?.split(',') || [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'application/pdf'
-  ];
+  // Define allowed extensions and mimetypes
+  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+  const allowedMimetypes = ['image/jpeg', 'image/png', 'application/pdf'];
 
-  if (allowedTypes.includes(file.mimetype)) {
+  const extension = path.extname(file.originalname).toLowerCase();
+  const mimetype = file.mimetype;
+
+  // Double validation (Extension + Mimetype)
+  if (allowedExtensions.includes(extension) && allowedMimetypes.includes(mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`), false);
+    cb(new Error('Format galat hai! Sirf JPG, PNG aur PDF files allow hain.'), false);
   }
 };
 
-// Configure multer
+// 4. Multer Instance
 export const upload = multer({
   storage: storage,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024 // 10MB default
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 // Default 5MB for security
   },
   fileFilter: fileFilter
 });
 
-// Error handling middleware for multer
+/**
+ * Global Error Handler for Uploads
+ * Specific responses for Multer errors
+ */
 export const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
+    let message = 'File upload error.';
+    
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({
-        success: false,
-        message: 'File too large. Maximum size is 10MB'
-      });
+      const size = process.env.MAX_FILE_SIZE ? 'config ke mutabiq' : '5MB';
+      message = `File bohot badi hai! Maximum size ${size} allowed hai.`;
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      message = 'Ghalat field name use kiya gaya hai upload ke liye.';
     }
-    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-      return res.status(400).json({
-        success: false,
-        message: 'Unexpected field in file upload'
-      });
-    }
+
+    return res.status(400).json({ success: false, message });
   }
-  
+
   if (err) {
     return res.status(400).json({
       success: false,
-      message: err.message || 'File upload error'
+      message: err.message || 'File upload ke dauran error aaya.'
     });
   }
-  
+
   next();
 };

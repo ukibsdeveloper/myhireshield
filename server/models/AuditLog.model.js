@@ -4,7 +4,7 @@ const auditLogSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false // Fix: Allow logging failed login attempts before user is identified
   },
   userEmail: String,
   userRole: {
@@ -25,12 +25,14 @@ const auditLogSchema = new mongoose.Schema({
       'two_factor_enabled',
       'two_factor_disabled',
       'failed_login_attempt',
-      // Profile
+      // Bureau Specific (New Nodes)
+      'employee_creation_by_company', 
+      'score_decryption_payment',
+      // Profile & Ledger Actions
       'profile_created',
       'profile_updated',
       'profile_viewed',
       'profile_deleted',
-      // Reviews
       'review_created',
       'review_updated',
       'review_deleted',
@@ -45,12 +47,11 @@ const auditLogSchema = new mongoose.Schema({
       // Search
       'employee_searched',
       'search_filter_applied',
-      // Data Rights
+      // Data Rights & Security
       'data_exported',
       'consent_given',
       'consent_withdrawn',
       'account_deleted',
-      // Security
       'suspicious_activity',
       'ip_blocked',
       'account_suspended',
@@ -64,20 +65,17 @@ const auditLogSchema = new mongoose.Schema({
   os: String,
   device: String,
   sessionId: String,
-  // Location data (optional)
   location: {
     country: String,
     city: String,
     region: String
   },
-  // Status
   status: {
     type: String,
     enum: ['success', 'failure', 'warning'],
     default: 'success'
   },
   errorMessage: String,
-  // Metadata
   timestamp: {
     type: Date,
     default: Date.now,
@@ -87,43 +85,29 @@ const auditLogSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexes for efficient querying
+// Indexes for high-speed security forensic
 auditLogSchema.index({ userId: 1, timestamp: -1 });
 auditLogSchema.index({ eventType: 1, timestamp: -1 });
-auditLogSchema.index({ userRole: 1, timestamp: -1 });
 auditLogSchema.index({ ipAddress: 1, timestamp: -1 });
-auditLogSchema.index({ status: 1, timestamp: -1 });
-auditLogSchema.index({ timestamp: -1 });
 
-// TTL index - automatically delete logs older than 2 years
-auditLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 63072000 }); // 2 years
+// Automatically delete logs older than 2 years to keep DB lean
+auditLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 63072000 }); 
 
-// Static method to create audit log
+// Static method to create audit log without breaking main logic
 auditLogSchema.statics.createLog = async function(data) {
   try {
     const log = new this(data);
     await log.save();
     return log;
   } catch (error) {
-    console.error('Error creating audit log:', error);
-    // Don't throw error - audit logging should not break main functionality
+    console.error('Audit Log Error:', error);
     return null;
   }
 };
 
-// Static method to get user activity
-auditLogSchema.statics.getUserActivity = async function(userId, limit = 50) {
-  return await this.find({ userId })
-    .sort({ timestamp: -1 })
-    .limit(limit)
-    .lean();
-};
-
-// Static method to detect suspicious activity
+// Security logic: Detect brute force or scraping
 auditLogSchema.statics.detectSuspiciousActivity = async function(userId) {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  
-  // Check for multiple failed login attempts
   const failedLogins = await this.countDocuments({
     userId,
     eventType: 'failed_login_attempt',
@@ -131,54 +115,10 @@ auditLogSchema.statics.detectSuspiciousActivity = async function(userId) {
   });
   
   if (failedLogins >= 5) {
-    return {
-      suspicious: true,
-      reason: 'Multiple failed login attempts',
-      count: failedLogins
-    };
+    return { suspicious: true, reason: 'Brute force suspected', count: failedLogins };
   }
-  
-  // Check for rapid profile views from same user
-  const profileViews = await this.countDocuments({
-    userId,
-    eventType: 'profile_viewed',
-    timestamp: { $gte: oneHourAgo }
-  });
-  
-  if (profileViews >= 50) {
-    return {
-      suspicious: true,
-      reason: 'Excessive profile views',
-      count: profileViews
-    };
-  }
-  
   return { suspicious: false };
 };
 
-// Static method to get event statistics
-auditLogSchema.statics.getEventStats = async function(startDate, endDate) {
-  return await this.aggregate([
-    {
-      $match: {
-        timestamp: {
-          $gte: startDate,
-          $lte: endDate
-        }
-      }
-    },
-    {
-      $group: {
-        _id: '$eventType',
-        count: { $sum: 1 }
-      }
-    },
-    {
-      $sort: { count: -1 }
-    }
-  ]);
-};
-
 const AuditLog = mongoose.model('AuditLog', auditLogSchema);
-
 export default AuditLog;

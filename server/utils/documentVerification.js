@@ -1,200 +1,135 @@
-// Document Verification Utilities
+/**
+ * DOCUMENT VERIFICATION UTILITIES
+ * Frontend Optimized Version
+ */
 
-// Validate Aadhaar number using Verhoeff algorithm
+// --- VERHOEFF ALGORITHM TABLES (For Aadhaar) ---
+const d = [
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
+  [2, 3, 4, 0, 1, 7, 8, 9, 5, 6], [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
+  [4, 0, 1, 2, 3, 9, 5, 6, 7, 8], [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
+  [6, 5, 9, 8, 7, 1, 0, 4, 3, 2], [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
+  [8, 7, 6, 5, 9, 3, 2, 1, 0, 4], [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+];
+const p = [
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
+  [5, 8, 0, 3, 7, 9, 6, 1, 4, 2], [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
+  [9, 4, 5, 3, 1, 2, 6, 8, 7, 0], [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
+  [2, 7, 9, 3, 8, 0, 6, 4, 1, 5], [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
+];
+
+// --- CORE VALIDATORS ---
+
+// 1. Aadhaar Validator (12 Digits + Verhoeff Checksum)
 export const validateAadhaar = (aadhaarNumber) => {
-  // Remove spaces and validate format
-  const cleaned = aadhaarNumber.replace(/\s/g, '');
+  const cleaned = String(aadhaarNumber).replace(/\s/g, '');
   
-  // Must be 12 digits
-  if (!/^\d{12}$/.test(cleaned)) {
-    return { valid: false, error: 'Aadhaar must be 12 digits' };
+  // Aadhaar cannot start with 0 or 1 and must be 12 digits
+  if (!/^[2-9]{1}[0-9]{11}$/.test(cleaned)) {
+    return { valid: false, error: 'Aadhaar must be 12 digits and cannot start with 0 or 1' };
   }
-  
-  // Verhoeff algorithm
-  const d = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
-    [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
-    [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
-    [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
-    [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
-    [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
-    [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
-    [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
-    [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-  ];
-  
-  const p = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
-    [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
-    [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
-    [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
-    [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
-    [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
-    [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
-  ];
-  
+
   let c = 0;
   const reversedArray = cleaned.split('').map(Number).reverse();
-  
   reversedArray.forEach((val, i) => {
     c = d[c][p[i % 8][val]];
   });
-  
-  if (c !== 0) {
-    return { valid: false, error: 'Invalid Aadhaar number' };
-  }
-  
-  return { valid: true, message: 'Valid Aadhaar number' };
+
+  return c === 0 
+    ? { valid: true, message: 'Valid Aadhaar' } 
+    : { valid: false, error: 'Invalid Aadhaar checksum' };
 };
 
-// Validate PAN number
+// 2. PAN Validator (AAAAA9999A format + Entity Check)
 export const validatePAN = (panNumber) => {
-  // Remove spaces and convert to uppercase
   const cleaned = panNumber.replace(/\s/g, '').toUpperCase();
-  
-  // PAN format: AAAAA9999A
-  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  // Fourth character: P (Individual), C (Company), H (HUF), F (Firm), A (AOP), T (Trust), B (BOI), L (Local), J (Artificial), G (Govt)
+  const panRegex = /^[A-Z]{3}[PCHFATBLJG]{1}[A-Z]{1}[0-9]{4}[A-Z]{1}$/;
   
   if (!panRegex.test(cleaned)) {
-    return { valid: false, error: 'Invalid PAN format. Format should be: AAAAA9999A' };
+    return { valid: false, error: 'Invalid PAN format (e.g., ABCDE1234F)' };
   }
-  
-  // Fourth character should be 'P' for individual, 'C' for company, etc.
-  const fourthChar = cleaned[3];
-  const validFourthChars = ['P', 'C', 'H', 'F', 'A', 'T', 'B', 'L', 'J', 'G'];
-  
-  if (!validFourthChars.includes(fourthChar)) {
-    return { valid: false, error: 'Invalid PAN type' };
-  }
-  
-  return { valid: true, message: 'Valid PAN number' };
+  return { valid: true, message: 'Valid PAN' };
 };
 
-// Validate Passport number
+// 3. Passport Validator (Letter + 7 Digits)
 export const validatePassport = (passportNumber) => {
-  // Remove spaces and convert to uppercase
   const cleaned = passportNumber.replace(/\s/g, '').toUpperCase();
-  
-  // Indian passport format: A-Z followed by 7 digits
   const passportRegex = /^[A-Z]{1}[0-9]{7}$/;
-  
-  if (!passportRegex.test(cleaned)) {
-    return { valid: false, error: 'Invalid passport format. Format should be: A1234567' };
-  }
-  
-  return { valid: true, message: 'Valid passport number' };
+  return passportRegex.test(cleaned) 
+    ? { valid: true, message: 'Valid Passport' }
+    : { valid: false, error: 'Invalid Passport format (e.g., A1234567)' };
 };
 
-// Validate Driving License
+// 4. Driving License Validator (Standard 15 characters)
 export const validateDrivingLicense = (dlNumber) => {
-  // Remove spaces and convert to uppercase
-  const cleaned = dlNumber.replace(/\s/g, '').toUpperCase();
-  
-  // Indian DL format varies by state, but generally: AA00 00000000000
-  const dlRegex = /^[A-Z]{2}[0-9]{2}\s?[0-9]{11}$/;
-  
-  if (!dlRegex.test(cleaned)) {
-    return { valid: false, error: 'Invalid driving license format' };
-  }
-  
-  return { valid: true, message: 'Valid driving license number' };
+  const cleaned = dlNumber.replace(/[-\s]/g, '').toUpperCase();
+  const dlRegex = /^[A-Z]{2}[0-9]{2}[0-9]{11}$/;
+  return dlRegex.test(cleaned)
+    ? { valid: true, message: 'Valid Driving License' }
+    : { valid: false, error: 'Invalid DL format (15 characters required)' };
 };
 
-// Validate GSTIN
+// 5. GSTIN Validator (15 Chars)
 export const validateGSTIN = (gstin) => {
-  // Remove spaces and convert to uppercase
   const cleaned = gstin.replace(/\s/g, '').toUpperCase();
-  
-  // GSTIN format: 15 characters
   const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-  
-  if (!gstinRegex.test(cleaned)) {
-    return { valid: false, error: 'Invalid GSTIN format' };
-  }
-  
-  return { valid: true, message: 'Valid GSTIN' };
+  return gstinRegex.test(cleaned)
+    ? { valid: true, message: 'Valid GSTIN' }
+    : { valid: false, error: 'Invalid GSTIN format' };
 };
 
-// Extract text from image using OCR (placeholder - requires actual OCR library)
-export const extractTextFromImage = async (imagePath) => {
-  try {
-    // TODO: Implement actual OCR using Tesseract.js or Google Vision API
-    // For now, return placeholder
-    return {
-      success: true,
-      text: 'OCR text extraction would go here',
-      confidence: 0
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
-  }
+// --- AUTO VERIFICATION ENGINE ---
+
+const VALIDATOR_MAP = {
+  'aadhaar': validateAadhaar,
+  'pan': validatePAN,
+  'passport': validatePassport,
+  'driving_license': validateDrivingLicense,
+  'gstin': validateGSTIN
 };
 
-// Automated document verification
 export const autoVerifyDocument = async (document) => {
   const results = {
     attempted: true,
     passed: false,
-    checks: {},
+    checks: {
+      format: false,
+      fileSize: false,
+      fileType: false
+    },
     confidence: 0
   };
 
   try {
-    // Validate document number based on type
-    switch (document.documentType) {
-      case 'aadhaar':
-        if (document.documentNumber) {
-          const aadhaarResult = validateAadhaar(document.documentNumber);
-          results.checks.numberValidation = aadhaarResult.valid;
-          results.confidence += aadhaarResult.valid ? 30 : 0;
-        }
-        break;
-        
-      case 'pan':
-        if (document.documentNumber) {
-          const panResult = validatePAN(document.documentNumber);
-          results.checks.numberValidation = panResult.valid;
-          results.confidence += panResult.valid ? 30 : 0;
-        }
-        break;
-        
-      case 'passport':
-        if (document.documentNumber) {
-          const passportResult = validatePassport(document.documentNumber);
-          results.checks.numberValidation = passportResult.valid;
-          results.confidence += passportResult.valid ? 30 : 0;
-        }
-        break;
-        
-      case 'driving_license':
-        if (document.documentNumber) {
-          const dlResult = validateDrivingLicense(document.documentNumber);
-          results.checks.numberValidation = dlResult.valid;
-          results.confidence += dlResult.valid ? 30 : 0;
-        }
-        break;
+    // 1. Validate Document Format
+    const validator = VALIDATOR_MAP[document.documentType];
+    if (validator && document.documentNumber) {
+      const validation = validator(document.documentNumber);
+      results.checks.format = validation.valid;
+      if (validation.valid) {
+        results.confidence += 50; 
+      } else {
+        results.error = validation.error;
+      }
     }
 
-    // Check file integrity
-    results.checks.fileIntegrity = document.fileSize > 0 && document.fileSize < 10485760;
-    results.confidence += results.checks.fileIntegrity ? 20 : 0;
+    // 2. File Integrity (Max 10MB)
+    const MAX_SIZE = 10485760; // 10MB
+    results.checks.fileSize = document.fileSize > 0 && document.fileSize <= MAX_SIZE;
+    if (results.checks.fileSize) results.confidence += 25;
 
-    // Check file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-    results.checks.fileType = validTypes.includes(document.mimeType);
-    results.confidence += results.checks.fileType ? 20 : 0;
+    // 3. File Type Check
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    results.checks.fileType = allowedTypes.includes(document.mimeType);
+    if (results.checks.fileType) results.confidence += 25;
 
-    // Overall pass/fail
-    results.passed = results.confidence >= 50;
+    // Overall Logic: Document must have correct format + pass at least one file check
+    results.passed = results.checks.format && results.confidence >= 75;
 
   } catch (error) {
-    console.error('Auto verification error:', error);
-    results.error = error.message;
+    console.error('Verification Engine Error:', error);
+    results.error = 'Verification process failed';
   }
 
   return results;
