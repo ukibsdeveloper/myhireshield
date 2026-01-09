@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Configure axios defaults
+  // Configure axios defaults for all requests
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       if (token) {
         try {
+          // Note: Backend URL matches your existing setup
           const response = await axios.get('/api/auth/me');
           setUser(response.data.user);
         } catch (error) {
@@ -74,11 +75,7 @@ export const AuthProvider = ({ children }) => {
   const registerCompany = async (companyData) => {
     try {
       const response = await axios.post('/api/auth/register/company', companyData);
-      
-      return {
-        success: true,
-        message: response.data.message
-      };
+      return { success: true, message: response.data.message };
     } catch (error) {
       console.error('Registration error:', error);
       return {
@@ -92,11 +89,7 @@ export const AuthProvider = ({ children }) => {
   const registerEmployee = async (employeeData) => {
     try {
       const response = await axios.post('/api/auth/register/employee', employeeData);
-      
-      return {
-        success: true,
-        message: response.data.message
-      };
+      return { success: true, message: response.data.message };
     } catch (error) {
       console.error('Registration error:', error);
       return {
@@ -112,9 +105,10 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
+    // Redirection is handled by App.jsx or the component calling logout
   };
 
-  // Update user profile
+  // Update user profile (Shared between Company & Employee)
   const updateProfile = async (updates) => {
     try {
       const response = await axios.put('/api/auth/profile', updates);
@@ -129,6 +123,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // --- BUREAU MODEL HELPER ---
+  // Payment success hone par local state update karne ke liye
+  const setPaymentStatus = (status) => {
+    if (user) {
+      setUser({ ...user, isPaid: status });
+    }
+  };
+
   const value = {
     user,
     token,
@@ -138,10 +140,13 @@ export const AuthProvider = ({ children }) => {
     registerCompany,
     registerEmployee,
     updateProfile,
+    setPaymentStatus, // Added for Checkout logic
     isAuthenticated: !!user,
     isCompany: user?.role === 'company',
     isEmployee: user?.role === 'employee',
-    isAdmin: user?.role === 'admin'
+    isAdmin: user?.role === 'admin',
+    // CIBIL style report unlock check
+    hasPaidForReport: user?.isPaid || false 
   };
 
   return (

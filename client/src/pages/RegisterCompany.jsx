@@ -90,6 +90,7 @@ const RegisterCompany = () => {
     setError('');
 
     try {
+      // Corrected API Payload mapping
       const response = await authAPI.registerCompany({
         companyName: formData.companyName,
         email: formData.email,
@@ -129,9 +130,8 @@ const RegisterCompany = () => {
 
   return (
     <div className="min-h-screen flex bg-white overflow-hidden selection:bg-[#dd8d88]/30 font-sans antialiased">
-      {/* 1. LEFT SIDE: Premium Visual Brand Portal (Matches Login Style) */}
+      {/* 1. LEFT SIDE */}
       <div className="hidden lg:flex w-1/2 relative bg-[#496279] items-center justify-center p-12 overflow-hidden">
-        {/* Background Texture & Gradients (Same as Login) */}
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#4c8051] rounded-full blur-[120px] opacity-30"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#dd8d88] rounded-full blur-[120px] opacity-30"></div>
@@ -154,7 +154,6 @@ const RegisterCompany = () => {
             Join the gold standard of professional integrity nodes.
           </p>
 
-          {/* Premium Progress Indicators */}
           <div className="space-y-10">
             {[
               { s: 1, l: 'Entity Detail', d: 'Enterprise identity setup' },
@@ -163,7 +162,7 @@ const RegisterCompany = () => {
             ].map((item) => (
               <div key={item.s} className={`flex items-start gap-6 transition-all duration-700 ${step >= item.s ? 'opacity-100' : 'opacity-30'}`}>
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all ${
-                  step >= item.s ? 'bg-white text-[#496279] shadow-[0_0_30px_rgba(255,255,255,0.15)]' : 'border-2 border-white/20 text-white'
+                  step >= item.s ? 'bg-white text-[#496279] shadow-lg' : 'border-2 border-white/20 text-white'
                 }`}>
                   {step > item.s ? <i className="fas fa-check text-xs"></i> : item.s}
                 </div>
@@ -177,9 +176,8 @@ const RegisterCompany = () => {
         </div>
       </div>
 
-      {/* 2. RIGHT SIDE: Registration Form Interface */}
+      {/* 2. RIGHT SIDE */}
       <div className="w-full lg:w-1/2 flex flex-col bg-[#fcfaf9] relative overflow-y-auto">
-        {/* Mobile Header (Hidden on Desktop) */}
         <div className="lg:hidden p-6 flex justify-between items-center bg-white border-b border-slate-100 sticky top-0 z-50">
            <Link to="/" className="flex items-center gap-2">
               <img src="/logo.jpg" className="h-8 w-8 rounded-lg" alt="logo" />
@@ -196,13 +194,13 @@ const RegisterCompany = () => {
             </div>
 
             {error && (
-              <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+              <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in duration-300">
                 <i className="fas fa-shield-virus"></i> {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-              {/* STEP 1: Entity Intelligence */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* STEP 1 */}
               {step === 1 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="grid md:grid-cols-2 gap-6">
@@ -225,10 +223,6 @@ const RegisterCompany = () => {
                       <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Re-type Key" required />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Corporate Web (Opt)</label>
-                    <input type="url" name="website" value={formData.website} onChange={handleChange} className={inputClass} placeholder="https://" />
-                  </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Sector</label>
@@ -236,6 +230,8 @@ const RegisterCompany = () => {
                         <option value="">Select</option>
                         <option value="IT & Software">IT & Software</option>
                         <option value="Finance">Finance</option>
+                        <option value="Health">Healthcare</option>
+                        <option value="Manufacturing">Manufacturing</option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
@@ -243,20 +239,20 @@ const RegisterCompany = () => {
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Asset Size</label>
                       <select name="companySize" value={formData.companySize} onChange={handleChange} className={inputClass} required>
                         <option value="">Select</option>
-                        <option value="1-10">1-10</option>
-                        <option value="11-50">11-50</option>
-                        <option value="51-200">51-200</option>
-                        <option value="200+">200+</option>
+                        <option value="1-10">1-10 Members</option>
+                        <option value="11-50">11-50 Members</option>
+                        <option value="51-200">51-200 Members</option>
+                        <option value="200+">200+ Members</option>
                       </select>
                     </div>
                   </div>
-                  <button type="button" onClick={handleNext} className="w-full bg-[#496279] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:shadow-[#496279]/30 transition-all flex items-center justify-center gap-3">
+                  <button type="button" onClick={handleNext} className="w-full bg-[#496279] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3a4e61] transition-all flex items-center justify-center gap-3">
                     Initialize Next Stage <i className="fas fa-arrow-right"></i>
                   </button>
                 </div>
               )}
 
-              {/* STEP 2: Address Intelligence */}
+              {/* STEP 2 */}
               {step === 2 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div>
@@ -275,24 +271,20 @@ const RegisterCompany = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Region</label>
-                      <input type="text" name="country" value={formData.country} className={`${inputClass} bg-slate-100 cursor-not-allowed`} readOnly />
-                    </div>
-                    <div>
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Zip Code *</label>
                       <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">Return</button>
-                    <button type="button" onClick={handleNext} className="w-2/3 bg-[#496279] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all flex items-center justify-center gap-3">
+                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Return</button>
+                    <button type="button" onClick={handleNext} className="w-2/3 bg-[#496279] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3a4e61] transition-all flex items-center justify-center gap-3">
                       Verify Address <i className="fas fa-arrow-right"></i>
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* STEP 3: Compliance & Authorized Person */}
+              {/* STEP 3 */}
               {step === 3 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="grid md:grid-cols-2 gap-6">
@@ -301,34 +293,24 @@ const RegisterCompany = () => {
                       <input type="text" name="contactName" value={formData.contactName} onChange={handleChange} className={inputClass} required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Designation *</label>
-                      <input type="text" name="contactDesignation" value={formData.contactDesignation} onChange={handleChange} className={inputClass} required />
-                    </div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Phone Node *</label>
-                      <input type="tel" name="contactPhone" value={formData.contactPhone} onChange={handleChange} className={inputClass} required maxLength="10" />
-                    </div>
-                    <div>
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Audit Email *</label>
                       <input type="email" name="contactEmail" value={formData.contactEmail} onChange={handleChange} className={inputClass} required />
                     </div>
                   </div>
 
-                  <div className="p-5 bg-[#4c8051]/5 rounded-2xl border border-[#4c8051]/10 shadow-inner">
+                  <div className="p-5 bg-[#4c8051]/5 rounded-2xl border border-[#4c8051]/10">
                     <div className="flex items-start gap-3">
-                      <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#4c8051] cursor-pointer" required />
+                      <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#4c8051] rounded" required />
                       <label className="text-[10px] font-black text-slate-500 uppercase leading-relaxed tracking-wider">
-                        Commit to the <Link to="/legal/terms" className="text-[#4c8051] underline">Terms of Protocol</Link> and <Link to="/legal/privacy" className="text-[#4c8051] underline">Data Privacy</Link>
+                        Commit to the <Link to="/terms" className="text-[#4c8051] underline">Terms of Protocol</Link> and <Link to="/privacy" className="text-[#4c8051] underline">Data Privacy Node</Link>
                       </label>
                     </div>
                   </div>
 
                   <div className="flex gap-4">
-                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">Return</button>
-                    <button type="submit" disabled={loading} className="w-2/3 bg-[#4c8051] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3d6641] transition-all disabled:opacity-50">
-                      {loading ? 'Processing Node...' : 'Deploy Hub Account'}
+                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Return</button>
+                    <button type="submit" disabled={loading} className="w-2/3 bg-[#4c8051] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3d6641] transition-all disabled:opacity-50 active:scale-95">
+                      {loading ? 'Deploying Node...' : 'Deploy Hub Account'}
                     </button>
                   </div>
                 </div>
@@ -337,15 +319,14 @@ const RegisterCompany = () => {
 
             <div className="mt-12 text-center border-t border-slate-100 pt-8">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Existing Node? <Link to="/login" className="text-[#496279] ml-2 hover:underline">Authenticate Access</Link>
+                Existing Node? <Link to="/login" className="text-[#496279] ml-2 hover:underline underline-offset-4">Authenticate Access</Link>
               </p>
             </div>
           </div>
         </div>
 
-        {/* Global Minimal Footer */}
-        <div className="p-8 text-center lg:text-left">
-           <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.3em]">© 2026 HireShield Intelligence Network</p>
+        <div className="p-8 text-center lg:text-left opacity-30">
+           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Intelligence Network</p>
         </div>
       </div>
     </div>

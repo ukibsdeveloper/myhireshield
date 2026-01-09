@@ -55,18 +55,22 @@ const RegisterEmployee = () => {
     }
 
     try {
+      // API call to backend service
       const response = await authAPI.registerEmployee(formData);
-      if (response.success) {
+      
+      // Robust success handling
+      if (response.data?.success || response.success) {
         alert('Registration successful! Please check your email to verify your account.');
         navigate('/login');
       } else {
-        setError(response.message || 'Registration failed');
+        setError(response.data?.message || response.message || 'Registration failed');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Registration failed. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll up on error for visibility
     }
   };
 
@@ -77,16 +81,15 @@ const RegisterEmployee = () => {
       {/* Sharp Noise Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
-      {/* 1. LEFT SIDE: Premium Visual Brand Portal */}
+      {/* 1. LEFT SIDE: Visual Brand Portal */}
       <div className="hidden lg:flex w-1/2 relative bg-[#496279] items-center justify-center p-12 overflow-hidden">
-        {/* Same Gradients as Login/Company */}
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-[#4c8051] rounded-full blur-[120px] opacity-30"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#4c8051] rounded-full blur-[120px] opacity-30"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#dd8d88] rounded-full blur-[120px] opacity-30"></div>
 
         <div className="relative z-10 max-w-lg text-center">
           <Link to="/" className="inline-flex items-center gap-4 mb-12 group transition-transform hover:scale-105">
-            <div className="h-20 w-20 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center p-3">
+            <div className="h-20 w-20 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center p-3 border border-slate-50">
               <img src="/logo.jpg" alt="HireShield" className="h-full w-full object-contain" />
             </div>
           </Link>
@@ -98,23 +101,22 @@ const RegisterEmployee = () => {
           </p>
 
           <div className="grid grid-cols-2 gap-8 pt-12 border-t border-white/10">
-            <div className="text-left">
-               <i className="fas fa-id-card text-[#4c8051] text-2xl mb-4"></i>
+            <div className="text-left group cursor-default">
+               <i className="fas fa-id-card text-[#4c8051] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
                <h4 className="text-white font-black uppercase text-xs tracking-widest">Verified Badge</h4>
-               <p className="text-white/40 text-[10px] mt-1 uppercase">ISO Certified Node</p>
+               <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">ISO Certified Node</p>
             </div>
-            <div className="text-left">
-               <i className="fas fa-chart-line text-[#dd8d88] text-2xl mb-4"></i>
+            <div className="text-left group cursor-default">
+               <i className="fas fa-chart-line text-[#dd8d88] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
                <h4 className="text-white font-black uppercase text-xs tracking-widest">Shield Score™</h4>
-               <p className="text-white/40 text-[10px] mt-1 uppercase">Standard Integrity</p>
+               <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">Standard Integrity</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. RIGHT SIDE: Employee Registration Interface */}
+      {/* 2. RIGHT SIDE: Registration Interface */}
       <div className="w-full lg:w-1/2 flex flex-col bg-[#fcfaf9] relative overflow-y-auto">
-        {/* Mobile Header */}
         <div className="lg:hidden p-6 flex justify-between items-center bg-white border-b border-slate-100 sticky top-0 z-50">
            <Link to="/" className="flex items-center gap-2">
               <img src="/logo.jpg" className="h-8 w-8 rounded-lg" alt="logo" />
@@ -131,49 +133,45 @@ const RegisterEmployee = () => {
             </div>
 
             {error && (
-              <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+              <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in slide-in-from-top duration-300">
                 <i className="fas fa-user-shield"></i> {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name Row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">First Name *</label>
-                  <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="John" required />
+                  <input type="text" name="firstName" autoComplete="given-name" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="First Name" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Last Name *</label>
-                  <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className={inputClass} placeholder="Doe" required />
+                  <input type="text" name="lastName" autoComplete="family-name" value={formData.lastName} onChange={handleChange} className={inputClass} placeholder="Last Name" required />
                 </div>
               </div>
 
-              {/* Email & Phone */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Node *</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="name@domain.com" required />
+                  <input type="email" name="email" autoComplete="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="name@domain.com" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Phone Node *</label>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="10 Digits" required maxLength="10" />
+                  <input type="tel" name="phone" autoComplete="tel" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="10 Digits" required maxLength="10" />
                 </div>
               </div>
 
-              {/* Passwords */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Access Key *</label>
-                  <input type="password" name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="6+ Characters" required />
+                  <input type="password" name="password" autoComplete="new-password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="6+ Characters" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Key *</label>
-                  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Re-type Key" required />
+                  <input type="password" name="confirmPassword" autoComplete="new-password" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Verify Key" required />
                 </div>
               </div>
 
-              {/* DOB & Gender */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Date of Birth *</label>
@@ -190,50 +188,47 @@ const RegisterEmployee = () => {
                 </div>
               </div>
 
-              {/* Address Row */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">City *</label>
-                  <input type="text" name="city" value={formData.city} onChange={handleChange} className={inputClass} required />
+                  <input type="text" name="city" autoComplete="address-level2" value={formData.city} onChange={handleChange} className={inputClass} required />
                 </div>
                 <div className="col-span-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">State *</label>
-                  <input type="text" name="state" value={formData.state} onChange={handleChange} className={inputClass} required />
+                  <input type="text" name="state" autoComplete="address-level1" value={formData.state} onChange={handleChange} className={inputClass} required />
                 </div>
                 <div className="col-span-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Zip *</label>
-                  <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
+                  <input type="text" name="pincode" autoComplete="postal-code" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
                 </div>
               </div>
 
-              {/* Terms */}
               <div className="p-5 bg-white border border-slate-200 rounded-2xl shadow-inner">
                 <div className="flex items-start gap-3">
                   <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#496279] cursor-pointer" required />
                   <label className="text-[10px] font-black text-slate-500 uppercase leading-relaxed tracking-wider">
-                    I agree to the <Link to="/legal/terms" className="text-[#496279] underline">Terms of Protocol</Link> and <Link to="/legal/privacy" className="text-[#496279] underline">Privacy Policy</Link>
+                    I agree to the <Link to="/terms" className="text-[#496279] underline">Terms of Protocol</Link> and <Link to="/privacy" className="text-[#496279] underline">Privacy Policy</Link>
                   </label>
                 </div>
               </div>
 
-              <button type="submit" disabled={loading} className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 ${
-                loading ? 'bg-slate-200 text-slate-400' : 'bg-[#496279] text-white hover:shadow-[#496279]/30'
+              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 ${
+                loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#496279] text-white hover:bg-[#3a4e61] shadow-[#496279]/30'
               }`}>
-                {loading ? 'Processing Identity...' : 'Initialize Professional Node'}
+                {loading ? <><i className="fas fa-circle-notch fa-spin"></i> Processing Identity...</> : 'Initialize Professional Node'}
               </button>
             </form>
 
             <div className="mt-10 text-center border-t border-slate-100 pt-8">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Existing Node? <Link to="/login" className="text-[#4c8051] ml-2 hover:underline">Authenticate Access</Link>
+                Existing Node? <Link to="/login" className="text-[#4c8051] ml-2 hover:underline underline-offset-4">Authenticate Access</Link>
               </p>
             </div>
           </div>
         </div>
 
-        {/* Global Minimal Footer */}
-        <div className="p-8 text-center lg:text-left">
-           <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.3em]">© 2026 HireShield Enterprise Integration Network</p>
+        <div className="p-8 text-center lg:text-left opacity-30">
+           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Enterprise Integration Network</p>
         </div>
       </div>
     </div>

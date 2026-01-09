@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from './context/AuthContext';
 
 // Pages
@@ -18,46 +19,60 @@ import VerifyDocuments from './pages/VerifyDocuments';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import ConsentForm from './pages/ConsentForm';
-import DataRights from './pages/DataRights';
+import ReputationReport from './pages/ReputationReport';
+import Checkout from './pages/Checkout';
+import UpdateProfile from './pages/UpdateProfile';
 
-// Protected Route Component
+/* ==========================================
+   PRODUCTION CONFIGURATION
+   ========================================== */
+const isLocalhost = window.location.hostname === 'localhost';
+axios.defaults.baseURL = isLocalhost 
+  ? 'http://localhost:5000' 
+  : 'https://myhireshield.com'; // <--- Yahan apna actual backend URL dalna
+
+// Token injection for all requests
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+/* ==========================================
+   PRODUCTION GUARDS (ENABLED)
+   ========================================== */
+
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center font-bold">
-          <i className="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
-          <p className="text-gray-600">Loading Access...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#fcfaf9]">
+        <div className="text-center">
+          <i className="fas fa-shield-halved fa-spin text-4xl text-[#496279] mb-4"></i>
+          <p className="text-[#496279] font-black uppercase tracking-widest text-[10px]">Validating Access...</p>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={user?.role === 'company' ? '/dashboard/company' : '/dashboard/employee'} replace />;
   }
 
   return children;
 };
 
-// Public Route (redirect if already logged in)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
-
   if (isAuthenticated) {
-    if (user?.role === 'company') {
-      return <Navigate to="/dashboard/company" replace />;
-    } else if (user?.role === 'employee') {
-      return <Navigate to="/dashboard/employee" replace />;
-    }
+    if (user?.role === 'company') return <Navigate to="/dashboard/company" replace />;
+    if (user?.role === 'employee') return <Navigate to="/dashboard/employee" replace />;
   }
-
   return children;
 };
 
@@ -75,85 +90,54 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/consent" element={<ConsentForm />} />
-        <Route path="/data-rights" element={<DataRights />} />
         
         {/* Company Exclusive Routes */}
         <Route 
           path="/dashboard/company" 
-          element={
-            <ProtectedRoute allowedRoles={['company']}>
-              <CompanyDashboard />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute allowedRoles={['company']}><CompanyDashboard /></ProtectedRoute>} 
         />
         <Route 
           path="/review/submit" 
-          element={
-            <ProtectedRoute allowedRoles={['company']}>
-              <SubmitReview />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute allowedRoles={['company']}><SubmitReview /></ProtectedRoute>} 
         />
         <Route 
           path="/review/manage" 
-          element={
-            <ProtectedRoute allowedRoles={['company']}>
-              <ManageReviews />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute allowedRoles={['company']}><ManageReviews /></ProtectedRoute>} 
         />
         <Route 
           path="/verify/documents" 
-          element={
-            <ProtectedRoute allowedRoles={['company']}>
-              <VerifyDocuments />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute allowedRoles={['company']}><VerifyDocuments /></ProtectedRoute>} 
         />
         <Route 
           path="/employee/search" 
-          element={
-            <ProtectedRoute allowedRoles={['company']}>
-              <EmployeeSearch />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute allowedRoles={['company']}><EmployeeSearch /></ProtectedRoute>} 
         />
         
         {/* Employee Exclusive Routes */}
         <Route 
           path="/dashboard/employee" 
-          element={
-            <ProtectedRoute allowedRoles={['employee']}>
-              <EmployeeDashboard />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute allowedRoles={['employee']}><EmployeeDashboard /></ProtectedRoute>} 
         />
         <Route 
-          path="/documents/upload" 
-          element={
-            <ProtectedRoute allowedRoles={['employee']}>
-              <UploadDocuments />
-            </ProtectedRoute>
-          } 
+          path="/reputation-report" 
+          element={<ProtectedRoute allowedRoles={['employee']}><ReputationReport /></ProtectedRoute>} 
+        />
+        <Route 
+          path="/checkout" 
+          element={<ProtectedRoute allowedRoles={['employee']}><Checkout /></ProtectedRoute>} 
         />
         <Route 
           path="/employee/profile" 
-          element={
-            <ProtectedRoute allowedRoles={['employee']}>
-              <EmployeeProfile />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute allowedRoles={['employee']}><EmployeeProfile /></ProtectedRoute>} 
         />
 
-        {/* Dynamic Shared Route (Profile view) */}
+        {/* Dynamic & Profile Routes */}
         <Route 
           path="/employee/:id" 
-          element={
-            <ProtectedRoute>
-              <EmployeeProfile />
-            </ProtectedRoute>
-          } 
+          element={<ProtectedRoute><EmployeeProfile /></ProtectedRoute>} 
         />
+        <Route path="/settings" element={<ProtectedRoute><UpdateProfile /></ProtectedRoute>} />
+        <Route path="/upload/documents" element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>} />
         
         {/* 404 Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
