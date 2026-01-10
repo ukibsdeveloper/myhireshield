@@ -18,55 +18,64 @@ const AddEmployee = () => {
     department: 'General'
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Manual check for phone validation before sending to backend
-    if (!/^[6-9]\d{9}$/.test(formData.phone)) {
-        return alert("Please enter a valid 10-digit Indian phone number starting with 6-9");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  
+  try {
+    const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); 
+
+    const payload = {
+      firstName: formData.firstName.trim().toUpperCase(),
+      lastName: formData.lastName.trim().toUpperCase(),
+      email: formData.email.trim().toLowerCase(),
+      password: cleanDOB,
+      confirmPassword: cleanDOB,
+      dateOfBirth: formData.dateOfBirth,
+      gender: formData.gender,
+      phone: formData.phone,
+      address: {
+        street: 'Verified Enterprise Node',
+        city: 'Delhi',
+        state: 'Delhi',
+        country: 'India',
+        pincode: '110001'
+      },
+      designation: formData.designation,
+      department: formData.department || 'General'
+    };
+
+    const res = await axios.post('/api/auth/register/employee', payload); 
+
+    // FIX: Check for both res.data.success OR HTTP status 200/201
+    if (res.status === 200 || res.status === 201 || res.data.success) {
+      console.log("Registration Successful:", res.data);
+      alert("Employee Node Created Successfully! ✅\nDefault Password: " + cleanDOB);
+      navigate('/dashboard/company');
+    } else {
+      // Agar backend success:false bhejta hai bina catch trigger kiye
+      alert(res.data.message || "Unknown error during registration");
     }
 
-    setLoading(true);
-    try {
-      const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); 
+  } catch (err) {
+    // FIX: Catch block tabhi chalega jab server 4xx ya 5xx error dega
+    console.error("Registration Error Object:", err.response);
 
-      const payload = {
-        firstName: formData.firstName.trim().toUpperCase(),
-        lastName: formData.lastName.trim().toUpperCase(),
-        email: formData.email.trim().toLowerCase(),
-        password: cleanDOB,
-        confirmPassword: cleanDOB,
-        dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender,
-        phone: formData.phone, // Real phone number from state
-        address: {
-          street: 'Verified Enterprise Node',
-          city: 'Delhi',
-          state: 'Delhi',
-          country: 'India',
-          pincode: '110001'
-        },
-        designation: formData.designation,
-        department: formData.department
-      };
+    const backendErrors = err.response?.data?.errors;
+    const errorMessage = err.response?.data?.message;
 
-      const res = await axios.post('/api/auth/register/employee', payload); 
-      
-      if (res.data.success) {
-        alert("Employee Node Created Successfully! ✅\nDefault Password: " + cleanDOB);
-        navigate('/dashboard/company');
-      }
-    } catch (err) {
-      const backendErrors = err.response?.data?.errors;
-      if (backendErrors && backendErrors.length > 0) {
-        alert(`Validation Failed: ${backendErrors[0].field} - ${backendErrors[0].message}`);
-      } else {
-        alert(err.response?.data?.message || "Critical Protocol Error");
-      }
-    } finally {
-      setLoading(false);
+    if (backendErrors && backendErrors.length > 0) {
+      alert(`Validation Failed: ${backendErrors[0].field || backendErrors[0].path} - ${backendErrors[0].message || backendErrors[0].msg}`);
+    } else if (errorMessage) {
+      alert("Error: " + errorMessage);
+    } else {
+      alert("Network or Protocol Error. Please check console.");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const inputClass = "p-4 bg-slate-50 rounded-xl border-none font-bold outline-none focus:ring-2 ring-[#4c8051]/20";
 
