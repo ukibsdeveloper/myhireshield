@@ -18,76 +18,62 @@ const AddEmployee = () => {
     department: 'General'
   });
 
-    const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); 
+   const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  
+  try {
+    const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); 
 
-      const payload = {
-        firstName: formData.firstName.trim().toUpperCase(),
-        lastName: formData.lastName.trim().toUpperCase(),
-        email: formData.email.trim().toLowerCase(),
-        password: cleanDOB,
-        confirmPassword: cleanDOB,
-        dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender,
-        phone: formData.phone,
-        address: {
-          street: 'Verified Enterprise Node',
-          city: 'Delhi',
-          state: 'Delhi',
-          country: 'India',
-          pincode: '110001'
-        },
-        designation: formData.designation,
-        department: formData.department || 'General'
-      };
+    const payload = {
+      firstName: formData.firstName.trim().toUpperCase(),
+      lastName: formData.lastName.trim().toUpperCase(),
+      email: formData.email.trim().toLowerCase(),
+      password: cleanDOB,
+      confirmPassword: cleanDOB,
+      dateOfBirth: formData.dateOfBirth,
+      gender: formData.gender,
+      phone: formData.phone,
+      address: {
+        street: 'Verified Enterprise Node',
+        city: 'Delhi',
+        state: 'Delhi',
+        country: 'India',
+        pincode: '110001'
+      },
+      designation: formData.designation,
+      department: formData.department || 'General'
+    };
 
-      // DEBUG: Payload check karne ke liye
-      console.log("Attempting Registration with:", payload);
+    // Axios call
+    const res = await axios.post('/api/auth/register/employee', payload); 
 
-      const res = await axios.post('/api/auth/register/employee', payload); 
-
-      /**
-       * SUCCESS LOGIC RE-ENGINEERED:
-       * Agar status code 200 ya 201 hai, toh registration success hai.
-       * Database screenshot ne confirm kar diya hai ki user create ho raha hai.
-       */
-      if (res.status === 201 || res.status === 200 || res.data.success) {
-        console.log("Backend Success Response:", res.data);
-        alert("Employee Node Created Successfully! ✅\n\nLogin Email: " + payload.email + "\nDefault Password: " + cleanDOB);
-        navigate('/dashboard/company');
-      } else {
-        // Yeh bohot rare case hai jab status success ho par backend mana kare
-        alert(res.data.message || "Unexpected response from server");
-      }
-
-    } catch (err) {
-      /**
-       * CATCH BLOCK:
-       * Yeh tabhi chalna chahiye jab status code 400, 401, 500 etc ho.
-       */
-      console.error("Full Error Object:", err);
-      
-      // Agar Backend ne Validation list bheji hai
-      const backendErrors = err.response?.data?.errors;
-      const backendMessage = err.response?.data?.message;
-
-      if (backendErrors && backendErrors.length > 0) {
-        alert(`Protocol Validation Failed: ${backendErrors[0].message || backendErrors[0].msg}`);
-      } else if (backendMessage) {
-        alert("Registration Error: " + backendMessage);
-      } else {
-        // Agar Axios response hi nahi la paya (Network issues)
-        alert("Connection Timeout or Protocol Mismatch. Check Network Tab.");
-      }
-    } finally {
-      setLoading(false);
+    // SUCCESS LOGIC: Database mein entry ho gayi, ab response status check karo
+    // Agar status 201 ya 200 hai, toh error mat dikhao
+    if (res.status === 201 || res.status === 200 || res.data.success) {
+      alert("Employee Node Created Successfully! ✅\nLogin Email: " + payload.email);
+      navigate('/dashboard/company');
+      return; // Yahin se code khatam karo
     }
-  };
 
+  } catch (err) {
+    // CATCH BLOCK: Yeh tabhi chalega jab real error hoga (jaise Email already exists)
+    // Agar user database mein ban gaya hai (Status 201), toh axios use error nahi manega
+    
+    // Safety check: Agar error ke bawajood status 201 hai (kabhi kabhi axios behavior)
+    if (err.response?.status === 201) {
+       alert("Employee Node Created Successfully! ✅");
+       navigate('/dashboard/company');
+       return;
+    }
+
+    const errorMessage = err.response?.data?.message || "Registration Failed";
+    alert("Error: " + errorMessage);
+    console.error("Critical Debug:", err.response?.data);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const inputClass = "p-4 bg-slate-50 rounded-xl border-none font-bold outline-none focus:ring-2 ring-[#4c8051]/20";
 
