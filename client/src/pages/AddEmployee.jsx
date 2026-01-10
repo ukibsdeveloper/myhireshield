@@ -12,20 +12,26 @@ const AddEmployee = () => {
     dateOfBirth: '', gender: '', designation: '', department: ''
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      // Yeh API call backend mein ek naya employee user create karegi
-      const res = await axios.post('/api/company/register-employee', formData);
-      if (res.data.success) {
-        alert("Employee Node Created! They can now login with Name & DOB.");
-        navigate('/dashboard/company');
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Node Creation Failed");
-    } finally { setLoading(false); }
-  };
+// AddEmployee.jsx ke andar changes:
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    // Exact Backend Route Match:
+    const res = await axios.post('/api/auth/register/employee', formData); 
+    
+    if (res.data.success) {
+      alert("Employee Node Created Successfully! ✅");
+      navigate('/dashboard/company');
+    }
+  } catch (err) {
+    // Backend se aane wala error message dikhayegagit
+    alert(err.response?.data?.message || "Node Creation Failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#fcfaf9]">
