@@ -18,13 +18,12 @@ const AddEmployee = () => {
     department: 'General'
   });
 
-   const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
   
   try {
     const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); 
-
     const payload = {
       firstName: formData.firstName.trim().toUpperCase(),
       lastName: formData.lastName.trim().toUpperCase(),
@@ -45,31 +44,28 @@ const AddEmployee = () => {
       department: formData.department || 'General'
     };
 
-    // Axios call
-    const res = await axios.post('/api/auth/register/employee', payload); 
+    // Axios call with explicit status validation
+    const res = await axios.post('/api/auth/register/employee', payload, {
+      validateStatus: function (status) {
+        return status >= 200 && status < 300; // Isse 201 bhi success mana jayega
+      }
+    }); 
 
-    // SUCCESS LOGIC: Database mein entry ho gayi, ab response status check karo
-    // Agar status 201 ya 200 hai, toh error mat dikhao
-    if (res.status === 201 || res.status === 200 || res.data.success) {
-      alert("Employee Node Created Successfully! ✅\nLogin Email: " + payload.email);
-      navigate('/dashboard/company');
-      return; // Yahin se code khatam karo
-    }
+    // SUCCESS: Agar hum yahan pahunche, toh status 2xx hai
+    alert("Employee Node Created Successfully! ✅\nEmail: " + payload.email);
+    navigate('/dashboard/company');
 
   } catch (err) {
-    // CATCH BLOCK: Yeh tabhi chalega jab real error hoga (jaise Email already exists)
-    // Agar user database mein ban gaya hai (Status 201), toh axios use error nahi manega
-    
-    // Safety check: Agar error ke bawajood status 201 hai (kabhi kabhi axios behavior)
-    if (err.response?.status === 201) {
-       alert("Employee Node Created Successfully! ✅");
-       navigate('/dashboard/company');
-       return;
+    // Agar status 2xx ke bahar hai, tabhi catch chalega
+    if (err.response?.status === 201 || err.response?.status === 200) {
+        // Double safety for Axios strange behaviors
+        alert("Employee Node Created Successfully! ✅");
+        navigate('/dashboard/company');
+        return;
     }
 
     const errorMessage = err.response?.data?.message || "Registration Failed";
     alert("Error: " + errorMessage);
-    console.error("Critical Debug:", err.response?.data);
   } finally {
     setLoading(false);
   }
