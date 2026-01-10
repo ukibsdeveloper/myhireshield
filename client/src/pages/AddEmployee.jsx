@@ -18,63 +18,63 @@ const AddEmployee = () => {
     department: 'General'
   });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  
-  try {
-    const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); 
 
-    const payload = {
-      firstName: formData.firstName.trim().toUpperCase(),
-      lastName: formData.lastName.trim().toUpperCase(),
-      email: formData.email.trim().toLowerCase(),
-      password: cleanDOB,
-      confirmPassword: cleanDOB,
-      dateOfBirth: formData.dateOfBirth,
-      gender: formData.gender,
-      phone: formData.phone,
-      address: {
-        street: 'Verified Enterprise Node',
-        city: 'Delhi',
-        state: 'Delhi',
-        country: 'India',
-        pincode: '110001'
-      },
-      designation: formData.designation,
-      department: formData.department || 'General'
-    };
+      const payload = {
+        firstName: formData.firstName.trim().toUpperCase(),
+        lastName: formData.lastName.trim().toUpperCase(),
+        email: formData.email.trim().toLowerCase(),
+        password: cleanDOB,
+        confirmPassword: cleanDOB,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        phone: formData.phone,
+        address: {
+          street: 'Verified Enterprise Node',
+          city: 'Delhi',
+          state: 'Delhi',
+          country: 'India',
+          pincode: '110001'
+        },
+        designation: formData.designation,
+        department: formData.department || 'General'
+      };
 
-    const res = await axios.post('/api/auth/register/employee', payload); 
+      const res = await axios.post('/api/auth/register/employee', payload); 
 
-    // FIX: Check for both res.data.success OR HTTP status 200/201
-    if (res.status === 200 || res.status === 201 || res.data.success) {
-      console.log("Registration Successful:", res.data);
-      alert("Employee Node Created Successfully! ✅\nDefault Password: " + cleanDOB);
-      navigate('/dashboard/company');
-    } else {
-      // Agar backend success:false bhejta hai bina catch trigger kiye
-      alert(res.data.message || "Unknown error during registration");
+      // SUCCESS LOGIC: Agar status 200 ya 201 hai, toh iska matlab data save ho gaya hai.
+      if (res.status === 200 || res.status === 201 || res.data.success === true) {
+        console.log("Registration Successful Response:", res.data);
+        alert("Employee Node Created Successfully! ✅\nDefault Password: " + cleanDOB);
+        navigate('/dashboard/company');
+      } else {
+        // Yeh tab chalega jab status 200/201 ho par success flag false ho
+        alert(res.data.message || "Unknown error during registration");
+      }
+
+    } catch (err) {
+      // CATCH BLOCK: Yeh tabhi chalega jab server 4xx ya 5xx status code dega (Asal Error)
+      console.error("Critical Registration Error:", err.response?.data);
+
+      const backendErrors = err.response?.data?.errors;
+      const errorMessage = err.response?.data?.message;
+
+      if (backendErrors && backendErrors.length > 0) {
+        alert(`Validation Failed: ${backendErrors[0].field || backendErrors[0].path} - ${backendErrors[0].message || backendErrors[0].msg}`);
+      } else if (errorMessage) {
+        alert("Registration Error: " + errorMessage);
+      } else {
+        alert("Network Protocol Error. Please check connectivity.");
+      }
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    // FIX: Catch block tabhi chalega jab server 4xx ya 5xx error dega
-    console.error("Registration Error Object:", err.response);
-
-    const backendErrors = err.response?.data?.errors;
-    const errorMessage = err.response?.data?.message;
-
-    if (backendErrors && backendErrors.length > 0) {
-      alert(`Validation Failed: ${backendErrors[0].field || backendErrors[0].path} - ${backendErrors[0].message || backendErrors[0].msg}`);
-    } else if (errorMessage) {
-      alert("Error: " + errorMessage);
-    } else {
-      alert("Network or Protocol Error. Please check console.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const inputClass = "p-4 bg-slate-50 rounded-xl border-none font-bold outline-none focus:ring-2 ring-[#4c8051]/20";
