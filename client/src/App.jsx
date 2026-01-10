@@ -22,6 +22,7 @@ import ConsentForm from './pages/ConsentForm';
 import ReputationReport from './pages/ReputationReport';
 import Checkout from './pages/Checkout';
 import UpdateProfile from './pages/UpdateProfile';
+import AddEmployee from './pages/AddEmployee'; // Ye line missing hai, ise add karein
 
 /* ==========================================
    PRODUCTION CONFIGURATION
