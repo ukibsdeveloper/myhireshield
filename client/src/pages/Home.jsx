@@ -104,9 +104,13 @@ const Home = () => {
                     <span className="text-[10px] font-black text-[#4c8051] bg-[#4c8051]/5 px-3 py-1 rounded-full border border-[#4c8051]/10 tracking-widest uppercase">Verified System</span>
                   </div>
                   <div className="flex items-center gap-5 mb-10">
-                    <div className="w-16 h-16 rounded-2xl bg-[#496279] flex items-center justify-center shadow-lg shadow-[#496279]/20">
-                      <i className="fas fa-shield-halved text-2xl text-[#dd8d88]"></i>
-                    </div>
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-100 shadow-lg shadow-[#496279]/10 bg-white">
+                        <img 
+                          src="/logo.jpg" 
+                          alt="HireShield Logo" 
+                          className="w-full h-full object-cover" 
+                        />
+                      </div>
                     <div>
                       <h4 className="text-xl font-black text-[#496279] tracking-tight">Trust Score™</h4>
                       <p className="text-xs font-bold text-[#4c8051] tracking-[0.1em] uppercase">Status: Credible</p>
