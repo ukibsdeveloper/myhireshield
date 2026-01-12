@@ -182,7 +182,7 @@ const Home = () => {
       </section>
 
       {/* Workflow Section */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-white relative overflow-hidden">
+      <section id="process" className="py-24 md:py-32 bg-white relative overflow-hidden">
         <div className="container mx-auto px-5 max-w-7xl text-center">
           <div className="max-w-3xl mx-auto mb-24 animate-on-scroll">
             <h2 className="text-4xl md:text-5xl font-black text-[#496279] tracking-tighter mb-6 uppercase">How MyHireShield Works</h2>
