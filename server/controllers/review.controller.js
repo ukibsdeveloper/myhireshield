@@ -4,14 +4,15 @@ import Company from '../models/Company.model.js';
 import AuditLog from '../models/AuditLog.model.js';
 import mongoose from 'mongoose';
 
-// @desc    Create new review
+// @desc    Create or Update review (Upsert Logic)
 // @route   POST /api/reviews
 // @access  Private (Company only)
 export const createReview = async (req, res) => {
   try {
     const { employeeId, ratings, employmentDetails, comment, wouldRehire, tags } = req.body;
+    const companyId = req.user.profileId;
 
-    // Data structuring with explicit Number conversion to prevent "NaN"
+    // 1. Data structuring with Number conversion
     const ratingsData = {
       workQuality: Number(ratings.workQuality) || 1,
       punctuality: Number(ratings.punctuality) || 1,
@@ -23,59 +24,81 @@ export const createReview = async (req, res) => {
       reliability: Number(ratings.reliability) || 1
     };
 
-    // Calculate initial averageRating
     const ratingsArray = Object.values(ratingsData);
     const averageRating = ratingsArray.reduce((a, b) => a + b, 0) / ratingsArray.length;
 
-    const reviewData = {
-      companyId: req.user.profileId, // Using profileId from auth middleware
-      employeeId,
-      ratings: ratingsData,
-      averageRating,
-      employmentDetails: {
+    // 2. CHECK: Kya is company ne is employee ko pehle review diya hai?
+    // Hum sirf isActive: true wale review ko check karenge
+    let review = await Review.findOne({ 
+      companyId: companyId, 
+      employeeId: employeeId,
+      isActive: true 
+    });
+
+    if (review) {
+      // FIX: Naya banane ki bajaye purane ko update karo
+      review.ratings = ratingsData;
+      review.averageRating = averageRating;
+      review.comment = comment;
+      review.wouldRehire = Boolean(wouldRehire);
+      review.tags = tags || [];
+      review.employmentDetails = {
         designation: employmentDetails.designation,
         startDate: new Date(employmentDetails.startDate),
         endDate: new Date(employmentDetails.endDate),
         employmentType: employmentDetails.employmentType
-      },
-      comment,
-      wouldRehire: Boolean(wouldRehire),
-      tags: tags || [],
-      createdBy: req.user._id
-    };
+      };
+      
+      // Edit history maintain karein
+      review.editHistory.push({
+        editedAt: Date.now(),
+        editedBy: req.user._id,
+        changes: { ratings: ratingsData, comment }
+      });
 
-    // Check for duplicate review in same period
-    const existingReview = await Review.findOne({
-      companyId: req.user.profileId,
-      employeeId,
-      'employmentDetails.startDate': reviewData.employmentDetails.startDate,
-      isActive: true
-    });
-
-    if (existingReview) {
-      return res.status(400).json({ success: false, message: 'Review already exists for this period' });
+      await review.save();
+    } else {
+      // Agar pehle se koi review nahi hai, toh naya create karein
+      review = await Review.create({
+        companyId: companyId,
+        employeeId,
+        ratings: ratingsData,
+        averageRating,
+        employmentDetails: {
+          designation: employmentDetails.designation,
+          startDate: new Date(employmentDetails.startDate),
+          endDate: new Date(employmentDetails.endDate),
+          employmentType: employmentDetails.employmentType
+        },
+        comment,
+        wouldRehire: Boolean(wouldRehire),
+        tags: tags || [],
+        createdBy: req.user._id
+      });
     }
 
-    const review = await Review.create(reviewData);
-
-    // Score Update logic in Employee Model
+    // 3. Score Update logic in Employee Model
     const employee = await Employee.findById(employeeId);
     if (employee && typeof employee.updateScore === 'function') {
       await employee.updateScore();
     }
 
-    // Create audit log
+    // 4. Create audit log
     await AuditLog.createLog({
       userId: req.user._id,
       userEmail: req.user.email,
       userRole: 'company',
-      eventType: 'review_created',
+      eventType: review.isNew ? 'review_created' : 'review_updated',
       eventData: { employeeId, reviewId: review._id },
       ipAddress: req.ip,
       status: 'success'
     });
 
-    return res.status(201).json({ success: true, data: review });
+    return res.status(review.isNew ? 201 : 200).json({ 
+      success: true, 
+      message: review.isNew ? 'Review submitted' : 'Review updated', 
+      data: review 
+    });
 
   } catch (error) {
     console.error("Review Controller Error:", error.message);
@@ -83,31 +106,21 @@ export const createReview = async (req, res) => {
   }
 };
 
-// @desc    Get reviews for an employee
-// @route   GET /api/reviews/employee/:employeeId
+// @desc    Get reviews for an employee (Public/Dashboard)
 export const getEmployeeReviews = async (req, res) => {
   try {
     const { employeeId } = req.params;
-    const employee = await Employee.findById(employeeId);
-    
-    if (!employee) return res.status(404).json({ success: false, message: 'Employee not found' });
-
-    if (!employee.profileVisible || !employee.consentGiven) {
-      return res.status(403).json({ success: false, message: 'Employee profile is not public' });
-    }
-
     const reviews = await Review.find({ employeeId, isActive: true })
       .populate('companyId', 'companyName industry logo verified')
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, count: reviews.length, data: reviews });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching reviews', error: error.message });
+    res.status(500).json({ success: false, message: 'Error fetching reviews' });
   }
 };
 
-// @desc    Get company's reviews
-// @route   GET /api/reviews/company
+// @desc    Get company's reviews (History)
 export const getCompanyReviews = async (req, res) => {
   try {
     const company = await Company.findOne({ userId: req.user._id });
@@ -120,48 +133,6 @@ export const getCompanyReviews = async (req, res) => {
     res.status(200).json({ success: true, count: reviews.length, data: reviews });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching reviews' });
-  }
-};
-
-// @desc    Update review with Edit History
-export const updateReview = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { ratings, comment, wouldRehire } = req.body;
-
-    const review = await Review.findById(id);
-    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
-
-    const company = await Company.findOne({ userId: req.user._id });
-    if (!company || review.companyId.toString() !== company._id.toString()) {
-      return res.status(403).json({ success: false, message: 'Not authorized' });
-    }
-
-    // Capture changes for history
-    const changes = {};
-    if (ratings) {
-      review.ratings = ratings;
-      const vals = Object.values(ratings);
-      review.averageRating = vals.reduce((a, b) => a + b, 0) / vals.length;
-      changes.ratings = ratings;
-    }
-    if (comment) { review.comment = comment; changes.comment = comment; }
-    if (wouldRehire !== undefined) { review.wouldRehire = wouldRehire; changes.wouldRehire = wouldRehire; }
-
-    review.editHistory.push({
-      editedAt: Date.now(),
-      editedBy: req.user._id,
-      changes
-    });
-
-    await review.save();
-
-    const employee = await Employee.findById(review.employeeId);
-    if (employee) await employee.updateScore();
-
-    res.status(200).json({ success: true, message: 'Review updated', data: review });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Update failed' });
   }
 };
 
