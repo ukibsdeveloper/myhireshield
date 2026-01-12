@@ -20,10 +20,12 @@ const EmployeeSearch = () => {
     try {
       // Logic: Axios automatically uses baseURL from App.jsx
       // Backend controller uses req.query.name and req.query.dob
+      // EmployeeSearch.jsx mein handleSearch function ke andar line 27-30 badlein:
       const res = await axios.get(`/api/employees/search`, {
+      // EmployeeSearch.jsx ke handleSearch mein:
         params: { 
-          name: fullName.trim(),
-          dob: dob || undefined // Only send if selected
+          query: fullName.trim().toUpperCase(), // .toUpperCase() add kar dein
+          dob: dob || undefined 
         }
       });
 

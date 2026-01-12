@@ -12,6 +12,7 @@ export const searchEmployees = async (req, res) => {
   try {
     const {
       query,
+      dob,
       scoreRange,
       experience,
       skills,
@@ -73,6 +74,10 @@ export const searchEmployees = async (req, res) => {
         { 'address.city': { $regex: location, $options: 'i' } },
         { 'address.state': { $regex: location, $options: 'i' } }
       ];
+    }
+
+    if (dob) {
+      searchQuery.dateOfBirth = dob; 
     }
 
     // Education filter

@@ -84,12 +84,17 @@ export const registerEmployee = async (req, res) => {
 
     const user = await User.create({ email, password, role: 'employee' });
 
-    const employee = await Employee.create({
-      userId: user._id,
-      firstName, lastName, email, phone, dateOfBirth,
-      gender: gender.toLowerCase(),
-      address: { city, state, pincode, country: 'India' }
-    });
+// auth.controller.js ke registerEmployee function mein (Line 90-95 ke paas)
+const employee = await Employee.create({
+  userId: user._id,
+  firstName: firstName.trim().toUpperCase(), // uppercase add kiya
+  lastName: lastName.trim().toUpperCase(),   // uppercase add kiya
+  email, 
+  phone, 
+  dateOfBirth, // Ye String format (YYYY-MM-DD) mein hi jayega jo sahi hai
+  gender: gender.toLowerCase(),
+  address: { city, state, pincode, country: 'India' }
+});
 
     user.profileId = employee._id;
     await user.save();
@@ -126,13 +131,13 @@ export const login = async (req, res) => {
       if (!email) return res.status(400).json({ success: false, message: 'Email required' });
       user = await User.findOne({ email, role }).select('+password');
     } 
-    else if (role === 'employee') {
-      if (!firstName || !dateOfBirth) return res.status(400).json({ success: false, message: 'Name and DOB required' });
-      
-      profileData = await Employee.findOne({ 
-        firstName: { $regex: new RegExp(`^${firstName}$`, 'i') }, 
-        dateOfBirth 
-      });
+else if (role === 'employee') {
+  if (!firstName || !dateOfBirth) return res.status(400).json({ success: false, message: 'Name and DOB required' });
+  
+  profileData = await Employee.findOne({ 
+    firstName: firstName.trim().toUpperCase(), // RegExp ki zaroorat nahi, direct match karein
+    dateOfBirth 
+  });
 
       if (profileData) {
         user = await User.findOne({ _id: profileData.userId, role }).select('+password');

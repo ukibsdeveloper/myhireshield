@@ -1,4 +1,6 @@
 import React from 'react';
+import React, { useEffect, useState } from 'react'; // useState aur useEffect add kiya
+import axios from 'axios'; // axios add kiya
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
