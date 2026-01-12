@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -46,19 +46,13 @@ const AddEmployee = () => {
       dateOfBirth: formData.dateOfBirth, // YYYY-MM-DD format strictly
       gender: formData.gender.toLowerCase(), // female/male strictly lowercase
       phone: String(formData.phone).trim(),
-      // Ye fields schema validation ke liye mandatory ho sakti hain
-      address: {
-        street: 'Registered Node',
-        city: 'Delhi',
-        state: 'Delhi',
-        country: 'India',
-        pincode: '110001'
-      },
-      designation: formData.designation || "Executive",
-      department: formData.department || "Operations"
+      // Backend expects these as top-level fields
+      city: 'Delhi',
+      state: 'Delhi', 
+      pincode: '110001'
     };
 
-    const res = await axios.post('/api/auth/register/employee', payload); 
+    const res = await api.post('/auth/register/employee', payload); 
 
     // Success check based on status code 201
     if (res.status === 201 || res.status === 200 || res.data.success) {

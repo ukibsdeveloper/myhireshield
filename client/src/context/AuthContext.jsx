@@ -16,34 +16,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // 1. Axios Security: Token Injection & Auto-Logout Logic
+  // 1. Check Auth Status on Startup
   useEffect(() => {
-    // Request Interceptor: Token automatically attach karna
-    const requestInterceptor = api.interceptors.request.use((config) => {
+    const checkAuth = async () => {
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    });
-
-    // Response Interceptor: Agar token expire ho jaye (401) toh logout karna
-    const responseInterceptor = api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          logout();
+        try {
+          const response = await api.get('/auth/me');
+          if (response.data.success) {
+            setUser(response.data.user);
+          }
+        } catch (error) {
+          localStorage.removeItem('token');
+          setToken(null);
+          setUser(null);
         }
-        return Promise.reject(error);
       }
-    );
-
-    return () => {
-      api.interceptors.request.eject(requestInterceptor);
-      api.interceptors.response.eject(responseInterceptor);
+      setLoading(false);
     };
+    checkAuth();
   }, [token]);
-
-  // 2. Check Auth Status on Startup
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
@@ -75,6 +66,13 @@ export const AuthProvider = ({ children }) => {
         ...credentials,
         role
       });
+
+      if (!response.data.success) {
+        return {
+          success: false,
+          error: response.data.message || 'Login failed'
+        };
+      }
 
       const { token: newToken, user: userData } = response.data;
       

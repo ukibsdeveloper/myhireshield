@@ -46,10 +46,11 @@ const Login = () => {
         };
       } else {
         // Employee login: Name + DOB + DOB as password (as per backend logic)
+        const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); // Remove hyphens for password
         credentials = { 
           firstName: formData.firstName.trim().toUpperCase(), 
           dateOfBirth: formData.dateOfBirth,
-          password: formData.dateOfBirth // Backend validation needs this
+          password: cleanDOB // Password is clean DOB (YYYYMMDD)
         };
       }
 
