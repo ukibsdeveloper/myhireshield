@@ -21,17 +21,21 @@ router.get('/company', protect, authorize('company'), async (req, res) => {
       return res.status(404).json({ success: false, message: 'Company profile not found' });
     }
 
-    // 1. Core Stats
+    // 1. Core Stats for Cards
     const totalReviews = await Review.countDocuments({ companyId: company._id, isActive: true });
     const employeesReviewed = await Review.distinct('employeeId', { companyId: company._id });
     
-    // 2. Recent Activity
+    // 2. Trust Rating & Clearance Logic
+    // Agar company verified hai toh 95%, varna default 75%
+    const trustRating = company.verified ? 95 : 75;
+
+    // 3. Recent Audit Ledger (Matches Table in Dashboard)
     const recentReviews = await Review.find({ companyId: company._id, isActive: true })
       .sort({ createdAt: -1 })
-      .limit(5)
-      .populate('employeeId', 'firstName lastName email profilePicture');
+      .limit(3) // Sirf top 3 results table ke liye
+      .populate('employeeId', 'firstName lastName email currentDesignation overallScore profilePicture');
 
-    // 3. Review Trends (Last 6 Months)
+    // 4. Review Trends (Last 6 Months)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -59,8 +63,9 @@ router.get('/company', protect, authorize('company'), async (req, res) => {
       success: true,
       data: {
         totalReviews,
-        totalEmployeesReviewed: employeesReviewed.length,
-        recentReviews,
+        staffNodesCount: employeesReviewed.length, // Updated key name for frontend sync
+        trustRating, // Added for gauge sync
+        recentReviews, // Added for table sync
         reviewTrends
       }
     });
@@ -90,8 +95,7 @@ router.get('/employee', protect, authorize('employee'), async (req, res) => {
       verificationStatus: 'verified' 
     });
     
-    // 2. Profile Views (From Employee model analytics or Audit Log)
-    // Humne Employee model mein profileViews field rakhi hai, wahi use karenge for speed
+    // 2. Profile Views
     const profileViews = employee.profileViews || 0;
 
     // 3. Recent Feedbacks
