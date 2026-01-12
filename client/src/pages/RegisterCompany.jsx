@@ -190,7 +190,7 @@ const handleSubmit = async (e) => {
           <div className="w-full max-w-lg">
             <div className="mb-10 text-center lg:text-left">
               <h2 className="text-3xl font-black text-[#496279] uppercase tracking-tight mb-2">Protocol Onboarding</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]"> your enterprise audit node</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Deploy your enterprise audit node</p>
             </div>
 
             {error && (
