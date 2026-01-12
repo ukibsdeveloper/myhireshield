@@ -10,9 +10,6 @@ const CompanyDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // FIX: Hardcoded fallback data ko hata kar 0 kar diya hai
-  const displayStats = stats || { totalReviews: 0, staffNodesCount: 0, trustRating: 0 };
-
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -30,7 +27,7 @@ const CompanyDashboard = () => {
   }, []);
 
   // UI Helper: Trust Rating logic
-  const trustRating = displayStats.trustRating || 0;
+  const trustRating = stats?.trustRating || 0;
   const strokeDashoffset = 364.4 - (364.4 * trustRating) / 100;
 
   if (loading) {
@@ -104,8 +101,8 @@ const CompanyDashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {[
-            { label: 'Integrity Logs', value: displayStats.totalReviews || 0, icon: 'fa-star', color: '#4c8051' },
-            { label: 'Staff Nodes', value: displayStats.staffNodesCount || 0, icon: 'fa-users', color: '#496279' },
+            { label: 'Integrity Logs', value: stats?.totalReviews || 0, icon: 'fa-star', color: '#4c8051' },
+            { label: 'Staff Nodes', value: stats?.staffNodesCount || 0, icon: 'fa-users', color: '#496279' },
             { label: 'Clearance Rate', value: '98%', icon: 'fa-bolt', color: '#dd8d88' }
           ].map((stat, i) => (
             <div key={i} className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all relative group overflow-hidden">
@@ -166,9 +163,7 @@ const CompanyDashboard = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="py-10 text-center text-[10px] font-bold text-slate-300 tracking-widest uppercase">
-                        No recent audits deployed. System Idle.
-                      </td>
+                      <td colSpan="3" className="py-10 text-center text-[10px] font-bold text-slate-300 tracking-widest">No recent audits deployed.</td>
                     </tr>
                   )}
                 </tbody>
@@ -183,8 +178,8 @@ const CompanyDashboard = () => {
                  <i className="fas fa-bell"></i> Alerts
                </h3>
                <div className="border-l-2 border-[#dd8d88] pl-4">
-                  <p className="text-[10px] font-black text-[#496279] leading-tight uppercase">System Operational</p>
-                  <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase">Audit Ledger Syncing Complete</p>
+                  <p className="text-[10px] font-black text-[#496279] leading-tight">System Operational</p>
+                  <p className="text-[9px] font-bold text-slate-400 mt-1">Audit Ledger Syncing Complete</p>
                </div>
             </div>
 
@@ -195,7 +190,7 @@ const CompanyDashboard = () => {
                  { to: "/review/manage", icon: 'fa-database', title: 'Managed History' },
                ].map((action, i) => (
                  <Link key={i} to={action.to} className="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-3xl hover:border-[#4c8051] transition-all shadow-sm group hover:-translate-y-1">
-                    <span className="text-[10px] font-black text-[#496279] tracking-widest uppercase">{action.title}</span>
+                    <span className="text-[10px] font-black text-[#496279] tracking-widest">{action.title}</span>
                     <i className={`fas ${action.icon} text-slate-200 group-hover:text-[#4c8051] transition-colors`}></i>
                  </Link>
                ))}
