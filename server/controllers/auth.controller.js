@@ -28,97 +28,47 @@ const getDeviceInfo = (req) => {
 // @desc    Register company
 export const registerCompany = async (req, res) => {
   try {
-    console.log('Registration request received');
-    console.log('Full request body:', JSON.stringify(req.body, null, 2));
-    console.log('Request body keys:', Object.keys(req.body));
-    
-    const { companyName, email, password, contactPerson } = req.body;
+    const { companyName, email, password, industry, companySize, address, contactPerson, website, gstin, cin } = req.body;
 
-    // Minimal validation
-    if (!companyName || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
-    }
-
-    // Check if user exists
-    console.log('Checking if user exists with email:', email);
+    // 1. Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log('User already exists:', existingUser._id);
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
-    console.log('User does not exist, proceeding with creation');
 
-    // Create user
-    console.log('Creating user with data:', { email, role: 'company', isActive: true, emailVerified: true });
+    // 2. Create User
     const user = new User({ 
       email, 
       password, 
       role: 'company',
       isActive: true,
-      emailVerified: true
+      emailVerified: true 
     });
-    console.log('Saving user...');
     await user.save();
-    console.log('User created successfully:', user._id);
 
-    // Create minimal company
-    console.log('Creating company with data:', {
-      userId: user._id,
-      companyName,
-      email,
-      industry: req.body.industry || 'Other',
-      companySize: req.body.companySize || '1-10',
-      contactPerson: {
-        name: contactPerson?.name || 'Contact',
-        designation: contactPerson?.designation || 'Manager',
-        phone: contactPerson?.phone || '0000000000',
-        email: contactPerson?.email || email
-      }
-    });
+    // 3. Create Company with ALL fields including address
     const company = new Company({
       userId: user._id,
       companyName,
       email,
-      industry: req.body.industry || 'Other',
-      companySize: req.body.companySize || '1-10',
-      contactPerson: {
-        name: contactPerson?.name || 'Contact',
-        designation: contactPerson?.designation || 'Manager',
-        phone: contactPerson?.phone || '0000000000',
-        email: contactPerson?.email || email
-      }
+      website,
+      industry,
+      companySize,
+      address, // FIX: Frontend se aane wala address object ab save hoga
+      contactPerson,
+      gstin,
+      cin
     });
-    console.log('Saving company...');
     await company.save();
-    console.log('Company created successfully:', company._id);
 
+    // 4. Link profileId back to User
     user.profileId = company._id;
     await user.save();
 
     res.status(201).json({ success: true, message: 'Company registered successfully!' });
   } catch (error) {
-    console.error('Registration error details:', error);
-    console.error('Error stack:', error.stack);
-    
-    // Handle Mongoose validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ 
-        success: false, 
-        message: `Validation Error: ${messages.join(', ')}` 
-      });
-    }
-    
-    // Handle duplicate key errors
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyValue)[0];
-      return res.status(400).json({ 
-        success: false, 
-        message: `${field} already exists` 
-      });
-    }
-    
-    res.status(500).json({ success: false, message: `Registration failed: ${error.message}` });
+    console.error('Registration Error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

@@ -26,14 +26,17 @@ export const validateCompanyRegistration = [
   body('email').trim().isEmail().withMessage('Valid email is required').normalizeEmail(),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   body('industry').notEmpty().withMessage('Industry type is required'),
-  body('companySize').isIn(['1-10', '11-50', '51-200', '201-500', '500+']).withMessage('Invalid size'),
+  body('companySize').notEmpty().withMessage('Company size is required'),
   body('contactPerson.name').trim().notEmpty().withMessage('Contact person name is required'),
   body('contactPerson.designation').trim().notEmpty().withMessage('Contact person designation is required'),
-  body('contactPerson.phone').matches(/^[6-9]\d{9}$/).withMessage('Valid 10-digit Indian phone required'),
+  body('contactPerson.phone').notEmpty().withMessage('Contact phone is required'),
   body('contactPerson.email').isEmail().withMessage('Valid contact email required'),
+  // Address validation optional but recommended
+  body('address.city').notEmpty().withMessage('City is required'),
+  body('address.state').notEmpty().withMessage('State is required'),
+  body('address.pincode').isLength({ min: 6, max: 6 }).withMessage('Pincode must be 6 digits'),
   validate
 ];
-
 /**
  * 2. Employee Registration Rules
  */

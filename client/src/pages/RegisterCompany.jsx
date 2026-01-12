@@ -86,52 +86,53 @@ const RegisterCompany = () => {
   };
 
   // SUBMIT LOGIC SYNCED WITH BACKEND SCHEMA
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateStep3()) return;
-    setLoading(true);
-    setError('');
+// Sirf handleSubmit function ko isse replace karein
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateStep3()) return;
+  setLoading(true);
+  setError('');
 
-    try {
-      // Corrected Payload Mapping to Nested Objects
-      const payload = {
-        companyName: formData.companyName,
-        email: formData.email,
-        password: formData.password,
-        website: formData.website,
-        industry: formData.industry,
-        companySize: formData.companySize,
-        address: {
-          street: formData.street,
-          city: formData.city,
-          state: formData.state,
-          country: formData.country,
-          pincode: formData.pincode
-        },
-        contactPerson: {
-          name: formData.contactName,
-          designation: formData.contactDesignation,
-          phone: formData.contactPhone,
-          email: formData.contactEmail || formData.email
-        },
-        gstin: formData.gstin,
-        cin: formData.cin
-      };
+  try {
+    const payload = {
+      companyName: formData.companyName,
+      email: formData.email,
+      password: formData.password,
+      website: formData.website,
+      industry: formData.industry,
+      companySize: formData.companySize,
+      address: {
+        street: formData.street || '',
+        city: formData.city,
+        state: formData.state,
+        country: formData.country,
+        pincode: formData.pincode
+      },
+      contactPerson: {
+        name: formData.contactName,
+        designation: formData.contactDesignation,
+        phone: formData.contactPhone,
+        email: formData.contactEmail.trim() !== '' ? formData.contactEmail : formData.email // FIX: Never send empty string
+      },
+      gstin: formData.gstin,
+      cin: formData.cin
+    };
 
-      const result = await registerCompany(payload);
+    const result = await registerCompany(payload);
 
-      if (result.success) {
-        alert('Registration successful! Please check your email to verify.');
-        navigate('/login');
-      } else {
-        setError(result.error);
-      }
-    } catch (err) {
-      setError('Connection failed. Please check network nodes.');
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      alert('Registration successful!');
+      navigate('/login');
+    } else {
+      // Backend se jo error message aa raha hai wahi dikhayenge
+      setError(result.message || result.error);
     }
-  };
+  } catch (err) {
+    setError('Connection failed. Please check your server.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const inputClass = "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#4c8051] focus:border-transparent outline-none transition-all font-medium text-[#496279] shadow-sm";
 
