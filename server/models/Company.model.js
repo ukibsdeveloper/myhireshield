@@ -29,7 +29,7 @@ const companySchema = new mongoose.Schema({
   companySize: {
     type: String,
     // Fix: Added '200+' to sync with RegisterCompany.jsx frontend options
-    enum: ['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+', '200+'], 
+    enum: ['1-10', '11-50', '51-200', '201-500', '500+'], 
     required: [true, 'Company size is required']
   },
   address: {

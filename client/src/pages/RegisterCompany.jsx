@@ -67,6 +67,7 @@ const RegisterCompany = () => {
 
   const validateStep3 = () => {
     if (!formData.contactName.trim()) { setError('Contact person name is required'); return false; }
+    if (!formData.contactDesignation.trim()) { setError('Contact person designation is required'); return false; }
     if (!formData.contactPhone.trim() || !/^\d{10}$/.test(formData.contactPhone)) { setError('Valid 10-digit phone number is required'); return false; }
     if (!formData.agreeToTerms) { setError('You must agree to the terms node'); return false; }
     return true;
@@ -287,9 +288,13 @@ const RegisterCompany = () => {
                       <input type="text" name="contactName" value={formData.contactName} onChange={handleChange} className={inputClass} required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Audit Phone *</label>
-                      <input type="tel" name="contactPhone" value={formData.contactPhone} onChange={handleChange} className={inputClass} required maxLength="10" />
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Admin Role *</label>
+                      <input type="text" name="contactDesignation" value={formData.contactDesignation} onChange={handleChange} className={inputClass} placeholder="CEO, HR Manager, etc." required />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Audit Phone *</label>
+                    <input type="tel" name="contactPhone" value={formData.contactPhone} onChange={handleChange} className={inputClass} required maxLength="10" />
                   </div>
                   <div className="p-5 bg-[#4c8051]/5 rounded-2xl border border-[#4c8051]/10">
                     <div className="flex items-start gap-3">
