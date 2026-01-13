@@ -32,13 +32,13 @@ const Footer = () => {
                   Hire<span className="text-[#4c8051]">Shield</span>
                 </span>
                 <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase mt-1.5">
-                  Verification Platform
+                  Trusted Hiring Platform
                 </span>
               </div>
             </Link>
 
             <p className="text-slate-600 text-[15px] leading-relaxed mb-8 font-medium max-w-sm">
-              A cutting-edge background verification platform ensuring trustworthy hiring decisions through accurate employee data verification.
+              A simple hiring platform that helps you build trust with your team through verified work history and honest feedback.
             </p>
 
             {/* Social Media Links */}
@@ -67,9 +67,9 @@ const Footer = () => {
               For Employees
             </h4>
             <ul className="space-y-3.5">
-              <li><Link to="/register/employee" className="footer-link">Claim My Profile</Link></li>
-              <li><Link to="/dashboard/employee" className="footer-link">View Trust Score</Link></li>
-              <li><Link to="/verify/documents" className="footer-link">Document Center</Link></li>
+              <li><Link to="/register/employee" className="footer-link">I am an Employee</Link></li>
+              <li><Link to="/dashboard/employee" className="footer-link">Check My Score</Link></li>
+              <li><Link to="/verify/documents" className="footer-link">My Documents</Link></li>
               <li><Link to="/consent" className="footer-link">Privacy Settings</Link></li>
             </ul>
           </div>
@@ -80,11 +80,11 @@ const Footer = () => {
               For Companies
             </h4>
             <ul className="space-y-3.5">
-              <li><Link to="/register/company" className="footer-link">Business Registration</Link></li>
-              <li><Link to="/employee/search" className="footer-link">Candidate Search</Link></li>
-              <li><Link to="/dashboard/company" className="footer-link">Enterprise Dashboard</Link></li>
-              <li><Link to="/review/submit" className="footer-link">Submit Employee Audit</Link></li>
-              <li><Link to="/review/manage" className="footer-link">History Records</Link></li>
+              <li><Link to="/register/company" className="footer-link">Company Registration</Link></li>
+              <li><Link to="/employee/search" className="footer-link">Find People</Link></li>
+              <li><Link to="/dashboard/company" className="footer-link">Company Dashboard</Link></li>
+              <li><Link to="/review/submit" className="footer-link">Rate an Employee</Link></li>
+              <li><Link to="/review/manage" className="footer-link">Review History</Link></li>
             </ul>
           </div>
 
@@ -148,10 +148,10 @@ const Footer = () => {
             </div>
 
             <div className="flex items-center gap-4 text-xs">
-              <span className="text-slate-400 font-medium">Secured Verification Platform</span>
+              <span className="text-slate-400 font-medium">Safe Hiring Platform</span>
               <div className="flex items-center gap-2">
                 <i className="fas fa-shield-alt text-[#4c8051]"></i>
-                <span className="text-slate-500 font-semibold">SSL Encrypted</span>
+                <span className="text-slate-500 font-semibold">SSL Protected</span>
               </div>
             </div>
           </div>

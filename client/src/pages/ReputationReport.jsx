@@ -35,7 +35,7 @@ const ReputationReport = () => {
     if (user) fetchReport();
   }, [user, hasPaidForReport]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center uppercase font-black text-[10px] tracking-[0.3em]">Decoding Integrity Node...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center uppercase font-black text-[10px] tracking-[0.3em]">Building Trust Report...</div>;
 
   // Real Score from Database
   const overallScore = reportData?.overallScore || 0;
@@ -69,7 +69,7 @@ const ReputationReport = () => {
               Certified Professional Report
             </div>
             <h1 className="text-4xl font-black text-[#496279] uppercase tracking-tighter">
-              Integrity <span className="text-[#4c8051]">Audit Report</span>
+              Trust <span className="text-[#4c8051]">Verification Report</span>
             </h1>
           </div>
           <div className="flex gap-4">
@@ -79,11 +79,11 @@ const ReputationReport = () => {
                 className="flex items-center gap-3 px-6 py-3 bg-[#496279] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-[#4c8051] transition-all"
               >
                 <i className="fas fa-file-pdf"></i>
-                Export Node PDF
+                Download PDF
               </button>
             )}
             <div className="px-6 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm text-center">
-              <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Node Subject</p>
+              <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Employee Profile</p>
               <span className="text-[10px] font-black text-[#496279] uppercase tracking-tighter">{user?.firstName} {user?.lastName}</span>
             </div>
           </div>
@@ -93,7 +93,7 @@ const ReputationReport = () => {
         {isUnlocked && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 animate-in fade-in zoom-in">
             <div className="p-8 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Integrity Spectrum (Real-time)</h4>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Performance History (Real-time)</h4>
               <div className="flex items-end gap-2 h-32">
                 {[40, 70, overallScore, 60, 85].map((h, i) => (
                   <div key={i} className="flex-1 rounded-t-xl transition-all duration-1000"
@@ -106,11 +106,11 @@ const ReputationReport = () => {
               <div className="flex items-center gap-4 mb-4">
                 <div className={`w-3 h-3 rounded-full ${overallScore > 60 ? 'bg-[#4c8051]' : 'bg-[#dd8d88]'}`}></div>
                 <p className="text-[10px] font-black text-[#496279] uppercase tracking-widest">
-                  {overallScore > 60 ? 'Low Risk Profile' : 'High Risk Node'}
+                  {overallScore > 60 ? 'Low Risk Profile' : 'Needs Verification'}
                 </p>
               </div>
               <p className="text-xs text-slate-400 font-bold leading-relaxed uppercase tracking-tight">
-                Current audit node represents an aggregate score of <span className="text-[#4c8051]">{overallScore}%</span> across verified enterprise logs.
+                This report represents an overall score of <span className="text-[#4c8051]">{overallScore}%</span> based on verified feedback from companies.
               </p>
             </div>
           </div>
@@ -120,10 +120,10 @@ const ReputationReport = () => {
         <div className="bg-white border border-slate-100 rounded-[3.5rem] p-10 shadow-xl mb-12 relative overflow-hidden">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="text-center md:text-left">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Shield Aggregate Index</p>
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Total Trust Score</p>
               <h2 className="text-9xl font-black text-[#496279] tracking-tighter leading-none">{overallScore}</h2>
               <p className="text-[#4c8051] font-black uppercase text-[10px] tracking-widest mt-4">
-                {overallScore >= 75 ? 'Verified Elite Status' : 'Standard Node Status'}
+                {overallScore >= 75 ? 'Top Verified Talent' : 'Verified Profile'}
               </p>
             </div>
             <div className="space-y-4">
@@ -144,7 +144,7 @@ const ReputationReport = () => {
 
         {/* Complete History - All Reviews */}
         <div className="relative">
-          <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-8 ml-4">Employment Audit Logs</h3>
+          <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-8 ml-4">Detailed Work History</h3>
 
           <div className={`space-y-6 ${!isUnlocked ? 'filter blur-xl pointer-events-none select-none opacity-40' : 'animate-in fade-in'}`}>
             {reportData?.recentReviews?.length > 0 ? reportData.recentReviews.map((rev, i) => (
@@ -166,7 +166,7 @@ const ReputationReport = () => {
               </div>
             )) : (
               <div className="text-center py-10 bg-white rounded-[3rem] border-dashed border-2 border-slate-100">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No Verified Enterprise Logs Found</p>
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No Verified Reviews Found</p>
               </div>
             )}
           </div>
@@ -176,11 +176,11 @@ const ReputationReport = () => {
             <div className="absolute inset-0 flex items-center justify-center z-20">
               <div className="bg-white/90 backdrop-blur-xl p-12 rounded-[4rem] border border-white shadow-2xl text-center max-w-md mx-6">
                 <div className="w-20 h-20 bg-[#496279] rounded-3xl flex items-center justify-center text-white mx-auto mb-8 shadow-xl">
-                  <i className="fas fa-fingerprint text-3xl"></i>
+                  <i className="fas fa-lock text-3xl"></i>
                 </div>
-                <h2 className="text-2xl font-black text-[#496279] uppercase tracking-tighter mb-4">Decode History</h2>
+                <h2 className="text-2xl font-black text-[#496279] uppercase tracking-tighter mb-4">View Full History</h2>
                 <p className="text-[11px] font-bold text-slate-400 uppercase leading-relaxed mb-10 tracking-widest">
-                  Employer feedback and behavioral nodes are encrypted. Access real-time node history.
+                  Detailed company feedback and reviews are hidden. Get full access to your trust report.
                 </p>
                 <button
                   onClick={() => window.location.href = '/checkout'}
@@ -195,7 +195,7 @@ const ReputationReport = () => {
 
         <div className="mt-20 text-center opacity-30">
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.5em]">
-            HireShield Professional Platform // Node ID: {user?._id?.toUpperCase()}
+            HireShield Verified Network // Profile ID: {user?._id?.toUpperCase()}
           </p>
         </div>
       </div>

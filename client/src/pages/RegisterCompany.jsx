@@ -164,14 +164,14 @@ const RegisterCompany = () => {
             The Gateway to <br /> <span className="text-[#4c8051]">Trusted Teams.</span>
           </h1>
           <p className="text-white/60 text-lg font-bold uppercase tracking-widest leading-relaxed mb-16">
-            Join the gold standard of professional integrity nodes.
+            Join our network of trusted companies.
           </p>
 
           <div className="space-y-10">
             {[
-              { s: 1, l: 'Entity Detail', d: 'Enterprise identity setup' },
-              { s: 2, l: 'Head Office', d: 'Headquarters verification' },
-              { s: 3, l: 'Compliance Node', d: 'Legal authorization stage' }
+              { s: 1, l: 'Company Details', d: 'Basic information' },
+              { s: 2, l: 'Office Address', d: 'Where you are located' },
+              { s: 3, l: 'Final Steps', d: 'Contact and agreement' }
             ].map((item) => (
               <div key={item.s} className={`flex items-start gap-6 transition-all duration-700 ${step >= item.s ? 'opacity-100' : 'opacity-30'}`}>
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all ${step >= item.s ? 'bg-white text-[#496279] shadow-lg' : 'border-2 border-white/20 text-white'
@@ -194,12 +194,12 @@ const RegisterCompany = () => {
           <div className="w-full max-w-lg">
             <div className="mb-10 text-center lg:text-left">
               <h2 className="text-3xl font-black text-[#496279] uppercase tracking-tight mb-2">Company Registration</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Deploy your enterprise audit node</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Create your company account</p>
             </div>
 
             {error && (
               <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in duration-300">
-                <i className="fas fa-shield-virus"></i> {error}
+                <i className="fas fa-exclamation-circle"></i> {error}
               </div>
             )}
 
@@ -208,27 +208,27 @@ const RegisterCompany = () => {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Entity Name *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Company Name *</label>
                       <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} className={inputClass} placeholder="Legal Name" required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Work Domain *</label>
-                      <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="hr@domain.com" required />
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Work Email *</label>
+                      <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="hr@company.com" required />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Access Key *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Password *</label>
                       <input type="password" name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="8+ Characters" required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Verify Key *</label>
-                      <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Re-type Key" required />
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Confirm Password *</label>
+                      <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Re-type Password" required />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Sector</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Industry</label>
                       <select name="industry" value={formData.industry} onChange={handleChange} className={inputClass} required>
                         <option value="">Select</option>
                         <option value="IT & Software">IT & Software</option>
@@ -239,7 +239,7 @@ const RegisterCompany = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Asset Size</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Company Size</label>
                       <select name="companySize" value={formData.companySize} onChange={handleChange} className={inputClass} required>
                         <option value="">Select</option>
                         <option value="1-10">1-10 Members</option>
@@ -251,7 +251,7 @@ const RegisterCompany = () => {
                     </div>
                   </div>
                   <button type="button" onClick={handleNext} className="w-full bg-[#496279] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3a4e61] transition-all flex items-center justify-center gap-3">
-                    Initialize Next Stage <i className="fas fa-arrow-right"></i>
+                    Next Step <i className="fas fa-arrow-right"></i>
                   </button>
                 </div>
               )}
@@ -259,25 +259,25 @@ const RegisterCompany = () => {
               {step === 2 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Physical Address Node</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Street Address</label>
                     <input type="text" name="street" value={formData.street} onChange={handleChange} className={inputClass} placeholder="Building, Street" />
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">City Node *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">City *</label>
                       <input type="text" name="city" value={formData.city} onChange={handleChange} className={inputClass} required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">State Node *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">State *</label>
                       <input type="text" name="state" value={formData.state} onChange={handleChange} className={inputClass} required />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Zip Code *</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pincode *</label>
                     <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
                   </div>
                   <div className="flex gap-4">
-                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Return</button>
+                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Back</button>
                     <button type="button" onClick={handleNext} className="w-2/3 bg-[#496279] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3a4e61] transition-all flex items-center justify-center gap-3">
                       Verify Address <i className="fas fa-arrow-right"></i>
                     </button>
@@ -289,31 +289,31 @@ const RegisterCompany = () => {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Admin Name *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Contact Person *</label>
                       <input type="text" name="contactName" value={formData.contactName} onChange={handleChange} className={inputClass} required />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Admin Role *</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Designation *</label>
                       <input type="text" name="contactDesignation" value={formData.contactDesignation} onChange={handleChange} className={inputClass} placeholder="CEO, HR Manager, etc." required />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Audit Phone *</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Work Phone *</label>
                     <input type="tel" name="contactPhone" value={formData.contactPhone} onChange={handleChange} className={inputClass} required maxLength="10" />
                   </div>
                   <div className="p-5 bg-[#4c8051]/5 rounded-2xl border border-[#4c8051]/10">
                     <div className="flex items-start gap-3">
                       <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#4c8051] rounded cursor-pointer" required />
                       <label className="text-[10px] font-black text-slate-500 uppercase leading-relaxed tracking-wider">
-                        I COMMIT TO THE <Link to="/terms" className="text-[#4c8051] underline">TERMS OF PROTOCOL</Link> AND <Link to="/privacy" className="text-[#4c8051] underline">DATA PRIVACY NODE</Link>
+                        I AGREE TO THE <Link to="/terms" className="text-[#4c8051] underline">TERMS OF SERVICE</Link> AND <Link to="/privacy" className="text-[#4c8051] underline">PRIVACY POLICY</Link>
                       </label>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Return</button>
+                    <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Back</button>
                     <button type="button" onClick={handleSubmit} disabled={loading} className="w-2/3 bg-[#4c8051] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3d6641] transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center gap-2">
                       {loading && <i className="fas fa-circle-notch fa-spin"></i>}
-                      {loading ? 'Creating Account...' : 'Create Company Account'}
+                      {loading ? 'Creating Account...' : 'Finish Registration'}
                     </button>
                   </div>
                 </div>
@@ -322,7 +322,7 @@ const RegisterCompany = () => {
 
             <div className="mt-12 text-center border-t border-slate-100 pt-8">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Existing Node? <Link to="/login" className="text-[#496279] ml-2 hover:underline underline-offset-4">Authenticate Access</Link>
+                Already have an account? <Link to="/login" className="text-[#496279] ml-2 hover:underline underline-offset-4">Login Here</Link>
               </p>
             </div>
           </div>

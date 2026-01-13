@@ -6,32 +6,31 @@ const RefundPolicy = () => {
   return (
     <div className="min-h-screen bg-[#fcfaf9] selection:bg-[#496279]/20">
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.02] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-      
+
       <Navbar scrolled={true} />
 
       <div className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
         <div className="bg-white border border-slate-100 rounded-[3.5rem] shadow-2xl p-10 md:p-16 relative overflow-hidden animate-on-scroll">
-          
-          {/* Header Node */}
+
           <div className="flex items-center gap-4 mb-12">
             <div className="w-14 h-14 bg-[#496279]/10 rounded-2xl flex items-center justify-center text-[#496279]">
               <i className="fas fa-undo-alt text-2xl"></i>
             </div>
             <div>
               <h1 className="text-3xl font-black text-[#496279] uppercase tracking-tighter leading-none">Refund Policy.</h1>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2">Policy Node: HS-REFUND-2026</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2">Policy ID: HS-REFUND-2026</p>
             </div>
           </div>
 
           <div className="space-y-12 text-[#496279]/80 font-medium leading-relaxed text-sm uppercase tracking-tight">
-            
+
             {/* Clause 1 */}
             <section className="space-y-4">
               <h3 className="text-sm font-black text-[#496279] flex items-center gap-3">
                 <span className="w-6 h-px bg-[#4c8051]"></span> 01. Refund Eligibility
               </h3>
               <p className="pl-9 text-slate-500 font-bold leading-relaxed">
-                Refunds are available within 7 days of purchase for unused services. Once a background check has been initiated or completed, refunds are not applicable.
+                Refunds are available within 7 days of purchase for unused services. Once a check has been started or completed, refunds are not possible.
               </p>
             </section>
 
@@ -41,7 +40,7 @@ const RefundPolicy = () => {
                 <span className="w-6 h-px bg-[#4c8051]"></span> 02. Processing Time
               </h3>
               <p className="pl-9 text-slate-500 font-bold leading-relaxed">
-                Approved refunds will be processed within 5-7 business days and credited back to the original payment method.
+                Approved refunds will be processed within 5-7 business days and sent back to your original payment method.
               </p>
             </section>
 
@@ -61,7 +60,7 @@ const RefundPolicy = () => {
                 <span className="w-6 h-px bg-[#4c8051]"></span> 04. Non-Refundable Services
               </h3>
               <p className="pl-9 text-slate-500 font-bold leading-relaxed">
-                Background verification reports and completed audits are non-refundable once the process has begun.
+                Verification reports and completed reviews are non-refundable once the process has begun.
               </p>
             </section>
 
@@ -71,13 +70,13 @@ const RefundPolicy = () => {
             <div className="w-20 h-20 border-4 border-slate-100 rounded-full flex items-center justify-center mb-4">
               <i className="fas fa-shield-halved text-slate-200 text-3xl"></i>
             </div>
-            <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.5em]">HireShield Certified Refund Policy</p>
+            <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.5em]">HireShield Certified Policy</p>
           </div>
         </div>
 
         <div className="mt-12 text-center opacity-40">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            Questions? Contact our Resolution Hub at +91 9910048130
+            Questions? Contact our Support Team at +91 9910048130
           </p>
         </div>
       </div>

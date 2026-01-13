@@ -25,7 +25,7 @@ const VerifyDocuments = () => {
         setSubmissions(res.data.data);
       }
     } catch (err) {
-      toast.error("Compliance registry access failure.");
+      toast.error("Could not load verification records.");
     } finally {
       setLoading(false);
     }
@@ -36,32 +36,32 @@ const VerifyDocuments = () => {
     let rejectionReason = '';
 
     if (status === 'rejected') {
-      rejectionReason = window.prompt('Provide rejection protocol reason (Mandatory):');
+      rejectionReason = window.prompt('Reason for rejection:');
       if (!rejectionReason || rejectionReason.trim() === '') {
-        return toast.error('Rejection requires justification protocol.');
+        return toast.error('Please provide a reason for rejection.');
       }
     }
 
-    const toastId = toast.loading(`${status.toUpperCase()} protocol in progress...`);
+    const toastId = toast.loading(`Processing...`);
     try {
       const res = await documentAPI.verify(id, status, rejectionReason?.trim());
       if (res.data.success) {
-        toast.success(`Node ${status.toUpperCase()} Successfully.`, { id: toastId });
+        toast.success(`Verified Successfully.`, { id: toastId });
         setSubmissions(prev => prev.filter(s => s.id !== id));
         setSelectedDocument(null);
       }
     } catch (err) {
-      toast.error("Protocol error during authorization.", { id: toastId });
+      toast.error("Error during verification.", { id: toastId });
     }
   };
 
   const handleBackgroundCheck = async (documentId, checkType, result, notes) => {
-    const toastId = toast.loading(`Executing ${checkType} Protocol...`);
+    const toastId = toast.loading(`Running ${checkType} check...`);
     try {
       // Note: Backend endpoint for background-check: POST /api/documents/:id/background-check
       const res = await documentAPI.performBackgroundCheck(documentId, { checkType, result, notes });
       if (res.data.success) {
-        toast.success(`Audit Entry Logged.`, { id: toastId });
+        toast.success(`Result Saved.`, { id: toastId });
         // Update local state for immediate feedback
         setBackgroundChecks(prev => ({
           ...prev,
@@ -71,7 +71,7 @@ const VerifyDocuments = () => {
         fetchSubmissions();
       }
     } catch (err) {
-      toast.error("Encryption mismatch in audit log.", { id: toastId });
+      toast.error("Error saving check result.", { id: toastId });
     }
   };
 
@@ -81,12 +81,12 @@ const VerifyDocuments = () => {
   };
 
   const performCheck = (checkType) => {
-    const result = window.prompt(`Execute ${checkType}: (passed/failed)`);
+    const result = window.prompt(`Result for ${checkType}: (passed/failed)`);
     if (!result || !['passed', 'failed'].includes(result.toLowerCase())) {
       return toast.error('Invalid status. Use "passed" or "failed".');
     }
 
-    const notes = window.prompt('Add audit testimony context:');
+    const notes = window.prompt('Add notes for this check:');
     if (notes === null) return;
 
     handleBackgroundCheck(selectedDocument.id, checkType, result.toLowerCase(), notes);
@@ -105,7 +105,7 @@ const VerifyDocuments = () => {
           <Breadcrumb />
           <Link to="/dashboard/company" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-            Return to Control Center
+            Back to Dashboard
           </Link>
         </div>
 
@@ -118,10 +118,10 @@ const VerifyDocuments = () => {
               Verification Command Center
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-6">
-              Audit <span className="text-[#4c8051]">Queue.</span>
+              Review <span className="text-[#4c8051]">Requests.</span>
             </h1>
             <p className="text-slate-400 font-bold text-xs tracking-[0.4em] max-w-lg leading-relaxed">
-              Authorized interface for deep analysis and identity verification. Compliance protocols strictly enforced.
+              Review and verify employee documents and background checks for your network.
             </p>
           </div>
         </div>
@@ -129,11 +129,11 @@ const VerifyDocuments = () => {
         {/* QUEUE STATISTICS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl">
-            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2">Pending Nodes</p>
+            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2">Pending</p>
             <h4 className="text-5xl font-black tracking-tighter text-[#496279]">{submissions.filter(s => s.status !== 'verified').length}</h4>
           </div>
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl">
-            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2">Authenticated</p>
+            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2">Verified</p>
             <h4 className="text-5xl font-black tracking-tighter text-[#4c8051]">{submissions.filter(s => s.status === 'verified').length}</h4>
           </div>
         </div>
@@ -148,17 +148,17 @@ const VerifyDocuments = () => {
                 <div className="w-20 h-20 border-4 border-slate-100 rounded-full"></div>
                 <div className="absolute inset-0 border-t-4 border-[#4c8051] rounded-full animate-spin"></div>
               </div>
-              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Accessing Secure Records...</p>
+              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Loading records...</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-slate-50">
-                    <th className="pb-10 pl-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Target Node</th>
-                    <th className="pb-10 px-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Asset Fingerprint</th>
-                    <th className="pb-10 px-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Registry Timestamp</th>
-                    <th className="pb-10 pr-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase text-right">Command</th>
+                    <th className="pb-10 pl-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Name</th>
+                    <th className="pb-10 px-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Document</th>
+                    <th className="pb-10 px-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Date</th>
+                    <th className="pb-10 pr-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -191,7 +191,7 @@ const VerifyDocuments = () => {
                             onClick={() => openBackgroundCheckModal(sub)}
                             className="px-8 py-4 bg-[#496279] text-white text-[10px] font-black tracking-widest rounded-2xl shadow-lg hover:bg-[#4c8051] transition-all active:scale-95"
                           >
-                            AUDIT NODE
+                            REVIEW
                           </button>
                           <button
                             onClick={() => handleVerify(sub.id, 'rejected')}
@@ -206,7 +206,7 @@ const VerifyDocuments = () => {
                 </tbody>
               </table>
               {submissions.length === 0 && (
-                <div className="text-center py-40 opacity-30 text-xs font-black tracking-[0.5em] uppercase">Registry Clear. All Nodes Verified.</div>
+                <div className="text-center py-40 opacity-30 text-xs font-black tracking-[0.5em] uppercase">All verification requests cleared.</div>
               )}
             </div>
           )}
@@ -223,7 +223,7 @@ const VerifyDocuments = () => {
                     <i className="fas fa-microchip text-[#4c8051]"></i>
                     Session ID: {Math.random().toString(36).substring(7).toUpperCase()}
                   </div>
-                  <h2 className="text-4xl font-black tracking-tighter uppercase leading-none mb-2">Deep Identification <span className="text-[#4c8051]">Audit.</span></h2>
+                  <h2 className="text-4xl font-black tracking-tighter uppercase leading-none mb-2">Verify Identity & <span className="text-[#4c8051]">Background.</span></h2>
                   <p className="text-slate-400 font-bold text-[10px] tracking-[0.4em]">Target: {selectedDocument.employeeName} | Type: {selectedDocument.documentType}</p>
                 </div>
                 <button
@@ -238,7 +238,7 @@ const VerifyDocuments = () => {
                 {/* Performance Matrix */}
                 <div className="space-y-8">
                   <h3 className="text-[11px] font-black tracking-[0.5em] text-slate-300 flex items-center gap-4">
-                    <span className="h-px w-12 bg-slate-100"></span> Verification Protocols
+                    <span className="h-px w-12 bg-slate-100"></span> Background Checks
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     {['policeVerification', 'courtRecords', 'addressVerification', 'employmentVerification', 'educationVerification', 'referenceCheck', 'criminalBackground'].map(key => (
@@ -271,22 +271,22 @@ const VerifyDocuments = () => {
                 {/* Asset Review */}
                 <div className="space-y-8">
                   <h3 className="text-[11px] font-black tracking-[0.5em] text-slate-300 flex items-center gap-4">
-                    <span className="h-px w-12 bg-slate-100"></span> Primary Asset
+                    <span className="h-px w-12 bg-slate-100"></span> Primary Document
                   </h3>
                   <div className="bg-slate-50 border border-slate-100 rounded-[3rem] p-10 h-full relative overflow-hidden flex flex-col items-center justify-center text-center group/asset">
                     <i className="fas fa-file-pdf text-8xl text-slate-100 group-hover/asset:text-[#4c8051]/20 transition-all duration-1000 mb-8"></i>
-                    <p className="text-[10px] font-black tracking-[0.4em] mb-4">Original Entry: {selectedDocument.fileName}</p>
+                    <p className="text-[10px] font-black tracking-[0.4em] mb-4">File Name: {selectedDocument.fileName}</p>
                     <a
                       href={`/uploads/documents/${selectedDocument.fileName}`}
                       target="_blank"
                       className="px-10 py-5 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-widest hover:bg-[#496279] hover:text-white transition-all shadow-sm"
                     >
-                      OPEN SECURE LINK
+                      VIEW DOCUMENT
                     </a>
                     <div className="mt-10 p-6 bg-white/50 border border-dashed border-slate-100 rounded-2xl w-full">
-                      <p className="text-[9px] font-black text-slate-300 tracking-widest mb-2">Subject Context</p>
+                      <p className="text-[9px] font-black text-slate-300 tracking-widest mb-2">Notes</p>
                       <p className="text-[10px] font-bold leading-relaxed opacity-60 normal-case italic">
-                        {selectedDocument.verificationNotes || "No context provided by deploying agent."}
+                        {selectedDocument.verificationNotes || "No notes provided."}
                       </p>
                     </div>
                   </div>
@@ -299,13 +299,13 @@ const VerifyDocuments = () => {
                   className="flex-1 group bg-[#4c8051] text-white py-8 rounded-[2.5rem] font-black tracking-[0.5em] text-xs shadow-2xl hover:bg-[#3a8e41] transition-all relative overflow-hidden active:scale-95"
                 >
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                  <span className="relative z-10">Fully Authorize Node</span>
+                  <span className="relative z-10">Approve & Verify</span>
                 </button>
                 <button
                   onClick={() => handleVerify(selectedDocument.id, 'rejected')}
                   className="flex-1 group bg-rose-50 text-rose-500 border border-rose-100 py-8 rounded-[2.5rem] font-black tracking-[0.5em] text-xs hover:bg-rose-500 hover:text-white transition-all active:scale-95"
                 >
-                  Reject Application protocol
+                  Reject Document
                 </button>
               </div>
             </div>

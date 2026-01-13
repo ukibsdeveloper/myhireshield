@@ -13,12 +13,12 @@ const Checkout = () => {
 
   const handlePayment = () => {
     setProcessing(true);
-    const toastId = toast.loading('Initializing Secure Gateway...');
+    const toastId = toast.loading('Connecting to Secure Payment...');
 
     setTimeout(() => {
       setProcessing(false);
       setPaymentStatus(true);
-      toast.success('Transaction Verified. Node Decrypted.', { id: toastId });
+      toast.success('Payment Successful. Report Unlocked.', { id: toastId });
       navigate('/reputation-report');
     }, 2500);
   };
@@ -42,25 +42,25 @@ const Checkout = () => {
 
           <div className="relative z-10 flex flex-col items-center text-center">
             <div className="w-24 h-24 bg-[#fcfaf9] rounded-[2.5rem] flex items-center justify-center mb-10 shadow-inner group border border-slate-100">
-              <i className="fas fa-shield-halved text-4xl text-[#496279] group-hover:scale-110 transition-transform"></i>
+              <i className="fas fa-lock-open text-4xl text-[#496279] group-hover:scale-110 transition-transform"></i>
             </div>
 
-            <h2 className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mb-4">Payment Protocol 7.2</h2>
-            <h3 className="text-4xl font-black text-[#496279] tracking-tighter mb-4">Registry <span className="text-[#4c8051]">Unlock.</span></h3>
+            <h2 className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mb-4">Secure Payment</h2>
+            <h3 className="text-4xl font-black text-[#496279] tracking-tighter mb-4">Unlock Your <span className="text-[#4c8051]">Report.</span></h3>
 
             <div className="my-12 relative">
               <div className="absolute -inset-4 bg-[#4c8051]/5 blur-2xl rounded-full"></div>
               <div className="relative">
                 <p className="text-8xl font-black text-[#496279] tracking-tighter leading-none">₹99</p>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">One-Time Decryption Token</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">One-Time Access Fee</p>
               </div>
             </div>
 
             <div className="w-full space-y-5 mb-12 text-left bg-slate-50/50 p-10 rounded-[2.5rem] border border-slate-50">
               {[
-                { l: 'Full Historical Ledger', d: 'View all employer feedback nodes' },
-                { l: 'Behavioral Spectrum', d: 'Analyze work quality & metrics' },
-                { l: 'PDF Export Protocol', d: 'Generate verified audit certificates' }
+                { l: 'Full Work History', d: 'View all verified company reviews' },
+                { l: 'Performance Insights', d: 'Analyze work quality & feedback' },
+                { l: 'Verified PDF Report', d: 'Download your Trust Report' }
               ].map((b, i) => (
                 <div key={i} className="flex justify-between items-start gap-4">
                   <div>
@@ -82,11 +82,11 @@ const Checkout = () => {
                 {processing ? (
                   <>
                     <i className="fas fa-circle-notch fa-spin"></i>
-                    Bypassing Encryption...
+                    Processing...
                   </>
                 ) : (
                   <>
-                    Initialize Gateway
+                    Pay Now
                     <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
                   </>
                 )}
@@ -95,7 +95,7 @@ const Checkout = () => {
 
             <p className="mt-10 text-[9px] font-black text-slate-300 uppercase tracking-[0.3em] flex items-center gap-3">
               <i className="fas fa-lock text-[#4c8051]"></i>
-              End-to-End Encrypted Transaction Node
+              Secure & Encrypted Transaction
             </p>
           </div>
         </div>

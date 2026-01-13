@@ -37,7 +37,7 @@ const EmployeeSearch = () => {
         setResults([]);
       }
     } catch (err) {
-      console.error("Node Scanning Error:", err);
+      console.error("Search Error:", err);
       setResults([]);
     } finally {
       setTimeout(() => setLoading(false), 800);
@@ -71,7 +71,7 @@ const EmployeeSearch = () => {
           <Breadcrumb />
           <Link to="/dashboard/company" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-            Return to Command Center
+            Back to Dashboard
           </Link>
         </div>
 
@@ -81,13 +81,13 @@ const EmployeeSearch = () => {
           <div className="relative z-10">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
-              Registry Scan Active
+              Search Active
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-6">
-              Deep <span className="text-[#4c8051]">Search.</span>
+              Find <span className="text-[#4c8051]">People.</span>
             </h1>
             <p className="text-slate-400 font-bold text-xs tracking-[0.4em] max-w-lg leading-relaxed">
-              Query the sovereign professional directory for verified identity nodes and behavioral trajectory logs.
+              Search our verified network to find and check employee details and work history.
             </p>
           </div>
         </div>
@@ -97,9 +97,9 @@ const EmployeeSearch = () => {
           <div className="absolute -inset-4 bg-gradient-to-r from-[#4c8051]/10 via-[#496279]/10 to-[#dd8d88]/10 rounded-[4rem] blur-2xl opacity-50"></div>
           <div className="relative bg-white border border-slate-100 p-8 md:p-10 rounded-[4rem] shadow-2xl flex flex-col md:flex-row gap-8 items-center">
             <div className="flex-1 w-full space-y-2">
-              <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-2">Subject Name</label>
+              <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-2">Employee Name</label>
               <div className="flex items-center gap-4 px-8 py-5 bg-slate-50 border border-slate-100 rounded-3xl focus-within:border-[#4c8051] transition-all group">
-                <i className="fas fa-fingerprint text-slate-300 group-focus-within:text-[#4c8051] transition-colors"></i>
+                <i className="fas fa-search text-slate-300 group-focus-within:text-[#4c8051] transition-colors"></i>
                 <input
                   type="text"
                   placeholder="FULL LEGAL NAME"
@@ -132,7 +132,7 @@ const EmployeeSearch = () => {
               >
                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                 <span className="relative z-10 flex items-center gap-3">
-                  {loading ? <i className="fas fa-circle-notch fa-spin"></i> : 'Verify Node'}
+                  {loading ? <i className="fas fa-circle-notch fa-spin"></i> : 'Search Now'}
                   <i className="fas fa-bolt text-[8px] opacity-50"></i>
                 </span>
               </button>
@@ -145,7 +145,7 @@ const EmployeeSearch = () => {
           <div className="mb-12 flex flex-col md:flex-row gap-8 items-center justify-between p-8 bg-white border border-slate-100 rounded-[3rem] shadow-sm animate-in fade-in duration-1000">
             <div className="flex items-center gap-8 w-full md:w-auto">
               <div className="space-y-2 flex-1 md:flex-initial">
-                <label className="text-[8px] font-black text-slate-300 tracking-[0.3em] ml-2">Min Shield Score: {minScore}%</label>
+                <label className="text-[8px] font-black text-slate-300 tracking-[0.3em] ml-2">Min Score: {minScore}%</label>
                 <input
                   type="range" min="0" max="100"
                   value={minScore}
@@ -154,20 +154,20 @@ const EmployeeSearch = () => {
                 />
               </div>
               <div className="space-y-2 flex-1 md:flex-initial">
-                <label className="text-[8px] font-black text-slate-300 tracking-[0.3em] ml-2">Sort Order</label>
+                <label className="text-[8px] font-black text-slate-300 tracking-[0.3em] ml-2">Sort By</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="block w-full bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl text-[9px] font-black tracking-widest outline-none focus:border-[#4c8051]"
                 >
-                  <option value="relevant">Standard Relevance</option>
-                  <option value="score-desc">High Integrity First</option>
-                  <option value="score-asc">Low Integrity Check</option>
+                  <option value="relevant">Relevance</option>
+                  <option value="score-desc">High Score First</option>
+                  <option value="score-asc">Low Score First</option>
                 </select>
               </div>
             </div>
             <div className="text-[9px] font-black text-slate-300 tracking-[0.2em] uppercase">
-              Found {processedResults.length} Verified Subject Nodes
+              Found {processedResults.length} Employees
             </div>
           </div>
         )}
@@ -180,7 +180,7 @@ const EmployeeSearch = () => {
                 <div className="w-20 h-20 border-4 border-slate-100 rounded-full"></div>
                 <div className="absolute inset-0 border-t-4 border-[#4c8051] rounded-full animate-spin"></div>
               </div>
-              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Scanning Global Ledgers...</p>
+              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Searching...</p>
             </div>
           ) : visibleResults.length > 0 ? (
             <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-4">
@@ -203,17 +203,17 @@ const EmployeeSearch = () => {
                     <div>
                       <div className="flex items-center gap-4 mb-2">
                         <h4 className="text-3xl font-black tracking-tighter leading-none">{emp.firstName} {emp.lastName}</h4>
-                        <span className="px-3 py-1 bg-[#4c8051]/5 text-[#4c8051] text-[8px] font-black rounded-lg tracking-widest">Active Node</span>
+                        <span className="px-3 py-1 bg-[#4c8051]/5 text-[#4c8051] text-[8px] font-black rounded-lg tracking-widest">Verified</span>
                       </div>
-                      <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em]">{emp.currentDesignation || 'PROFESSIONAL NODE'}</p>
+                      <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em]">{emp.currentDesignation || 'EMPLOYEE'}</p>
                       <div className="mt-6 flex gap-6 opacity-40">
                         <div className="flex items-center gap-2">
                           <i className="fas fa-map-marker-alt text-[8px]"></i>
-                          <span className="text-[8px] font-black tracking-widest">India Central</span>
+                          <span className="text-[8px] font-black tracking-widest">Identity Verified</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <i className="fas fa-shield-alt text-[8px]"></i>
-                          <span className="text-[8px] font-black tracking-widest">Aadhar Bound</span>
+                          <span className="text-[8px] font-black tracking-widest">Trusted Profile</span>
                         </div>
                       </div>
                     </div>
@@ -221,14 +221,14 @@ const EmployeeSearch = () => {
 
                   <div className="flex items-center gap-12 relative z-10 w-full md:w-auto justify-between md:justify-end">
                     <div className="text-right">
-                      <p className="text-[10px] font-black text-slate-300 tracking-[0.4em] mb-2">Shield Rank™</p>
+                      <p className="text-[10px] font-black text-slate-300 tracking-[0.4em] mb-2">Trust Score</p>
                       <div className="flex items-baseline gap-1">
                         <span className="text-5xl font-black tracking-tighter text-[#496279] group-hover:text-[#4c8051] transition-colors">{emp.overallScore || '0'}</span>
                         <span className="text-base font-black opacity-20">%</span>
                       </div>
                     </div>
                     <Link to={`/employee/${emp._id}`} className="bg-[#496279] text-white px-10 py-5 rounded-[2rem] font-black text-[10px] tracking-[0.3em] shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all">
-                      Analyze Node
+                      View Profile
                     </Link>
                   </div>
                 </div>
@@ -240,7 +240,7 @@ const EmployeeSearch = () => {
                     onClick={() => setDisplayCount(prev => prev + 5)}
                     className="bg-white border border-slate-100 px-12 py-5 rounded-3xl text-[10px] font-black tracking-[0.5em] text-slate-400 hover:text-[#496279] hover:border-[#496279]/20 transition-all shadow-sm"
                   >
-                    Load Secondary Nodes
+                    Show More
                   </button>
                 </div>
               )}
@@ -248,11 +248,11 @@ const EmployeeSearch = () => {
           ) : searched && !loading && (
             <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[5rem] border-2 border-dashed border-slate-100 text-center animate-in fade-in duration-1000">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-8 opacity-30">
-                <i className="fas fa-microscope text-2xl"></i>
+                <i className="fas fa-user-times text-2xl"></i>
               </div>
-              <h3 className="text-xl font-black tracking-tighter mb-4 opacity-50">Null Identification.</h3>
+              <h3 className="text-xl font-black tracking-tighter mb-4 opacity-50">No Results.</h3>
               <p className="text-[10px] font-black text-slate-400 tracking-[0.3em] max-w-xs leading-relaxed">
-                The requested identity node does not exist within the sovereign registry or does not meet filter criteria.
+                No matching employees found. Please check the name or date of birth.
               </p>
             </div>
           )}

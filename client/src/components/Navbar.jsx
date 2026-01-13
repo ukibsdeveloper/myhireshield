@@ -28,21 +28,19 @@ const Navbar = ({ scrolled }) => {
   return (
     <>
       {/* Top Header */}
-      <div className={`fixed w-full z-[110] transition-all duration-500 px-4 md:px-6 ${
-        scrolled ? 'top-2 md:top-4' : 'top-0'
-      }`}>
-        <nav className={`mx-auto max-w-7xl transition-all duration-500 rounded-xl md:rounded-2xl ${
-          scrolled 
-            ? 'bg-white/90 backdrop-blur-xl shadow-lg border border-slate-100 py-2.5 md:py-3 px-5 md:px-8' 
-            : 'bg-transparent py-5 md:py-6 px-4'
+      <div className={`fixed w-full z-[110] transition-all duration-500 px-4 md:px-6 ${scrolled ? 'top-2 md:top-4' : 'top-0'
         }`}>
+        <nav className={`mx-auto max-w-7xl transition-all duration-500 rounded-xl md:rounded-2xl ${scrolled
+            ? 'bg-white/90 backdrop-blur-xl shadow-lg border border-slate-100 py-2.5 md:py-3 px-5 md:px-8'
+            : 'bg-transparent py-5 md:py-6 px-4'
+          }`}>
           <div className="flex justify-between items-center">
             {/* Logo Section Updated with Actual Logo */}
             <Link to="/" className="flex items-center gap-2 md:gap-3 z-[120]">
               <div className="h-8 w-8 md:h-10 md:w-10 overflow-hidden rounded-xl bg-white shadow-lg transition-transform hover:rotate-6 border border-slate-100">
-                <img 
-                  src="/logo.jpg" 
-                  alt="HireShield Logo" 
+                <img
+                  src="/logo.jpg"
+                  alt="HireShield Logo"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -50,7 +48,7 @@ const Navbar = ({ scrolled }) => {
                 <span className={`text-lg md:text-xl font-black transition-colors duration-500 ${isMobileMenuOpen ? 'text-white' : 'text-[#496279]'}`}>
                   Hire<span className={isMobileMenuOpen ? 'text-white/80' : 'text-[#4c8051]'}>Shield</span>
                 </span>
-                <span className="text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase text-[#dd8d88]">Professional Platform</span>
+                <span className="text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase text-[#dd8d88]">Simple & Safe Hiring</span>
               </div>
             </Link>
 
@@ -77,13 +75,13 @@ const Navbar = ({ scrolled }) => {
               <div className="hidden md:flex items-center gap-4">
                 {isAuthenticated ? (
                   <>
-                    <Link 
-                      to={user?.role === 'company' ? "/dashboard/company" : "/dashboard/employee"} 
+                    <Link
+                      to={user?.role === 'company' ? "/dashboard/company" : "/dashboard/employee"}
                       className="px-6 py-2.5 bg-[#496279] text-white text-[11px] font-black uppercase tracking-widest rounded-xl active:scale-95 transition-all shadow-lg shadow-[#496279]/20"
                     >
                       Dashboard
                     </Link>
-                    <button 
+                    <button
                       onClick={handleLogout}
                       className="text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
                     >
@@ -97,7 +95,7 @@ const Navbar = ({ scrolled }) => {
                   </>
                 )}
               </div>
-              
+
               <button onClick={toggleMenu} className="md:hidden relative z-[120] w-10 h-10 flex items-center justify-center bg-white/80 rounded-lg border border-slate-200 shadow-sm">
                 <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'} text-[#496279]`}></i>
               </button>
@@ -113,16 +111,16 @@ const Navbar = ({ scrolled }) => {
             <i className="fas fa-home text-lg"></i>
             <span className="text-[8px] font-black uppercase tracking-widest">Home</span>
           </Link>
-          
+
           <Link to={isAuthenticated ? (user?.role === 'company' ? "/dashboard/company" : "/dashboard/employee") : "/login"} className="flex flex-col items-center gap-1 opacity-60">
             <i className="fas fa-th-large text-lg"></i>
-            <span className="text-[8px] font-black uppercase tracking-widest">Panel</span>
+            <span className="text-[8px] font-black uppercase tracking-widest">Dashboard</span>
           </Link>
 
           <div className="relative -top-8">
-             <Link to="/register/company" className="w-14 h-14 bg-[#4c8051] rounded-full border-4 border-[#fcfaf9] shadow-[0_10px_20px_rgba(76,128,81,0.4)] flex items-center justify-center text-white scale-110 active:scale-90 transition-transform">
-               <i className="fas fa-plus text-xl"></i>
-             </Link>
+            <Link to="/register/company" className="w-14 h-14 bg-[#4c8051] rounded-full border-4 border-[#fcfaf9] shadow-[0_10px_20px_rgba(76,128,81,0.4)] flex items-center justify-center text-white scale-110 active:scale-90 transition-transform">
+              <i className="fas fa-plus text-xl"></i>
+            </Link>
           </div>
 
           <Link to="/settings" className="flex flex-col items-center gap-1 opacity-60">
@@ -133,7 +131,7 @@ const Navbar = ({ scrolled }) => {
           {isAuthenticated ? (
             <button onClick={handleLogout} className="flex flex-col items-center gap-1 text-rose-400">
               <i className="fas fa-sign-out-alt text-lg"></i>
-              <span className="text-[8px] font-black uppercase tracking-widest">Exit</span>
+              <span className="text-[8px] font-black uppercase tracking-widest">Logout</span>
             </button>
           ) : (
             <Link to="/login" className="flex flex-col items-center gap-1 opacity-60">

@@ -24,24 +24,24 @@ const ManageReviews = () => {
         setReviews(res.data.data);
       }
     } catch (err) {
-      toast.error("Audit Ledger accessibility failure.");
+      toast.error("Could not load reviews.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("PROTOCOL WARNING: Terminate this data node? This action is logged.")) return;
+    if (!window.confirm("Are you sure you want to delete this review? This action cannot be undone.")) return;
 
-    const toastId = toast.loading("Purging Ledger Entry...");
+    const toastId = toast.loading("Deleting Review...");
     try {
       const res = await reviewAPI.delete(id);
       if (res.data.success) {
-        toast.success("Node Purged Successfully.", { id: toastId });
+        toast.success("Review deleted successfully.", { id: toastId });
         setReviews(prev => prev.filter(r => r._id !== id));
       }
     } catch (err) {
-      toast.error("Purge Error: Authorization mismatch.", { id: toastId });
+      toast.error("Error deleting review. Please try again.", { id: toastId });
     }
   };
 
@@ -69,7 +69,7 @@ const ManageReviews = () => {
           <Breadcrumb />
           <Link to="/dashboard/company" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-            Return to Command Center
+            Back to Dashboard
           </Link>
         </div>
 
@@ -79,19 +79,19 @@ const ManageReviews = () => {
           <div className="relative z-10 flex-1">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
-              Ledger Sync Active
+              Live History
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-6">
-              Audit <span className="text-[#4c8051]">Ledger.</span>
+              Review <span className="text-[#4c8051]">History.</span>
             </h1>
             <p className="text-slate-400 font-bold text-xs tracking-[0.4em] max-w-lg leading-relaxed">
-              Vault of sovereign professional records and behavioral deployments under your command.
+              Manage and view all employee reviews you have submitted to the network.
             </p>
           </div>
           <div className="relative z-10 hidden md:block">
             <Link to="/review/submit" className="group bg-[#496279] text-white px-12 py-6 rounded-[2.5rem] font-black text-[11px] tracking-[0.4em] shadow-2xl hover:bg-[#4c8051] transition-all relative overflow-hidden flex items-center gap-4">
               <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-              <span className="relative z-10">Deploy New Audit</span>
+              <span className="relative z-10">Rate Employee</span>
               <i className="fas fa-plus relative z-10 text-[10px]"></i>
             </Link>
           </div>
@@ -104,7 +104,7 @@ const ManageReviews = () => {
               <i className="fas fa-search text-slate-300"></i>
               <input
                 type="text"
-                placeholder="SEARCH REGISTERED SUBJECTS..."
+                placeholder="SEARCH EMPLOYEES..."
                 className="bg-transparent outline-none w-full font-black text-[10px] tracking-widest placeholder:text-slate-200"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -115,13 +115,13 @@ const ManageReviews = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
-              <option value="latest">Latest Entries</option>
-              <option value="highest">High Integrity</option>
-              <option value="lowest">Low Integrity</option>
+              <option value="latest">Recent Reviews</option>
+              <option value="highest">Highest Rated</option>
+              <option value="lowest">Lowest Rated</option>
             </select>
           </div>
           <div className="text-[9px] font-black text-slate-300 tracking-[0.3em]">
-            {processedReviews.length} Records Decoded
+            {processedReviews.length} Reviews Found
           </div>
         </div>
 
@@ -133,7 +133,7 @@ const ManageReviews = () => {
                 <div className="w-20 h-20 border-4 border-slate-100 rounded-full"></div>
                 <div className="absolute inset-0 border-t-4 border-[#4c8051] rounded-full animate-spin"></div>
               </div>
-              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Accessing Encrypted Records...</p>
+              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Loading reviews...</p>
             </div>
           ) : processedReviews.length > 0 ? (
             processedReviews.map((r, i) => (
@@ -171,7 +171,7 @@ const ManageReviews = () => {
                 {/* Performance Actions */}
                 <div className="flex items-center gap-12 w-full lg:w-auto justify-between lg:justify-end">
                   <div className="text-right">
-                    <p className="text-[9px] font-black text-slate-300 tracking-[0.4em] mb-2 uppercase">Integrity Index</p>
+                    <p className="text-[9px] font-black text-slate-300 tracking-[0.4em] mb-2 uppercase">Overall Rating</p>
                     <div className="flex items-baseline gap-1">
                       <span className="text-5xl font-black tracking-tighter text-[#496279] group-hover:text-[#4c8051] transition-colors">{Math.round(r.averageRating * 10) / 10}</span>
                       <span className="text-base font-black opacity-20">/10</span>
@@ -194,7 +194,7 @@ const ManageReviews = () => {
                       to={`/employee/${r.employeeId?._id}`}
                       className="px-8 py-5 bg-[#496279] text-white rounded-2xl font-black text-[9px] tracking-widest hover:bg-[#4c8051] shadow-lg hover:shadow-2xl transition-all"
                     >
-                      ANALYZE NODE
+                      VIEW PROFILE
                     </Link>
                   </div>
                 </div>
@@ -205,12 +205,12 @@ const ManageReviews = () => {
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-8 opacity-30">
                 <i className="fas fa-scroll text-2xl"></i>
               </div>
-              <h3 className="text-xl font-black tracking-tighter mb-4 opacity-50">Empty Archive.</h3>
+              <h3 className="text-xl font-black tracking-tighter mb-4 opacity-50">No Reviews.</h3>
               <p className="text-[10px] font-black text-slate-400 tracking-[0.3em] max-w-xs leading-relaxed">
-                No historical integrity entries found in the sovereign ledger for your authorized session.
+                You haven't submitted any employee reviews yet.
               </p>
               <Link to="/review/submit" className="mt-10 px-10 py-5 bg-[#496279] text-white rounded-2xl font-black text-[10px] tracking-widest hover:bg-[#4c8051] transition-all">
-                Initialize First Audit
+                Submit First Review
               </Link>
             </div>
           )}

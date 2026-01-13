@@ -80,17 +80,17 @@ const RegisterEmployee = () => {
       const result = await registerEmployee(payload);
 
       if (result.success) {
-        toast.success('🎉 Node Initialized! Please verify your identity via email link.', {
+        toast.success('🎉 Account Created! Please check your email to verify.', {
           duration: 5000,
         });
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        toast.error(result.error || 'Identity registration protocol failed');
-        setError(result.error || 'Identity registration protocol failed');
+        toast.error(result.error || 'Registration failed. Please try again.');
+        setError(result.error || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      toast.error('Network synchronization failed. Please try again.');
-      setError('Network synchronization failed. Please try again.');
+      toast.error('Connection failed. Please try again.');
+      setError('Connection failed. Please try again.');
     } finally {
       setLoading(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -116,22 +116,22 @@ const RegisterEmployee = () => {
             </div>
           </Link>
           <h1 className="text-5xl font-black text-white mb-6 uppercase tracking-tighter leading-tight">
-            Claim Your <br /> <span className="text-[#dd8d88]">Professional Identity.</span>
+            Create Your <br /> <span className="text-[#dd8d88]">Professional Profile.</span>
           </h1>
           <p className="text-white/60 text-lg font-bold uppercase tracking-widest leading-relaxed mb-12">
-            Build your verified profile and access the standard employment credit score.
+            Build your profile and see your honesty score.
           </p>
 
           <div className="grid grid-cols-2 gap-8 pt-12 border-t border-white/10">
             <div className="text-left group cursor-default">
               <i className="fas fa-id-card text-[#4c8051] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
-              <h4 className="text-white font-black uppercase text-xs tracking-widest">Verified Badge</h4>
-              <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">ISO Certified Node</p>
+              <h4 className="text-white font-black uppercase text-xs tracking-widest">Verified Account</h4>
+              <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">Secure & Trusted</p>
             </div>
             <div className="text-left group cursor-default">
               <i className="fas fa-chart-line text-[#dd8d88] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
-              <h4 className="text-white font-black uppercase text-xs tracking-widest">Shield Score™</h4>
-              <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">Standard Integrity</p>
+              <h4 className="text-white font-black uppercase text-xs tracking-widest">Trust Score</h4>
+              <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">Standard Honesty</p>
             </div>
           </div>
         </div>
@@ -150,13 +150,13 @@ const RegisterEmployee = () => {
         <div className="flex-grow flex items-center justify-center px-6 md:px-12 lg:px-20 py-16">
           <div className="w-full max-w-xl">
             <div className="mb-10 text-center lg:text-left">
-              <h2 className="text-3xl font-black text-[#496279] uppercase tracking-tight mb-2">Professional Onboarding</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Deploy your personal audit profile</p>
+              <h2 className="text-3xl font-black text-[#496279] uppercase tracking-tight mb-2">Employee Sign Up</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Join HireShield and show your work history</p>
             </div>
 
             {error && (
               <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in slide-in-from-top duration-300">
-                <i className="fas fa-user-shield"></i> {error}
+                <i className="fas fa-exclamation-circle"></i> {error}
               </div>
             )}
 
@@ -174,23 +174,23 @@ const RegisterEmployee = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Node *</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="name@domain.com" required />
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address *</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="name@email.com" required />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Phone Node *</label>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Phone Number *</label>
                   <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="10 Digits" required maxLength="10" />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Access Key *</label>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Password *</label>
                   <input type="password" name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="6+ Characters" required />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Key *</label>
-                  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Verify Key" required />
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Password *</label>
+                  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Verify Password" required />
                 </div>
               </div>
 
@@ -229,27 +229,27 @@ const RegisterEmployee = () => {
                 <div className="flex items-start gap-3">
                   <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#496279] cursor-pointer" required />
                   <label className="text-[10px] font-black text-slate-500 uppercase leading-relaxed tracking-wider">
-                    I agree to the <Link to="/terms" className="text-[#496279] underline">Terms of Protocol</Link> and <Link to="/privacy" className="text-[#496279] underline">Privacy Policy</Link>
+                    I agree to the <Link to="/terms" className="text-[#496279] underline">Terms of Service</Link> and <Link to="/privacy" className="text-[#496279] underline">Privacy Policy</Link>
                   </label>
                 </div>
               </div>
 
               <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 ${loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#496279] text-white hover:bg-[#3a4e61] shadow-[#496279]/30'
                 }`}>
-                {loading ? <><i className="fas fa-circle-notch fa-spin"></i> Processing Identity...</> : 'Initialize Professional Node'}
+                {loading ? <><i className="fas fa-circle-notch fa-spin"></i> Starting...</> : 'Create Account'}
               </button>
             </form>
 
             <div className="mt-10 text-center border-t border-slate-100 pt-8">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Existing Node? <Link to="/login" className="text-[#4c8051] ml-2 hover:underline underline-offset-4">Authenticate Access</Link>
+                Already have an account? <Link to="/login" className="text-[#4c8051] ml-2 hover:underline underline-offset-4">Login Here</Link>
               </p>
             </div>
           </div>
         </div>
 
         <div className="p-8 text-center lg:text-left opacity-30">
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Enterprise Integration Network</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Network</p>
         </div>
       </div>
     </div>

@@ -61,10 +61,10 @@ const SubmitReview = () => {
           comment: review.comment,
           wouldRehire: review.wouldRehire
         });
-        toast.success("Existing Audit Node Loaded.");
+        toast.success("Review history loaded.");
       }
     } catch (err) {
-      toast.error("Audit Ledger accessibility failure.");
+      toast.error("Could not load reviews.");
       navigate('/review/manage');
     } finally {
       setLoading(false);
@@ -73,7 +73,7 @@ const SubmitReview = () => {
 
   const findEmployee = async () => {
     if (!searchName.trim() || !searchDob) {
-      return toast.error("Deployment requires Subject Name and DOB.");
+      return toast.error("Please enter Name and Date of Birth.");
     }
 
     setLoading(true);
@@ -81,12 +81,12 @@ const SubmitReview = () => {
       const res = await employeeAPI.search({ query: searchName.toUpperCase(), dob: searchDob });
       if (res.data.success && res.data.data.length > 0) {
         setEmployee(res.data.data[0]);
-        toast.success("Node Identified. Accessing Core Parameters.");
+        toast.success("Employee found.");
       } else {
-        toast.error("Authorized Node not found. Verify credentials.");
+        toast.error("Employee not found. Please check details.");
       }
     } catch (err) {
-      toast.error("Registry connection failed.");
+      toast.error("Connection failed.");
     } finally {
       setLoading(false);
     }
@@ -109,11 +109,11 @@ const SubmitReview = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.comment.length < 50) {
-      return toast.error("Testimony requires at least 50 chars of proof.");
+      return toast.error("Feedback must be at least 50 characters.");
     }
 
     setLoading(true);
-    const toastId = toast.loading(isEditMode ? "Synchronizing Audit Changes..." : "Deploying Integrity Report...");
+    const toastId = toast.loading(isEditMode ? "Saving changes..." : "Saving review...");
 
     try {
       const submissionData = new FormData();
@@ -137,11 +137,11 @@ const SubmitReview = () => {
       }
 
       if (res.data.success) {
-        toast.success(isEditMode ? 'Audit Node Synchronized ✅' : 'Integrity Report Published ✅', { id: toastId });
+        toast.success(isEditMode ? 'Review Saved ✅' : 'Review Posted ✅', { id: toastId });
         setTimeout(() => navigate('/review/manage'), 1500);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Deployment Failure.', { id: toastId });
+      toast.error(err.response?.data?.message || 'Error saving review.', { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -160,7 +160,7 @@ const SubmitReview = () => {
           <Breadcrumb />
           <Link to="/review/manage" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-            Return to Ledger
+            Back to History
           </Link>
         </div>
 
@@ -170,13 +170,13 @@ const SubmitReview = () => {
           <div className="relative z-10">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
-              {isEditMode ? 'Edit Mode Protocol' : 'Initial Audit Protocol'}
+              {isEditMode ? 'Edit Review' : 'New Review'}
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-6">
-              {isEditMode ? 'Modify' : 'Submit'} <span className="text-[#4c8051]">Audit.</span>
+              {isEditMode ? 'Modify' : 'Submit'} <span className="text-[#4c8051]">Review.</span>
             </h1>
             <p className="text-slate-400 font-bold text-xs tracking-[0.4em] max-w-lg leading-relaxed">
-              Vault entry protocol initialized. Secure handling of professional trajectories and metrics mandated.
+              Fill in the details below to rate the employee. Your feedback helps other companies hire better.
             </p>
           </div>
         </div>
@@ -189,12 +189,12 @@ const SubmitReview = () => {
               <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-10 border border-slate-100 shadow-inner">
                 <i className="fas fa-shield-halved text-3xl text-[#496279]/20"></i>
               </div>
-              <h2 className="text-3xl font-black tracking-tighter mb-4">Initialize Analysis</h2>
-              <p className="text-slate-400 font-bold text-[10px] tracking-[0.4em] mb-12">Identification parameters required</p>
+              <h2 className="text-3xl font-black tracking-tighter mb-4">Find Employee</h2>
+              <p className="text-slate-400 font-bold text-[10px] tracking-[0.4em] mb-12">Search to start rating</p>
 
               <div className="grid md:grid-cols-2 gap-6 w-full max-w-xl">
                 <div className="space-y-2 text-left">
-                  <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-4">Subject Name</label>
+                  <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-4">Employee Name</label>
                   <input
                     type="text"
                     placeholder="FULL LEGAL NAME"
@@ -220,7 +220,7 @@ const SubmitReview = () => {
                 >
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                   <span className="relative z-10">
-                    {loading ? <i className="fas fa-circle-notch fa-spin"></i> : 'Authenticate & Open Ledger'}
+                    {loading ? <i className="fas fa-circle-notch fa-spin"></i> : 'Check Employee & Rate'}
                   </span>
                 </button>
               </div>
@@ -243,7 +243,7 @@ const SubmitReview = () => {
               </div>
               <div className="flex-1 text-center md:text-left">
                 <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black tracking-[0.4em] mb-4 text-[#4c8051]">
-                  Identity Verified
+                  Verified
                 </div>
                 <h3 className="text-4xl md:text-6xl font-black tracking-tighter leading-none mb-2">{employee.firstName} {employee.lastName}</h3>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 mt-6 opacity-60">
@@ -259,7 +259,7 @@ const SubmitReview = () => {
               </div>
               {!isEditMode && (
                 <button type="button" onClick={() => setEmployee(null)} className="text-[10px] font-black tracking-[0.4em] text-white/20 hover:text-[#dd8d88] transition-colors uppercase py-4 border-b border-white/5">
-                  Abort Session
+                  Cancel
                 </button>
               )}
             </div>
@@ -268,7 +268,7 @@ const SubmitReview = () => {
               {/* PERFORMANCE GRID */}
               <div className="lg:col-span-2 bg-white border border-slate-100 rounded-[4rem] p-10 md:p-14 shadow-sm hover:shadow-2xl transition-all duration-700">
                 <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] mb-12 flex items-center gap-4">
-                  <span className="h-px w-12 bg-slate-100"></span> Behavioral Spectrum
+                  <span className="h-px w-12 bg-slate-100"></span> Performance Ratings
                 </h3>
                 <div className="grid md:grid-cols-2 gap-x-16 gap-y-12">
                   {Object.keys(formData.ratings).map(key => (
@@ -299,7 +299,7 @@ const SubmitReview = () => {
               {/* LOGISTICS & ASSETS */}
               <div className="space-y-12">
                 <div className="bg-white border border-slate-100 rounded-[4rem] p-10 shadow-sm">
-                  <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] mb-8 uppercase">Node Parameters</h3>
+                  <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] mb-8 uppercase">Work Details</h3>
                   <div className="space-y-6">
                     <input type="text" placeholder="Designation" required className={inputClass}
                       value={formData.employmentDetails.designation}
@@ -310,21 +310,21 @@ const SubmitReview = () => {
                       onChange={(e) => handleEmploymentChange('department', e.target.value)} />
 
                     <select className={inputClass} value={formData.employmentDetails.employmentType} onChange={(e) => handleEmploymentChange('employmentType', e.target.value)}>
-                      <option value="full-time">Standard Full-Time</option>
-                      <option value="part-time">Flexible Part-Time</option>
-                      <option value="contract">Fixed-Term Contract</option>
-                      <option value="internship">Apprentice Node</option>
+                      <option value="full-time">Full-Time</option>
+                      <option value="part-time">Part-Time</option>
+                      <option value="contract">Contract</option>
+                      <option value="internship">Internship</option>
                     </select>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <p className="text-[9px] font-black text-slate-300 tracking-widest ml-3 uppercase text-center">Inception</p>
+                        <p className="text-[9px] font-black text-slate-300 tracking-widest ml-3 uppercase text-center">Joining Date</p>
                         <input type="date" required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black text-slate-400 outline-none focus:border-[#4c8051]"
                           value={formData.employmentDetails.startDate}
                           onChange={(e) => handleEmploymentChange('startDate', e.target.value)} />
                       </div>
                       <div className="space-y-2">
-                        <p className="text-[9px] font-black text-slate-300 tracking-widest ml-3 uppercase text-center">Termination</p>
+                        <p className="text-[9px] font-black text-slate-300 tracking-widest ml-3 uppercase text-center">Relieving Date</p>
                         <input type="date" required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black text-slate-400 outline-none focus:border-[#4c8051]"
                           value={formData.employmentDetails.endDate}
                           onChange={(e) => handleEmploymentChange('endDate', e.target.value)} />
@@ -334,31 +334,31 @@ const SubmitReview = () => {
                 </div>
 
                 <div className="bg-white border border-slate-100 rounded-[4rem] p-10 shadow-sm">
-                  <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] mb-8 uppercase">Evidence Assets</h3>
+                  <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] mb-8 uppercase">Documents</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-100 rounded-3xl hover:border-[#4c8051] transition-all cursor-pointer group text-center">
                       <i className={`fas ${files.govId ? 'fa-check text-[#4c8051]' : 'fa-fingerprint text-slate-200'} text-xl mb-3`}></i>
                       <span className="text-[8px] font-black tracking-widest leading-tight">
-                        {files.govId ? 'SECURED' : 'GOV ID'}
+                        {files.govId ? 'UPLOADED' : 'ID CARD'}
                       </span>
                       <input type="file" className="hidden" onChange={(e) => setFiles({ ...files, govId: e.target.files[0] })} />
                     </label>
                     <label className="flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-100 rounded-3xl hover:border-[#4c8051] transition-all cursor-pointer group text-center">
                       <i className={`fas ${files.expCert ? 'fa-check text-[#4c8051]' : 'fa-file-invoice text-slate-200'} text-xl mb-3`}></i>
                       <span className="text-[8px] font-black tracking-widest leading-tight">
-                        {files.expCert ? 'SECURED' : 'EXP LETTER'}
+                        {files.expCert ? 'UPLOADED' : 'EXP LETTER'}
                       </span>
                       <input type="file" className="hidden" onChange={(e) => setFiles({ ...files, expCert: e.target.files[0] })} />
                     </label>
                   </div>
-                  <p className="text-[8px] font-black text-slate-300 text-center mt-4">Note: Uploading new files will overwrite existing assets.</p>
+                  <p className="text-[8px] font-black text-slate-300 text-center mt-4">Note: New files will replace old ones.</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white border border-slate-100 rounded-[4rem] p-10 md:p-14 shadow-sm flex flex-col">
               <div className="flex justify-between items-center mb-8">
-                <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] uppercase">Testimonial Matrix</h3>
+                <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] uppercase">Feedback</h3>
                 <div className="flex items-center gap-4">
                   <span className="text-[10px] font-black tracking-[0.2em]">Eligible for Re-Hire</span>
                   <div
@@ -370,13 +370,13 @@ const SubmitReview = () => {
                 </div>
               </div>
               <textarea
-                placeholder="DEPLOY PROFESSIONAL DECRYPTED TESTIMONY..."
+                placeholder="Write your feedback here (minimum 50 characters)..."
                 className="w-full p-10 bg-slate-50 border border-slate-100 rounded-[3rem] h-64 outline-none focus:border-[#4c8051] transition-all font-black text-xs tracking-widest text-[#496279] placeholder:text-slate-200 shadow-inner resize-none"
                 value={formData.comment}
                 onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
               />
               <div className="mt-8 flex justify-between items-center opacity-40">
-                <p className="text-[9px] font-black tracking-[0.4em]">Entropy Required: {formData.comment.length}/50 Min</p>
+                <p className="text-[9px] font-black tracking-[0.4em]">Characters: {formData.comment.length}/50 Min</p>
                 <i className="fas fa-lock text-xs"></i>
               </div>
             </div>
@@ -389,7 +389,7 @@ const SubmitReview = () => {
               >
                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                 <span className="relative z-10">
-                  {loading ? <i className="fas fa-circle-notch fa-spin"></i> : isEditMode ? 'Synchronize Persistent Record' : 'Publish Integrity Audit to Registry'}
+                  {loading ? <i className="fas fa-circle-notch fa-spin"></i> : isEditMode ? 'Save Changes' : 'Save Review'}
                 </span>
               </button>
             </div>

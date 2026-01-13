@@ -56,7 +56,7 @@ const CompanyUploadDocuments = () => {
       });
 
       if (res.data.success) {
-        toast.success('Asset Securely Uplinked to Vault ✅', { id: toastId });
+        toast.success('Document Uploaded Successfully ✅', { id: toastId });
         setFile(null);
         setDocNumber('');
         setVerificationNotes('');
@@ -67,7 +67,7 @@ const CompanyUploadDocuments = () => {
         if (fileInput) fileInput.value = '';
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Uplink protocol failed.', { id: toastId });
+      toast.error(err.response?.data?.message || 'Upload failed.', { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ const CompanyUploadDocuments = () => {
           <Breadcrumb />
           <Link to="/dashboard/company" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-            Return to Control Center
+            Back to Dashboard
           </Link>
         </div>
 
@@ -97,13 +97,13 @@ const CompanyUploadDocuments = () => {
           <div className="relative z-10">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
-              Uplink Protocol Active
+              Secure Upload Active
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-6">
-              Evidence <span className="text-[#4c8051]">Uplink.</span>
+              Upload <span className="text-[#4c8051]">Documents.</span>
             </h1>
             <p className="text-slate-400 font-bold text-xs tracking-[0.4em] max-w-lg leading-relaxed">
-              Securely inject verification assets into the sovereign profile node for comprehensive background integrity checks.
+              Securely add employee identification and background documents for verification.
             </p>
           </div>
         </div>
@@ -117,14 +117,14 @@ const CompanyUploadDocuments = () => {
               <form onSubmit={handleUpload} className="space-y-10 relative z-10">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Subject Node</label>
+                    <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Select Employee</label>
                     <select
                       value={selectedEmployee}
                       onChange={(e) => setSelectedEmployee(e.target.value)}
                       className={inputClass}
                       required
                     >
-                      <option value="">Authorize Subject...</option>
+                      <option value="">Choose Employee...</option>
                       {employees.map((emp) => (
                         <option key={emp.id} value={emp.id} className="py-4">
                           {emp.name} ({emp.verificationPercentage}%)
@@ -133,44 +133,44 @@ const CompanyUploadDocuments = () => {
                     </select>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Asset Blueprint</label>
+                    <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Document Type</label>
                     <select
                       value={docType}
                       onChange={(e) => setDocType(e.target.value)}
                       className={inputClass}
                     >
-                      <option value="aadhaar">Aadhaar Protocol</option>
-                      <option value="pan">PAN Identifier</option>
-                      <option value="passport">Global Passport</option>
-                      <option value="driving_license">Motion License</option>
-                      <option value="experience_letter">Tenure Proof</option>
-                      <option value="educational_certificate">Scholastic Record</option>
-                      <option value="other">Misc Asset</option>
+                      <option value="aadhaar">Aadhaar Card</option>
+                      <option value="pan">PAN Card</option>
+                      <option value="passport">Passport</option>
+                      <option value="driving_license">Driving License</option>
+                      <option value="experience_letter">Experience Letter</option>
+                      <option value="educational_certificate">Educational Certificate</option>
+                      <option value="other">Other Document</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Node ID Number</label>
+                  <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Document Number</label>
                   <input
                     type="text"
                     value={docNumber}
                     onChange={(e) => setDocNumber(e.target.value)}
                     className={inputClass}
-                    placeholder="Enter document identifier..."
+                    placeholder="Enter document number..."
                     required
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Evidence Injector</label>
+                  <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">File Upload</label>
                   <div className="relative group/upload">
                     <div className={`w-full h-40 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center gap-4 transition-all duration-500 bg-slate-50/50 ${file ? 'border-[#4c8051] bg-[#4c8051]/5' : 'border-slate-100'}`}>
                       <div className={`h-16 w-16 rounded-3xl flex items-center justify-center transition-all duration-500 ${file ? 'bg-[#4c8051] text-white shadow-xl' : 'bg-white text-slate-200 shadow-inner'}`}>
                         <i className={`fas ${file ? 'fa-check' : 'fa-cloud-arrow-up'} text-xl`}></i>
                       </div>
                       <p className="text-[9px] font-black tracking-[0.3em] text-slate-400">
-                        {file ? file.name : 'Drag & Drop Asset or Click'}
+                        {file ? file.name : 'Drag & Drop File or Click To Upload'}
                       </p>
                       <input
                         id="document"
@@ -183,18 +183,18 @@ const CompanyUploadDocuments = () => {
                     </div>
                   </div>
                   <div className="flex justify-between items-center px-4 pt-2">
-                    <p className="text-[8px] font-black text-slate-300 tracking-[0.2em]">MAX ENTROPY: 5MB (PDF/JPG/PNG)</p>
-                    {uploadProgress > 0 && <p className="text-[8px] font-black text-[#4c8051] tracking-[0.2em]">UPLINK: {uploadProgress}%</p>}
+                    <p className="text-[8px] font-black text-slate-300 tracking-[0.2em]">MAX FILE SIZE: 5MB (PDF/JPG/PNG)</p>
+                    {uploadProgress > 0 && <p className="text-[8px] font-black text-[#4c8051] tracking-[0.2em]">UPLOADING: {uploadProgress}%</p>}
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Neural Context (Notes)</label>
+                  <label className="text-[10px] font-black tracking-[0.3em] text-slate-300 ml-4">Context (Optional Notes)</label>
                   <textarea
                     value={verificationNotes}
                     onChange={(e) => setVerificationNotes(e.target.value)}
                     className="w-full p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] h-32 outline-none focus:border-[#4c8051] transition-all font-black text-[10px] tracking-widest text-[#496279] placeholder:text-slate-200 shadow-inner resize-none"
-                    placeholder="Add audit context..."
+                    placeholder="Add notes for this document..."
                   />
                 </div>
 
@@ -211,7 +211,7 @@ const CompanyUploadDocuments = () => {
                     ></div>
                   )}
                   <span className="relative z-10">
-                    {loading ? `TRANSMITTING... ${uploadProgress}%` : 'Execute Asset Uplink'}
+                    {loading ? `UPLOADING... ${uploadProgress}%` : 'Upload Document'}
                   </span>
                 </button>
               </form>
@@ -224,7 +224,7 @@ const CompanyUploadDocuments = () => {
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#4c8051] opacity-20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
               <h3 className="text-xl font-black tracking-tighter mb-8 relative z-10 flex items-center gap-4">
                 <i className="fas fa-lock text-[#4c8051]"></i>
-                Vault Protocol
+                Secure Verification
               </h3>
               <div className="space-y-8 relative z-10">
                 <div className="flex gap-6">
@@ -232,26 +232,26 @@ const CompanyUploadDocuments = () => {
                     <i className="fas fa-microchip text-[12px]"></i>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black tracking-widest mb-1">OCR Analysis</p>
-                    <p className="text-[10px] font-bold text-white/40 leading-relaxed normal-case">Automated data extraction and cross-referencing with national registries.</p>
+                    <p className="text-[10px] font-black tracking-widest mb-1">Automated Analysis</p>
+                    <p className="text-[10px] font-bold text-white/40 leading-relaxed normal-case">Fast and accurate verification of document data.</p>
                   </div>
                 </div>
                 <div className="flex gap-6">
                   <div className="h-10 w-10 shrink-0 bg-white/10 rounded-xl flex items-center justify-center">
-                    <i className="fas fa-satellite-dish text-[12px]"></i>
+                    <i className="fas fa-shield-check text-[12px]"></i>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black tracking-widest mb-1">Background Node</p>
-                    <p className="text-[10px] font-bold text-white/40 leading-relaxed normal-case">Criminal record scan and physical residence validation via authorized agents.</p>
+                    <p className="text-[10px] font-black tracking-widest mb-1">Safe Storage</p>
+                    <p className="text-[10px] font-bold text-white/40 leading-relaxed normal-case">All documents are stored in our secure and private vault.</p>
                   </div>
                 </div>
                 <div className="flex gap-6">
                   <div className="h-10 w-10 shrink-0 bg-white/10 rounded-xl flex items-center justify-center">
-                    <i className="fas fa-fingerprint text-[12px]"></i>
+                    <i className="fas fa-sync text-[12px]"></i>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black tracking-widest mb-1">Entity Sync</p>
-                    <p className="text-[10px] font-bold text-white/40 leading-relaxed normal-case">Real-time update to the Subject's Trust Core and Shield Rank™.</p>
+                    <p className="text-[10px] font-black tracking-widest mb-1">Profile Update</p>
+                    <p className="text-[10px] font-bold text-white/40 leading-relaxed normal-case">Real-time update to the employee's trust score after verification.</p>
                   </div>
                 </div>
               </div>
@@ -259,9 +259,9 @@ const CompanyUploadDocuments = () => {
 
             <div className="bg-white border border-slate-100 rounded-[4rem] p-12 shadow-sm text-center">
               <i className="fas fa-shield-halved text-4xl text-slate-100 mb-6"></i>
-              <h4 className="text-[11px] font-black tracking-[0.4em] mb-4">Integrity Disclaimer</h4>
+              <h4 className="text-[11px] font-black tracking-[0.4em] mb-4">Safe Usage Policy</h4>
               <p className="text-[10px] font-bold text-slate-300 normal-case leading-relaxed">
-                False asset injection is a protocol violation. All deployments are cryptographically signed and logged for audit purposes.
+                Uploading false documents is against our platform terms. All uploads are logged and verified for security.
               </p>
             </div>
           </div>

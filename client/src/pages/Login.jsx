@@ -100,10 +100,10 @@ const Login = () => {
             </div>
           </Link>
           <h1 className="text-5xl font-black text-white mb-6 uppercase tracking-tighter leading-tight">
-            The Gateway to <br /> <span className="text-[#4c8051]">Professional Trust.</span>
+            The Gateway to <br /> <span className="text-[#4c8051]">Trusted Teams.</span>
           </h1>
           <p className="text-white/60 text-lg font-bold uppercase tracking-widest leading-relaxed">
-            Standardizing integrity nodes for the modern enterprise ecosystem.
+            Making hiring simple and safe for everyone.
           </p>
         </div>
       </div>
@@ -113,8 +113,8 @@ const Login = () => {
         <div className="flex-grow flex items-center justify-center px-6 md:px-12 lg:px-24 py-12">
           <div className="w-full max-w-md">
             <div className="mb-10 text-center lg:text-left">
-              <h2 className="text-3xl font-black text-[#496279] uppercase tracking-tight mb-2">Portal Access</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Authorized credentials required</p>
+              <h2 className="text-3xl font-black text-[#496279] uppercase tracking-tight mb-2">Login</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Please enter your details</p>
             </div>
 
             {/* Role Switcher */}
@@ -127,14 +127,14 @@ const Login = () => {
                   className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${role === r ? 'bg-white text-[#496279] shadow-md' : 'text-slate-500 hover:text-[#496279]'
                     }`}
                 >
-                  {r === 'company' ? 'Enterprise' : 'Professional'}
+                  {r === 'company' ? 'Company' : 'Employee'}
                 </button>
               ))}
             </div>
 
             {error && (
               <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in duration-300">
-                <i className="fas fa-shield-virus"></i> {error}
+                <i className="fas fa-exclamation-circle"></i> {error}
               </div>
             )}
 
@@ -142,12 +142,12 @@ const Login = () => {
               {role === 'company' ? (
                 <>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Corporate ID / Email</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="node@enterprise.com" required />
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Work Email Address</label>
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="example@company.com" required />
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-2 ml-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Access Key</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
                     </div>
                     <div className="relative">
                       <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="••••••••" required />
@@ -160,7 +160,7 @@ const Login = () => {
               ) : (
                 <>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">First Name (As per Aadhar)</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">First Name (As per ID Card)</label>
                     <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="EX: RAHUL" required />
                   </div>
                   <div>
@@ -169,7 +169,7 @@ const Login = () => {
                   </div>
                   <div className="p-4 bg-[#4c8051]/5 rounded-xl border border-[#4c8051]/10">
                     <p className="text-[9px] font-bold text-[#4c8051] uppercase leading-tight tracking-wider">
-                      <i className="fas fa-info-circle mr-1"></i> Access is only granted to employees registered by verified enterprises.
+                      <i className="fas fa-info-circle mr-1"></i> Employees must be registered by their company to log in.
                     </p>
                   </div>
                 </>
@@ -179,7 +179,7 @@ const Login = () => {
               <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#496279] text-white hover:bg-[#3a4e61]'
                 }`}>
                 {loading && <i className="fas fa-circle-notch fa-spin"></i>}
-                {loading ? 'Verifying Node...' : 'Authenticate Access'}
+                {loading ? 'Checking...' : 'Login Now'}
               </button>
             </form>
           </div>

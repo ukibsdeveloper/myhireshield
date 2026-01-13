@@ -56,17 +56,16 @@ const AddEmployee = () => {
 
       // Success check based on status code 201
       if (res.status === 201 || res.status === 200 || res.data.success) {
-        alert("Employee Node Created Successfully! ✅");
+        alert("Employee Account Created Successfully! ✅");
         navigate('/dashboard/company');
       }
 
     } catch (err) {
       const backendErrors = err.response?.data?.errors;
       if (backendErrors && backendErrors.length > 0) {
-        // Isse alert mein exact field ka naam aur error message dikhega
         alert(`Validation Failed: ${backendErrors[0].field} - ${backendErrors[0].message}`);
       } else {
-        alert("Registration Error: " + (err.response?.data?.message || "Check your inputs"));
+        alert("Error: " + (err.response?.data?.message || "Please check your inputs"));
       }
     } finally {
       setLoading(false);
@@ -91,54 +90,54 @@ const AddEmployee = () => {
                 <i className="fas fa-user-plus text-3xl group-hover:scale-110 transition-transform"></i>
               </div>
               <div>
-                <h2 className="text-4xl font-black tracking-tighter leading-none mb-3">Register <span className="text-[#4c8051]">Node.</span></h2>
-                <p className="text-[10px] font-black text-slate-400 tracking-[0.4em]">System Identifier Assignment Protocol</p>
+                <h2 className="text-4xl font-black tracking-tighter leading-none mb-3">Add <span className="text-[#4c8051]">Employee.</span></h2>
+                <p className="text-[10px] font-black text-slate-400 tracking-[0.4em]">Create a new employee profile</p>
               </div>
             </div>
             <div className="px-6 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[9px] font-black tracking-widest text-[#496279]">
-              Vault ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
+              PROFILE ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-10 group relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className={labelClass}>Subject Forename</label>
-                <input type="text" placeholder="Entry required" className={inputClass} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} required />
+                <label className={labelClass}>First Name</label>
+                <input type="text" placeholder="REQUIRED" className={inputClass} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <label className={labelClass}>Subject Surname</label>
-                <input type="text" placeholder="Entry required" className={inputClass} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} required />
+                <label className={labelClass}>Last Name</label>
+                <input type="text" placeholder="REQUIRED" className={inputClass} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} required />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className={labelClass}>Neural Link (Email)</label>
-              <input type="email" placeholder="official@enterprise.node" className={inputClass} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+              <label className={labelClass}>Work Email</label>
+              <input type="email" placeholder="email@company.com" className={inputClass} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className={labelClass}>Identity Number (Phone)</label>
-                <input type="tel" placeholder="10 Digit Registry" className={inputClass} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required maxLength="10" />
+                <label className={labelClass}>Phone Number</label>
+                <input type="tel" placeholder="10 DIGIT MOBILE" className={inputClass} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required maxLength="10" />
               </div>
               <div className="space-y-2">
-                <label className={labelClass}>Inception Date (DOB)</label>
+                <label className={labelClass}>Date of Birth</label>
                 <input type="date" className={inputClass} onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })} required />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className={labelClass}>Node Designation</label>
-                <input type="text" placeholder="Role Identifier" className={inputClass} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} required />
+                <label className={labelClass}>Designation</label>
+                <input type="text" placeholder="ROLE / TITLE" className={inputClass} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <label className={labelClass}>Gender Identity</label>
+                <label className={labelClass}>Gender</label>
                 <select className={inputClass} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
-                  <option value="male">Biological: Male</option>
-                  <option value="female">Biological: Female</option>
-                  <option value="other">Universal: Other</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
             </div>
@@ -150,11 +149,11 @@ const AddEmployee = () => {
                   {loading ? (
                     <>
                       <i className="fas fa-circle-notch fa-spin"></i>
-                      Reconciling Registry...
+                      Adding Employee...
                     </>
                   ) : (
                     <>
-                      Deploy Subject Node
+                      Add Employee
                       <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
                     </>
                   )}
@@ -164,7 +163,7 @@ const AddEmployee = () => {
           </form>
 
           <p className="mt-12 text-center text-[8px] font-black text-slate-300 uppercase tracking-[0.6em] relative z-10">
-            Authentication Level 4 Required // All entries logged via Sovereign Ledger
+            All data is securely stored and protected within the network.
           </p>
         </div>
       </div>

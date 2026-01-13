@@ -17,22 +17,22 @@ const NotFound = () => {
                         <div className="w-40 h-40 bg-[#dd8d88] blur-[100px] opacity-20 animate-pulse"></div>
                         <div className="relative z-10 space-y-8">
                             <div className="inline-flex items-center gap-4 px-6 py-3 bg-white border border-slate-100 rounded-full text-[12px] font-black tracking-[0.4em] shadow-2xl">
-                                <i className="fas fa-satellite-dish text-[#dd8d88]"></i>
-                                Signal Lost
+                                <i className="fas fa-unlink text-[#dd8d88]"></i>
+                                Broken Link
                             </div>
-                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight">Node Not <span className="text-[#dd8d88]">Found.</span></h2>
+                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight">Page Not <span className="text-[#dd8d88]">Found.</span></h2>
                         </div>
                     </div>
                 </div>
 
                 <p className="max-w-xl text-slate-400 font-bold text-xs tracking-[0.4em] leading-relaxed mb-16 animate-in slide-in-from-bottom-8 duration-700 delay-300">
-                    The requested trajectory does not exist in the sovereign registry. Your current navigation coordinates are outside the authorized neural link.
+                    The page you are looking for has been moved or does not exist. Please check the URL or return to the main dashboard.
                 </p>
 
                 <Link to="/" className="group relative px-12 py-6 bg-[#496279] text-white rounded-[2.5rem] font-black text-[11px] tracking-[0.6em] shadow-2xl hover:bg-[#4c8051] transition-all overflow-hidden animate-in slide-in-from-bottom-12 duration-1000 delay-500">
                     <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                     <span className="relative z-10 flex items-center gap-4">
-                        Return to Inception
+                        Return to Dashboard
                         <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
                     </span>
                 </Link>

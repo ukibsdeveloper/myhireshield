@@ -71,16 +71,16 @@ const UpdateProfile = () => {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const toastId = toast.loading("Synchronizing Identity Node...");
+    const toastId = toast.loading("Updating Profile...");
     try {
       const res = await updateProfile(formData);
       if (res.success) {
-        toast.success("Identity Parameters Updated.", { id: toastId });
+        toast.success("Profile Updated Successfully.", { id: toastId });
       } else {
-        toast.error(res.error || "Sync Failure.", { id: toastId });
+        toast.error(res.error || "Update Failed.", { id: toastId });
       }
     } catch (err) {
-      toast.error("Critical Registry Error.", { id: toastId });
+      toast.error("Error updating profile.", { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -89,23 +89,23 @@ const UpdateProfile = () => {
   const handleSecuritySubmit = async (e) => {
     e.preventDefault();
     if (securityData.newPassword !== securityData.confirmPassword) {
-      return toast.error("Encryption Mismatch: Passwords do not correlate.");
+      return toast.error("Passwords do not match.");
     }
     setLoading(true);
-    const toastId = toast.loading("Recalibrating Security Layer...");
+    const toastId = toast.loading("Updating Password...");
     try {
       const res = await changePassword({
         currentPassword: securityData.currentPassword,
         newPassword: securityData.newPassword
       });
       if (res.success) {
-        toast.success("Security Credentials Synchronized.", { id: toastId });
+        toast.success("Password Updated Successfully.", { id: toastId });
         setSecurityData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
-        toast.error(res.error || "Authorization Denied.", { id: toastId });
+        toast.error(res.error || "Incorrect password.", { id: toastId });
       }
     } catch (err) {
-      toast.error("Security Layer Override Failed.", { id: toastId });
+      toast.error("Could not update password.", { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -124,7 +124,7 @@ const UpdateProfile = () => {
           <Breadcrumb />
           <Link to={user?.role === 'company' ? '/dashboard/company' : '/dashboard/employee'} className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-            Return to Control Center
+            Back to Dashboard
           </Link>
         </div>
 
@@ -134,13 +134,13 @@ const UpdateProfile = () => {
           <div className="relative z-10">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#496279] animate-pulse"></span>
-              Node Settings Active
+              Profile Settings Active
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-6">
-              System <span className="text-[#496279]">Nexus.</span>
+              Account <span className="text-[#496279]">Settings.</span>
             </h1>
             <p className="text-slate-400 font-bold text-xs tracking-[0.4em] max-w-lg leading-relaxed">
-              Modification of authorized identity nodes and security parameters. Integrity checks mandated for all structural changes.
+              Manage your personal information, security settings, and notifications here.
             </p>
           </div>
         </div>
@@ -149,9 +149,9 @@ const UpdateProfile = () => {
           {/* NAVIGATION SIDEBAR */}
           <div className="space-y-4">
             {[
-              { id: 'profile', label: 'Identity Node', icon: 'fa-user-astronaut' },
-              { id: 'security', label: 'Security Layer', icon: 'fa-shield-halved' },
-              { id: 'preferences', label: 'Neural Feeds', icon: 'fa-sliders' }
+              { id: 'profile', label: 'Profile Info', icon: 'fa-user' },
+              { id: 'security', label: 'Security & Password', icon: 'fa-lock' },
+              { id: 'preferences', label: 'Notifications', icon: 'fa-bell' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -164,9 +164,9 @@ const UpdateProfile = () => {
             ))}
 
             <div className="mt-12 p-10 bg-[#dd8d88]/5 border border-[#dd8d88]/10 rounded-[3rem] text-center group">
-              <i className="fas fa-triangle-exclamation text-[#dd8d88] text-xl mb-4 group-hover:animate-bounce transition-all"></i>
-              <h4 className="text-[9px] font-black text-[#dd8d88] tracking-widest mb-2">Caution Protocol</h4>
-              <p className="text-[8px] font-bold text-[#dd8d88]/50 normal-case leading-relaxed">Identity deviations may trigger manual re-validation by Shield agents.</p>
+              <i className="fas fa-info-circle text-[#dd8d88] text-xl mb-4 group-hover:scale-110 transition-all"></i>
+              <h4 className="text-[9px] font-black text-[#dd8d88] tracking-widest mb-2">Important Notice</h4>
+              <p className="text-[8px] font-bold text-[#dd8d88]/50 normal-case leading-relaxed">Changes to your name or designation might need verification from our team.</p>
             </div>
           </div>
 
@@ -180,11 +180,11 @@ const UpdateProfile = () => {
                   <div className="flex items-center gap-10 border-b border-slate-50 pb-12">
                     <div className="h-32 w-32 bg-slate-50 rounded-[3rem] border border-slate-100 flex items-center justify-center text-4xl font-black text-[#496279] shadow-inner relative group/avatar">
                       {user?.profile?.firstName?.charAt(0) || user?.profile?.companyName?.charAt(0)}
-                      <button type="button" className="absolute inset-0 bg-[#496279]/80 text-white rounded-[3rem] opacity-0 group-hover/avatar:opacity-100 transition-all flex items-center justify-center text-[8px] font-black tracking-widest">UPLOAD NODE</button>
+                      <button type="button" className="absolute inset-0 bg-[#496279]/80 text-white rounded-[3rem] opacity-0 group-hover/avatar:opacity-100 transition-all flex items-center justify-center text-[8px] font-black tracking-widest uppercase">Update Photo</button>
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-black tracking-tighter">Avatar Synchronization</h3>
-                      <p className="text-[9px] font-bold text-slate-300 tracking-[0.2em] normal-case">Visual representation of the node in the sovereign registry.</p>
+                      <h3 className="text-2xl font-black tracking-tighter">Profile Picture</h3>
+                      <p className="text-[9px] font-bold text-slate-300 tracking-[0.2em] normal-case">How you'll appear on the network.</p>
                     </div>
                   </div>
 
@@ -192,44 +192,44 @@ const UpdateProfile = () => {
                     {user?.role === 'employee' ? (
                       <>
                         <div className="space-y-3">
-                          <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Given Name</label>
+                          <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">First Name</label>
                           <input type="text" name="firstName" value={formData.firstName} onChange={handleProfileChange} className={inputClass} placeholder="FIRST NAME" />
                         </div>
                         <div className="space-y-3">
-                          <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Family Name</label>
+                          <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Last Name</label>
                           <input type="text" name="lastName" value={formData.lastName} onChange={handleProfileChange} className={inputClass} placeholder="LAST NAME" />
                         </div>
                         <div className="md:col-span-2 space-y-3">
-                          <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Current Trajectory (Designation)</label>
+                          <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Designation</label>
                           <input type="text" name="currentDesignation" value={formData.currentDesignation} onChange={handleProfileChange} className={inputClass} placeholder="PROFESSIONAL TITLE" />
                         </div>
                       </>
                     ) : (
                       <div className="md:col-span-2 space-y-3">
-                        <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Enterprise Entity</label>
+                        <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Company Name</label>
                         <input type="text" name="companyName" value={formData.companyName} onChange={handleProfileChange} className={inputClass} placeholder="COMPANY NAME" />
                       </div>
                     )}
 
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Neural Link (Email)</label>
+                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Email Address</label>
                       <input type="text" value={user?.email} disabled className={`${inputClass} bg-slate-100 cursor-not-allowed text-slate-300 border-none`} />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Contact Frequency (Phone)</label>
+                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Phone Number</label>
                       <input type="text" name="phone" value={formData.phone} onChange={handleProfileChange} className={inputClass} placeholder="+XX XXXXXXXX" />
                     </div>
 
                     <div className="md:col-span-2 space-y-3">
-                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Trajectory Summary (Bio)</label>
-                      <textarea name="bio" value={formData.bio} onChange={handleProfileChange} className={`${inputClass} h-40 resize-none py-8`} placeholder="DEPLOY ARCHIVE CONTEXT..."></textarea>
+                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Bio / Summary</label>
+                      <textarea name="bio" value={formData.bio} onChange={handleProfileChange} className={`${inputClass} h-40 resize-none py-8`} placeholder="TELL US ABOUT YOURSELF..."></textarea>
                     </div>
                   </div>
 
                   <div className="pt-8">
-                    <button type="submit" disabled={loading} className="w-full group bg-[#496279] text-white py-8 rounded-[2.5rem] font-black text-[11px] tracking-[0.6em] shadow-2xl hover:bg-[#4c8051] transition-all relative overflow-hidden active:scale-95">
+                    <button type="submit" disabled={loading} className="w-full group bg-[#496279] text-white py-8 rounded-[2.5rem] font-black text-[11px] tracking-widest shadow-24 hover:bg-[#4c8051] transition-all relative overflow-hidden active:scale-95">
                       <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                      <span className="relative z-10">{loading ? 'SYNCING...' : 'Synchronize Identity Core'}</span>
+                      <span className="relative z-10">{loading ? 'SAVING...' : 'Update Profile Info'}</span>
                     </button>
                   </div>
                 </form>
@@ -239,31 +239,31 @@ const UpdateProfile = () => {
                 <form onSubmit={handleSecuritySubmit} className="space-y-12 animate-in fade-in slide-in-from-right-8 duration-700">
                   <div className="p-10 bg-[#496279] rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#4c8051] opacity-20 rounded-full blur-[40px] -mr-16 -mt-16"></div>
-                    <h3 className="text-xl font-black tracking-tighter mb-4"><i className="fas fa-lock mr-4"></i>Security Recalibration</h3>
-                    <p className="text-[9px] font-bold text-white/40 tracking-[0.2em] normal-case leading-relaxed">Updating your encryption key requires the existing authorized passphrase.</p>
+                    <h3 className="text-xl font-black tracking-tighter mb-4"><i className="fas fa-lock mr-4"></i>Change Password</h3>
+                    <p className="text-[9px] font-bold text-white/40 tracking-widest normal-case leading-relaxed">Updating your password helps keep your account secure.</p>
                   </div>
 
                   <div className="space-y-8">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Existing Key</label>
-                      <input type="password" name="currentPassword" value={securityData.currentPassword} onChange={handleSecurityChange} className={inputClass} placeholder="CURRENT PASSPHRASE" required />
+                      <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Current Password</label>
+                      <input type="password" name="currentPassword" value={securityData.currentPassword} onChange={handleSecurityChange} className={inputClass} placeholder="ENTER CURRENT PASSWORD" required />
                     </div>
                     <div className="grid md:grid-cols-2 gap-8">
                       <div className="space-y-3">
-                        <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">New Encryption Key</label>
-                        <input type="password" name="newPassword" value={securityData.newPassword} onChange={handleSecurityChange} className={inputClass} placeholder="NEW PASSPHRASE" required />
+                        <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">New Password</label>
+                        <input type="password" name="newPassword" value={securityData.newPassword} onChange={handleSecurityChange} className={inputClass} placeholder="NEW PASSWORD" required />
                       </div>
                       <div className="space-y-3">
-                        <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Confirm Correlation</label>
+                        <label className="text-[10px] font-black tracking-[0.3em] text-slate-200 ml-4">Confirm New Password</label>
                         <input type="password" name="confirmPassword" value={securityData.confirmPassword} onChange={handleSecurityChange} className={inputClass} placeholder="RE-ENTER NEW" required />
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-8">
-                    <button type="submit" disabled={loading} className="w-full group bg-[#496279] text-white py-8 rounded-[2.5rem] font-black text-[11px] tracking-[0.6em] shadow-2xl hover:bg-[#dd8d88] transition-all relative overflow-hidden active:scale-95">
+                    <button type="submit" disabled={loading} className="w-full group bg-[#496279] text-white py-8 rounded-[2.5rem] font-black text-[11px] tracking-widest shadow-24 hover:bg-[#dd8d88] transition-all relative overflow-hidden active:scale-95">
                       <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                      <span className="relative z-10">{loading ? 'DEPLOYING...' : 'Recalibrate Security Layer'}</span>
+                      <span className="relative z-10">{loading ? 'UPDATING...' : 'Update Password'}</span>
                     </button>
                   </div>
                 </form>

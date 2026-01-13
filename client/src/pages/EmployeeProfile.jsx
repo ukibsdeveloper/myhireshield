@@ -83,7 +83,7 @@ const EmployeeProfile = () => {
           <Breadcrumb />
           <Link to={user?.role === 'company' ? '/dashboard/company' : '/dashboard/employee'} className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:text-[#4c8051] transition-all">
             <i className="fas fa-arrow-left"></i>
-            Return to Command Center
+            Back to Dashboard
           </Link>
         </div>
 
@@ -96,9 +96,9 @@ const EmployeeProfile = () => {
             <div className="relative z-10">
               <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl text-[9px] font-black tracking-[0.4em] mb-4 border border-white/10 uppercase">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#4c8051] animate-pulse"></span>
-                Sovereign Registry Certificate
+                Verified Profile Certificate
               </div>
-              <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">Subject <span className="text-[#4c8051]">Analysis.</span></h2>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">Employee <span className="text-[#4c8051]">Profile.</span></h2>
             </div>
           </div>
 
@@ -122,22 +122,22 @@ const EmployeeProfile = () => {
                   <h1 className="text-4xl md:text-6xl font-black text-[#496279] tracking-tighter leading-none">
                     {profile?.firstName} <span className="text-slate-300">{profile?.lastName}</span>
                   </h1>
-                  <span className="px-4 py-1.5 bg-[#4c8051]/10 text-[#4c8051] text-[9px] font-black rounded-full tracking-[0.2em] uppercase border border-[#4c8051]/10">Elite Node Status</span>
+                  <span className="px-4 py-1.5 bg-[#4c8051]/10 text-[#4c8051] text-[9px] font-black rounded-full tracking-[0.2em] uppercase border border-[#4c8051]/10">Top Verified User</span>
                 </div>
-                <p className="text-slate-400 font-bold text-xs tracking-[0.4em] uppercase mb-4">{profile?.email} // REF: {profile?._id?.substr(-6).toUpperCase()}</p>
+                <p className="text-slate-400 font-bold text-xs tracking-[0.4em] uppercase mb-4">{profile?.email} // ID: {profile?._id?.substr(-6).toUpperCase()}</p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-8 opacity-40">
-                  <div className="flex items-center gap-2"><i className="fas fa-satellite text-[10px]"></i> <span className="text-[8px] font-black tracking-widest uppercase">Asia Central Node</span></div>
-                  <div className="flex items-center gap-2"><i className="fas fa-shield-alt text-[10px]"></i> <span className="text-[8px] font-black tracking-widest uppercase">Verified Trajectory</span></div>
+                  <div className="flex items-center gap-2"><i className="fas fa-user-check text-[10px]"></i> <span className="text-[8px] font-black tracking-widest uppercase">Identity Verified</span></div>
+                  <div className="flex items-center gap-2"><i className="fas fa-history text-[10px]"></i> <span className="text-[8px] font-black tracking-widest uppercase">Verified Work History</span></div>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
               {[
-                { label: 'Neural Link (ID)', val: profile?.phone || 'PRIVATE', icon: 'fa-phone', color: '#496279' },
-                { label: 'Trajectory (EXP)', val: `${profile?.totalExperience || 0} Cycles`, icon: 'fa-briefcase', color: '#496279' },
-                { label: 'Registry Status', val: profile?.verified ? 'Synchronized' : 'Authenticating', icon: 'fa-id-card', color: profile?.verified ? '#4c8051' : '#dd8d88' },
-                { label: 'Shield Aggregate', val: `${profile?.overallScore || 0}%`, icon: 'fa-bolt', color: '#4c8051' }
+                { label: 'Phone Number', val: profile?.phone || 'PRIVATE', icon: 'fa-phone', color: '#496279' },
+                { label: 'Work Experience', val: `${profile?.totalExperience || 0} Years`, icon: 'fa-briefcase', color: '#496279' },
+                { label: 'Verification Status', val: profile?.verified ? 'Verified' : 'Pending', icon: 'fa-id-card', color: profile?.verified ? '#4c8051' : '#dd8d88' },
+                { label: 'Trust Score', val: `${profile?.overallScore || 0}%`, icon: 'fa-bolt', color: '#4c8051' }
               ].map((item, i) => (
                 <div key={i} className="p-8 bg-[#fcfaf9] rounded-[3rem] border border-slate-50 flex flex-col items-center group hover:bg-white hover:shadow-24 transition-all duration-500 hover:-translate-y-2">
                   <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-slate-100 group-hover:bg-[#496279] group-hover:text-white transition-colors">
@@ -150,11 +150,11 @@ const EmployeeProfile = () => {
             </div>
 
             <div className="mt-16 bg-slate-50/50 p-10 rounded-[3.5rem] border border-slate-50 text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Verification Audit Summary</p>
-              <h4 className="text-xl font-black tracking-tighter mb-6 uppercase text-[#496279]">Employment Integrity Score is based on {profile?.overallScore > 0 ? 'active' : 'historical'} enterprise audit signals.</h4>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Work History Summary</p>
+              <h4 className="text-xl font-black tracking-tighter mb-6 uppercase text-[#496279]">This score is calculated based on verified feedback from previous employers.</h4>
               <Link to="/reputation-report" className="inline-flex items-center gap-4 px-10 py-5 bg-[#496279] text-white rounded-[2rem] font-black text-[10px] tracking-[0.3em] shadow-xl hover:bg-[#4c8051] transition-all active:scale-95">
-                Execute Dynamic Audit
-                <i className="fas fa-microchip"></i>
+                View Full Report
+                <i className="fas fa-file-alt"></i>
               </Link>
             </div>
           </div>
@@ -162,7 +162,7 @@ const EmployeeProfile = () => {
 
         <div className="text-center opacity-30 mt-20">
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.6em] mb-2">
-            HireShield Sovereign Platform v3.0 // Assessment Node: {profile?._id?.toUpperCase() || 'SUBJECT-ALPHA'}
+            HireShield Verified Network // Profile ID: {profile?._id?.toUpperCase() || 'SUBJECT-ALPHA'}
           </p>
           <div className="w-12 h-[2px] bg-slate-300 mx-auto"></div>
         </div>
