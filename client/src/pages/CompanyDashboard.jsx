@@ -117,7 +117,7 @@ const CompanyDashboard = () => {
               <div className={`px-8 py-3 rounded-2xl border-2 transition-all duration-500 shadow-sm ${trustRating > 80 ? 'bg-white border-[#4c8051]/20 text-[#4c8051]' : 'bg-white border-slate-100 text-slate-500'}`}>
                 <p className="text-[10px] font-black tracking-[0.2em] uppercase flex items-center gap-3">
                   <span className={`h-2.5 w-2.5 rounded-full ${trustRating > 80 ? 'bg-[#4c8051] shadow-[0_0_10px_#4c8051] animate-pulse' : 'bg-slate-300'}`}></span>
-                  PROTOCAL: {trustRating > 80 ? 'MASTER' : 'STANDARD'}
+                  PROTOCOL: {trustRating > 80 ? 'MASTER' : 'STANDARD'}
                 </p>
               </div>
             </div>
