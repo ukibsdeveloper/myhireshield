@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const RegisterCompany = () => {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ const RegisterCompany = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   // FLAT STATE FOR EASY INPUT HANDLING
   const [formData, setFormData] = useState({
     companyName: '',
@@ -45,12 +46,12 @@ const RegisterCompany = () => {
   const validateStep1 = () => {
     if (!formData.companyName.trim()) { setError('Company name is required'); return false; }
     if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) { setError('Valid company email is required'); return false; }
-    
+
     // Optional: Personal email restriction
     const personalDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
     const domain = formData.email.split('@')[1];
     if (personalDomains.includes(domain)) { setError('Please use company email, not personal email'); return false; }
-    
+
     if (formData.password.length < 6) { setError('Password must be at least 6 characters'); return false; }
     if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return false; }
     if (!formData.industry) { setError('Please select an industry'); return false; }
@@ -76,7 +77,7 @@ const RegisterCompany = () => {
   const handleNext = () => {
     if (step === 1 && validateStep1()) setStep(2);
     else if (step === 2 && validateStep2()) setStep(3);
-    window.scrollTo(0, 0); 
+    window.scrollTo(0, 0);
   };
 
   const handleBack = () => {
@@ -86,53 +87,57 @@ const RegisterCompany = () => {
   };
 
   // SUBMIT LOGIC SYNCED WITH BACKEND SCHEMA
-// Sirf handleSubmit function ko isse replace karein
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateStep3()) return;
-  setLoading(true);
-  setError('');
+  // Sirf handleSubmit function ko isse replace karein
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateStep3()) return;
+    setLoading(true);
+    setError('');
 
-  try {
-    const payload = {
-      companyName: formData.companyName,
-      email: formData.email,
-      password: formData.password,
-      website: formData.website,
-      industry: formData.industry,
-      companySize: formData.companySize,
-      address: {
-        street: formData.street || '',
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        pincode: formData.pincode
-      },
-      contactPerson: {
-        name: formData.contactName,
-        designation: formData.contactDesignation,
-        phone: formData.contactPhone,
-        email: formData.contactEmail.trim() !== '' ? formData.contactEmail : formData.email // FIX: Never send empty string
-      },
-      gstin: formData.gstin,
-      cin: formData.cin
-    };
+    try {
+      const payload = {
+        companyName: formData.companyName,
+        email: formData.email,
+        password: formData.password,
+        website: formData.website,
+        industry: formData.industry,
+        companySize: formData.companySize,
+        address: {
+          street: formData.street || '',
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          pincode: formData.pincode
+        },
+        contactPerson: {
+          name: formData.contactName,
+          designation: formData.contactDesignation,
+          phone: formData.contactPhone,
+          email: formData.contactEmail.trim() !== '' ? formData.contactEmail : formData.email // FIX: Never send empty string
+        },
+        gstin: formData.gstin,
+        cin: formData.cin
+      };
 
-    const result = await registerCompany(payload);
+      const result = await registerCompany(payload);
 
-    if (result.success) {
-      alert('Registration successful!');
-      navigate('/login');
-    } else {
-      // Backend se jo error message aa raha hai wahi dikhayenge
-      setError(result.message || result.error);
+      if (result.success) {
+        toast.success('🎉 Registration successful! Welcome to MyHireShield', {
+          duration: 4000,
+        });
+        setTimeout(() => navigate('/login'), 1500);
+      } else {
+        // Backend se jo error message aa raha hai wahi dikhayenge
+        toast.error(result.message || result.error);
+        setError(result.message || result.error);
+      }
+    } catch (err) {
+      toast.error('Connection failed. Please check your server.');
+      setError('Connection failed. Please check your server.');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setError('Connection failed. Please check your server.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const inputClass = "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#4c8051] focus:border-transparent outline-none transition-all font-medium text-[#496279] shadow-sm";
 
@@ -150,11 +155,11 @@ const handleSubmit = async (e) => {
               <img src="/logo.jpg" alt="HireShield" className="h-full w-full object-contain" />
             </div>
             <div className="text-left">
-                <p className="text-2xl font-black text-white uppercase tracking-tighter leading-none">Hire<span className="text-[#4c8051]">Shield</span></p>
-                <p className="text-[10px] font-black text-[#dd8d88] uppercase tracking-[0.3em] mt-1">Company Headquarters</p>
+              <p className="text-2xl font-black text-white uppercase tracking-tighter leading-none">Hire<span className="text-[#4c8051]">Shield</span></p>
+              <p className="text-[10px] font-black text-[#dd8d88] uppercase tracking-[0.3em] mt-1">Company Headquarters</p>
             </div>
           </Link>
-          
+
           <h1 className="text-5xl font-black text-white mb-6 uppercase tracking-tighter leading-tight">
             The Gateway to <br /> <span className="text-[#4c8051]">Trusted Teams.</span>
           </h1>
@@ -169,9 +174,8 @@ const handleSubmit = async (e) => {
               { s: 3, l: 'Compliance Node', d: 'Legal authorization stage' }
             ].map((item) => (
               <div key={item.s} className={`flex items-start gap-6 transition-all duration-700 ${step >= item.s ? 'opacity-100' : 'opacity-30'}`}>
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all ${
-                  step >= item.s ? 'bg-white text-[#496279] shadow-lg' : 'border-2 border-white/20 text-white'
-                }`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all ${step >= item.s ? 'bg-white text-[#496279] shadow-lg' : 'border-2 border-white/20 text-white'
+                  }`}>
                   {step > item.s ? <i className="fas fa-check text-xs"></i> : item.s}
                 </div>
                 <div>
@@ -324,7 +328,7 @@ const handleSubmit = async (e) => {
         </div>
 
         <div className="p-8 text-center lg:text-left opacity-30">
-           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Intelligence Network</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Intelligence Network</p>
         </div>
       </div>
     </div>

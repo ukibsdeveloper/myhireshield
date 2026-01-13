@@ -16,25 +16,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
+
   // 1. Check Auth Status on Startup
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (token) {
-        try {
-          const response = await api.get('/auth/me');
-          if (response.data.success) {
-            setUser(response.data.user);
-          }
-        } catch (error) {
-          localStorage.removeItem('token');
-          setToken(null);
-          setUser(null);
-        }
-      }
-      setLoading(false);
-    };
-    checkAuth();
-  }, [token]);
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
@@ -75,11 +58,11 @@ export const AuthProvider = ({ children }) => {
       }
 
       const { token: newToken, user: userData } = response.data;
-      
+
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(userData);
-      
+
       return { success: true, user: userData };
     } catch (error) {
       return {
@@ -104,13 +87,13 @@ export const AuthProvider = ({ children }) => {
       return { success: true, message: response.data.message };
     } catch (error) {
       console.error('Registration error:', error.response?.data);
-      
+
       // Handle validation errors (array of errors)
       if (error.response?.data?.errors) {
         const errorMessages = error.response.data.errors.map(err => err.message).join(', ');
         return { success: false, error: errorMessages };
       }
-      
+
       // Handle single error message
       const errorMessage = error.response?.data?.message || 'Registration failed';
       return { success: false, error: errorMessage };
@@ -142,7 +125,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     isCompany: user?.role === 'company',
     isEmployee: user?.role === 'employee',
-    hasPaidForReport: user?.isPaid || false 
+    hasPaidForReport: user?.isPaid || false
   };
 
   return (

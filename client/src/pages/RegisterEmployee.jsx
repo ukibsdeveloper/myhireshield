@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const RegisterEmployee = () => {
   const navigate = useNavigate();
   const { registerEmployee } = useAuth(); // AuthContext ka method use karenge
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   // ORIGINAL STATE MAINTAINED
   const [formData, setFormData] = useState({
     firstName: '',
@@ -77,14 +78,18 @@ const RegisterEmployee = () => {
 
       // API call via AuthContext
       const result = await registerEmployee(payload);
-      
+
       if (result.success) {
-        alert('Node Initialized! Please verify your identity via email link.');
-        navigate('/login');
+        toast.success('🎉 Node Initialized! Please verify your identity via email link.', {
+          duration: 5000,
+        });
+        setTimeout(() => navigate('/login'), 2000);
       } else {
+        toast.error(result.error || 'Identity registration protocol failed');
         setError(result.error || 'Identity registration protocol failed');
       }
     } catch (err) {
+      toast.error('Network synchronization failed. Please try again.');
       setError('Network synchronization failed. Please try again.');
     } finally {
       setLoading(false);
@@ -119,14 +124,14 @@ const RegisterEmployee = () => {
 
           <div className="grid grid-cols-2 gap-8 pt-12 border-t border-white/10">
             <div className="text-left group cursor-default">
-               <i className="fas fa-id-card text-[#4c8051] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
-               <h4 className="text-white font-black uppercase text-xs tracking-widest">Verified Badge</h4>
-               <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">ISO Certified Node</p>
+              <i className="fas fa-id-card text-[#4c8051] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
+              <h4 className="text-white font-black uppercase text-xs tracking-widest">Verified Badge</h4>
+              <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">ISO Certified Node</p>
             </div>
             <div className="text-left group cursor-default">
-               <i className="fas fa-chart-line text-[#dd8d88] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
-               <h4 className="text-white font-black uppercase text-xs tracking-widest">Shield Score™</h4>
-               <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">Standard Integrity</p>
+              <i className="fas fa-chart-line text-[#dd8d88] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
+              <h4 className="text-white font-black uppercase text-xs tracking-widest">Shield Score™</h4>
+              <p className="text-white/40 text-[10px] mt-1 uppercase tracking-tighter">Standard Integrity</p>
             </div>
           </div>
         </div>
@@ -135,11 +140,11 @@ const RegisterEmployee = () => {
       {/* 2. RIGHT SIDE: Registration Interface */}
       <div className="w-full lg:w-1/2 flex flex-col bg-[#fcfaf9] relative overflow-y-auto">
         <div className="lg:hidden p-6 flex justify-between items-center bg-white border-b border-slate-100 sticky top-0 z-50">
-           <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.jpg" className="h-8 w-8 rounded-lg" alt="logo" />
-              <span className="text-sm font-black text-[#496279] uppercase tracking-tighter">HireShield</span>
-           </Link>
-           <Link to="/login" className="text-[10px] font-black uppercase text-[#4c8051]">Sign In</Link>
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/logo.jpg" className="h-8 w-8 rounded-lg" alt="logo" />
+            <span className="text-sm font-black text-[#496279] uppercase tracking-tighter">HireShield</span>
+          </Link>
+          <Link to="/login" className="text-[10px] font-black uppercase text-[#4c8051]">Sign In</Link>
         </div>
 
         <div className="flex-grow flex items-center justify-center px-6 md:px-12 lg:px-20 py-16">
@@ -229,9 +234,8 @@ const RegisterEmployee = () => {
                 </div>
               </div>
 
-              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 ${
-                loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#496279] text-white hover:bg-[#3a4e61] shadow-[#496279]/30'
-              }`}>
+              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 ${loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#496279] text-white hover:bg-[#3a4e61] shadow-[#496279]/30'
+                }`}>
                 {loading ? <><i className="fas fa-circle-notch fa-spin"></i> Processing Identity...</> : 'Initialize Professional Node'}
               </button>
             </form>
@@ -245,7 +249,7 @@ const RegisterEmployee = () => {
         </div>
 
         <div className="p-8 text-center lg:text-left opacity-30">
-           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Enterprise Integration Network</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 HireShield Enterprise Integration Network</p>
         </div>
       </div>
     </div>

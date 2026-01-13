@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated, user } = useAuth();
-  
+
   const [role, setRole] = useState('company');
-  const [formData, setFormData] = useState({ 
-    email: '', 
-    password: '', 
-    firstName: '', 
-    dateOfBirth: '', 
-    rememberMe: false 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    firstName: '',
+    dateOfBirth: '',
+    rememberMe: false
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,25 +31,28 @@ const Login = () => {
     setError('');
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    const loadingToast = toast.loading('Authenticating...');
+
     try {
       // Step 1: Backend ke naye AuthContext function ke hisaab se payload taiyaar karna
       let credentials = {};
-      
+
       if (role === 'company') {
-        credentials = { 
-          email: formData.email, 
-          password: formData.password 
+        credentials = {
+          email: formData.email,
+          password: formData.password
         };
       } else {
         // Employee login: Name + DOB + DOB as password (as per backend logic)
         const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); // Remove hyphens for password
-        credentials = { 
-          firstName: formData.firstName.trim().toUpperCase(), 
+        credentials = {
+          firstName: formData.firstName.trim().toUpperCase(),
           dateOfBirth: formData.dateOfBirth,
           password: cleanDOB // Password is clean DOB (YYYYMMDD)
         };
@@ -56,14 +60,23 @@ const Login = () => {
 
       // Step 2: Login call
       const result = await login(credentials, role);
-      
+
       if (result.success) {
+        toast.success(`Welcome back, ${result.user.firstName || result.user.companyName}! 🎉`, {
+          id: loadingToast,
+        });
         // Navigation handled by useEffect, but adding fallback
         navigate(result.user.role === 'company' ? '/dashboard/company' : '/dashboard/employee');
       } else {
+        toast.error(result.error || 'Identity credentials mismatch', {
+          id: loadingToast,
+        });
         setError(result.error || 'Identity credentials mismatch');
       }
     } catch (err) {
+      toast.error('Connection failed. Please try again.', {
+        id: loadingToast,
+      });
       setError('Connection failed. Please try again.');
     } finally {
       setLoading(false);
@@ -111,9 +124,8 @@ const Login = () => {
                   key={r}
                   type="button"
                   onClick={() => { setRole(r); setError(''); }}
-                  className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-                    role === r ? 'bg-white text-[#496279] shadow-md' : 'text-slate-500 hover:text-[#496279]'
-                  }`}
+                  className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${role === r ? 'bg-white text-[#496279] shadow-md' : 'text-slate-500 hover:text-[#496279]'
+                    }`}
                 >
                   {r === 'company' ? 'Enterprise' : 'Professional'}
                 </button>
@@ -163,9 +175,8 @@ const Login = () => {
                 </>
               )}
 
-              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 ${
-                loading ? 'bg-slate-200 text-slate-400' : 'bg-[#496279] text-white hover:bg-[#3a4e61]'
-              }`}>
+              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 ${loading ? 'bg-slate-200 text-slate-400' : 'bg-[#496279] text-white hover:bg-[#3a4e61]'
+                }`}>
                 {loading ? 'Verifying Node...' : 'Authenticate Access'}
               </button>
             </form>
