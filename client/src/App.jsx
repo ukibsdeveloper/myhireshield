@@ -12,6 +12,7 @@ import RegisterCompany from './pages/RegisterCompany';
 import RegisterEmployee from './pages/RegisterEmployee';
 import CompanyDashboard from './pages/CompanyDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
+import AddEmployee from './pages/AddEmployee';
 import EmployeeSearch from './pages/EmployeeSearch';
 import EmployeeProfile from './pages/EmployeeProfile';
 import SubmitReview from './pages/SubmitReview';
@@ -101,6 +102,7 @@ function App() {
         {/* Company Routes */}
         <Route path="/company/upload-documents" element={<ProtectedRoute allowedRoles={['company']}><CompanyUploadDocuments /></ProtectedRoute>} />
         <Route path="/dashboard/company" element={<ProtectedRoute allowedRoles={['company']}><CompanyDashboard /></ProtectedRoute>} />
+        <Route path="/employee/add" element={<ProtectedRoute allowedRoles={['company']}><AddEmployee /></ProtectedRoute>} />
         <Route path="/review/submit" element={<ProtectedRoute allowedRoles={['company']}><SubmitReview /></ProtectedRoute>} />
         <Route path="/review/edit/:id" element={<ProtectedRoute allowedRoles={['company']}><SubmitReview /></ProtectedRoute>} />
         <Route path="/review/manage" element={<ProtectedRoute allowedRoles={['company']}><ManageReviews /></ProtectedRoute>} />

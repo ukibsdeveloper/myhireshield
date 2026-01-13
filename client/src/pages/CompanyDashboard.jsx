@@ -178,10 +178,11 @@ const CompanyDashboard = () => {
             Quick Actions
           </h2>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
             {[
               { to: "/employee/search", icon: 'fa-search', title: 'Search Employees', desc: 'FIND AND VERIFY PEOPLE', color: '#496279' },
-              { to: "/company/upload-documents", icon: 'fa-file-upload', title: 'Upload Documents', desc: 'SECURE FILE UPLOAD', color: '#4c8051' },
+              { to: "/employee/add", icon: 'fa-user-plus', title: 'Register Employee', desc: 'CREATE NEW PROFILE', color: '#4c8051' },
+              { to: "/company/upload-documents", icon: 'fa-file-upload', title: 'Upload Documents', desc: 'SECURE FILE UPLOAD', color: '#496279' },
               { to: "/review/manage", icon: 'fa-history', title: 'Manage Reviews', desc: 'VIEW AND EDIT REVIEWS', color: '#dd8d88' },
               { to: "/verify/documents", icon: 'fa-check-double', title: 'Verify Data', desc: 'REVIEW REQUESTS', color: '#3a4e61' }
             ].map((cmd, i) => (
