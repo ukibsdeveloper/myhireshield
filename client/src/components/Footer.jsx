@@ -5,17 +5,17 @@ const Footer = () => {
   return (
     <footer className="bg-white border-t border-slate-100 pt-20 pb-10 selection:bg-[#4c8051]/10">
       <div className="container mx-auto px-6 max-w-7xl">
-        
+
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-20">
-          
+
           {/* 1. Brand & Value Prop */}
           <div className="lg:col-span-4 flex flex-col items-center lg:items-start">
             <Link to="/" className="flex items-center gap-3 mb-6 group">
               <div className="h-12 w-12 overflow-hidden rounded-xl border border-slate-200 shadow-sm transition-transform group-hover:scale-105 bg-white">
-                <img 
-                  src="/logo.jpg" 
-                  alt="MyHireShield Logo" 
+                <img
+                  src="/logo.jpg"
+                  alt="MyHireShield Logo"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -28,7 +28,7 @@ const Footer = () => {
                 </span>
               </div>
             </Link>
-            
+
             <p className="text-slate-500 text-sm leading-relaxed mb-8 font-medium max-w-sm text-center lg:text-left">
               MyHireShield is a well-structured & high-tech background verification platform that offers accurate employee data that ensures trustworthiness and helps to make transparent hiring decisions.
             </p>
@@ -78,6 +78,13 @@ const Footer = () => {
                 </a>
               </div>
               <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Email Support</span>
+                <a href="mailto:ukibsdeveloper786@gmail.com" className="text-sm font-bold text-[#496279] hover:text-[#4c8051] transition-colors flex items-center gap-2">
+                  <i className="fas fa-envelope text-[10px]"></i>
+                  ukibsdeveloper786@gmail.com
+                </a>
+              </div>
+              <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Common</span>
                 <a href="/#faq" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
                   FAQs & Help
@@ -109,11 +116,11 @@ const Footer = () => {
               © 2026 MyHireShield Platform. Professional Verification Service.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#4c8051] animate-pulse"></div>
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Active</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#4c8051] animate-pulse"></div>
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Active</span>
             </div>
             <Link to="/terms" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">Terms & Conditions</Link>
             <Link to="/privacy" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">Privacy Policy</Link>
@@ -121,7 +128,8 @@ const Footer = () => {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .footer-link {
           font-size: 13px;
           font-weight: 700;
