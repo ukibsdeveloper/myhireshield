@@ -45,7 +45,7 @@ const Checkout = () => {
           <h3 className="text-3xl font-black text-[#496279] uppercase tracking-tighter mb-2">Audit Unlock</h3>
           
           <div className="my-10">
-            <p className="text-6xl font-black text-[#4c8051] tracking-tighter leading-none">₹499</p>
+            <p className="text-6xl font-black text-[#4c8051] tracking-tighter leading-none">₹99</p>
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-4">One-time node decryption fee</p>
           </div>
 

@@ -239,7 +239,7 @@ const Home = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-[#fcfaf9]">
+      <section id="faq" className="py-24 bg-[#fcfaf9]">
         <div className="container mx-auto px-5 max-w-4xl">
             <h2 className="text-3xl md:text-4xl font-black text-[#496279] mb-12 text-center uppercase">Frequently Asked Questions</h2>
             <div className="space-y-4">

@@ -19,6 +19,8 @@ import VerifyDocuments from './pages/VerifyDocuments';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import ConsentForm from './pages/ConsentForm';
+import RefundPolicy from './pages/RefundPolicy';
+import Disclaimer from './pages/Disclaimer';
 import ReputationReport from './pages/ReputationReport';
 import Checkout from './pages/Checkout';
 import UpdateProfile from './pages/UpdateProfile';
@@ -90,6 +92,8 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/consent" element={<ConsentForm />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

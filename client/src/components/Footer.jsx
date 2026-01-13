@@ -32,18 +32,6 @@ const Footer = () => {
             <p className="text-slate-500 text-sm leading-relaxed mb-8 font-medium max-w-sm text-center lg:text-left">
               MyHireShield is a well-structured & high-tech background verification platform that offers accurate employee data that ensures trustworthiness and helps to make transparent hiring decisions.
             </p>
-
-            <div className="flex gap-4">
-              {['linkedin-in', 'x-twitter', 'instagram', 'facebook-f'].map(s => (
-                <a 
-                  key={s} 
-                  href="#" 
-                  className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#496279] hover:border-[#496279]/20 transition-all"
-                >
-                  <i className={`fab fa-${s} text-xs`}></i>
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* 2. Navigation Links */}
@@ -91,14 +79,23 @@ const Footer = () => {
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Common</span>
-                <Link to="/faq" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
+                <a href="/#faq" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
                   FAQs & Help
-                </Link>
+                </a>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Legal</span>
+                <Link to="/terms" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
+                  Terms & Conditions
+                </Link>
                 <Link to="/privacy" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
                   Privacy Policy
+                </Link>
+                <Link to="/refund-policy" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
+                  Refund Policy
+                </Link>
+                <Link to="/disclaimer" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
+                  Disclaimer
                 </Link>
               </div>
             </div>
@@ -118,8 +115,8 @@ const Footer = () => {
                 <div className="w-1.5 h-1.5 rounded-full bg-[#4c8051] animate-pulse"></div>
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Infrastructure Active</span>
             </div>
-            <Link to="/terms" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">Terms</Link>
-            <Link to="/privacy" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">GDPR</Link>
+            <Link to="/terms" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">Terms & Conditions</Link>
+            <Link to="/privacy" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">Privacy Policy</Link>
           </div>
         </div>
       </div>

@@ -167,7 +167,7 @@ const ReputationReport = () => {
                      onClick={() => window.location.href='/checkout'}
                      className="w-full bg-[#496279] text-white py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-[#3a4e61] transition-all"
                     >
-                       Initialize Unlock (₹499)
+                       Initialize Unlock (₹99)
                     </button>
                  </div>
               </div>

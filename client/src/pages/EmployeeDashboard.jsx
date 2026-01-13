@@ -86,7 +86,7 @@ const EmployeeDashboard = () => {
               to={hasPaidForReport ? "/reputation-report" : "/checkout"} 
               className="block w-full bg-[#4c8051] text-center py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-lg"
             >
-              {hasPaidForReport ? "Open Full Ledger" : "Unlock History (₹499)"}
+              {hasPaidForReport ? "Open Full Ledger" : "Unlock History (₹99)"}
             </Link>
           </div>
 
