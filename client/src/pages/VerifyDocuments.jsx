@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Breadcrumb from '../components/Breadcrumb';
 
 const VerifyDocuments = () => {
   // --- FIXED: Added Missing States ---
@@ -107,6 +108,13 @@ const VerifyDocuments = () => {
       <Navbar scrolled={true} isAuthenticated={true} />
 
       <div className="container mx-auto px-6 pt-32 pb-20 max-w-5xl">
+        <div className="flex justify-between items-center mb-6">
+          <Breadcrumb />
+          <Link to="/dashboard/company" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#4c8051] transition-all">
+            <i className="fas fa-arrow-left"></i>
+            Back to Dashboard
+          </Link>
+        </div>
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#4c8051]/10 rounded-lg text-[#4c8051] text-[10px] font-black uppercase tracking-widest mb-4 border border-[#4c8051]/20">
@@ -182,8 +190,8 @@ const VerifyDocuments = () => {
                   <div key={key} className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex justify-between items-center">
                     <span className="text-xs font-black text-[#496279] uppercase">{key.replace(/([A-Z])/g, ' $1')}</span>
                     <div className="flex items-center gap-3">
-                        <span className={`text-[8px] font-bold uppercase ${backgroundChecks[key]?.status === 'passed' ? 'text-[#4c8051]' : 'text-rose-500'}`}>{backgroundChecks[key]?.status || 'pending'}</span>
-                        <button onClick={() => performCheck(key)} className="px-3 py-1 bg-[#496279] text-white text-[9px] rounded-lg">Check</button>
+                      <span className={`text-[8px] font-bold uppercase ${backgroundChecks[key]?.status === 'passed' ? 'text-[#4c8051]' : 'text-rose-500'}`}>{backgroundChecks[key]?.status || 'pending'}</span>
+                      <button onClick={() => performCheck(key)} className="px-3 py-1 bg-[#496279] text-white text-[9px] rounded-lg">Check</button>
                     </div>
                   </div>
                 ))}

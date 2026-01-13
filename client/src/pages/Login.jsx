@@ -175,8 +175,10 @@ const Login = () => {
                 </>
               )}
 
-              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 ${loading ? 'bg-slate-200 text-slate-400' : 'bg-[#496279] text-white hover:bg-[#3a4e61]'
+
+              <button type="submit" disabled={loading} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${loading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#496279] text-white hover:bg-[#3a4e61]'
                 }`}>
+                {loading && <i className="fas fa-circle-notch fa-spin"></i>}
                 {loading ? 'Verifying Node...' : 'Authenticate Access'}
               </button>
             </form>

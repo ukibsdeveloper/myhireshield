@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Breadcrumb from '../components/Breadcrumb';
 
 const EmployeeSearch = () => {
   const [fullName, setFullName] = useState('');
@@ -20,9 +21,9 @@ const EmployeeSearch = () => {
     try {
       // API call with standardized query and dob
       const res = await axios.get(`/api/employees/search`, {
-        params: { 
-          query: fullName.trim().toUpperCase(), 
-          dob: dob || undefined 
+        params: {
+          query: fullName.trim().toUpperCase(),
+          dob: dob || undefined
         }
       });
 
@@ -45,7 +46,14 @@ const EmployeeSearch = () => {
       <Navbar scrolled={true} isAuthenticated={true} />
 
       <div className="container mx-auto px-6 pt-32 pb-20 max-w-5xl">
-        
+        <div className="flex justify-between items-center mb-6">
+          <Breadcrumb />
+          <Link to="/dashboard/company" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#4c8051] transition-all">
+            <i className="fas fa-arrow-left"></i>
+            Back to Dashboard
+          </Link>
+        </div>
+
         {/* Header Section */}
         <div className="text-center mb-16 animate-in fade-in duration-700">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#4c8051]/10 rounded-lg text-[#4c8051] text-[10px] font-black uppercase tracking-widest mb-6 border border-[#4c8051]/20">
@@ -63,8 +71,8 @@ const EmployeeSearch = () => {
           <div className="relative grid md:grid-cols-2 gap-4 bg-white p-4 rounded-[2.5rem] shadow-xl border border-slate-100">
             <div className="flex items-center gap-3 px-4 border-r border-slate-50">
               <i className="fas fa-user text-slate-300"></i>
-              <input 
-                type="text" placeholder="Full Name (Aadhar)" 
+              <input
+                type="text" placeholder="Full Name (Aadhar)"
                 className="w-full py-2 outline-none text-[#496279] font-bold placeholder:text-slate-300 text-sm"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -74,14 +82,14 @@ const EmployeeSearch = () => {
             <div className="flex gap-4 items-center pl-2">
               <div className="flex items-center gap-3 flex-1">
                 <i className="fas fa-calendar-alt text-slate-300"></i>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className="w-full py-2 outline-none text-slate-400 font-bold text-sm bg-transparent"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
                 />
               </div>
-              <button 
+              <button
                 onClick={handleSearch}
                 disabled={loading}
                 className="bg-[#496279] text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#3a4e61] transition-all shadow-xl disabled:opacity-50"
@@ -95,10 +103,10 @@ const EmployeeSearch = () => {
         {/* Results Stream */}
         <div className="space-y-6">
           {loading ? (
-             <div className="flex flex-col items-center justify-center py-20 opacity-40">
-                <i className="fas fa-shield-halved fa-spin text-6xl text-[#496279] mb-4"></i>
-                <p className="font-black uppercase tracking-[0.3em] text-[10px]">Searching Database...</p>
-             </div>
+            <div className="flex flex-col items-center justify-center py-20 opacity-40">
+              <i className="fas fa-shield-halved fa-spin text-6xl text-[#496279] mb-4"></i>
+              <p className="font-black uppercase tracking-[0.3em] text-[10px]">Searching Database...</p>
+            </div>
           ) : results.length > 0 ? (
             results.map((emp) => (
               <div key={emp._id} className="bg-white p-6 md:p-8 rounded-[3rem] border border-slate-100 flex flex-col md:flex-row justify-between items-center group hover:border-[#4c8051] transition-all duration-500 shadow-sm hover:shadow-xl">
@@ -109,9 +117,9 @@ const EmployeeSearch = () => {
                   <div>
                     <h3 className="text-2xl font-black text-[#496279] uppercase tracking-tight group-hover:text-[#4c8051] transition-colors">{emp.firstName} {emp.lastName}</h3>
                     <div className="flex items-center gap-3 mt-2">
-                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{emp.currentDesignation || 'Verified Professional'}</span>
-                       <span className="h-1 w-1 rounded-full bg-slate-200"></span>
-                       <span className="text-[10px] font-black text-[#dd8d88] uppercase tracking-widest">Identity Secured 🛡️</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{emp.currentDesignation || 'Verified Professional'}</span>
+                      <span className="h-1 w-1 rounded-full bg-slate-200"></span>
+                      <span className="text-[10px] font-black text-[#dd8d88] uppercase tracking-widest">Identity Secured 🛡️</span>
                     </div>
                   </div>
                 </div>

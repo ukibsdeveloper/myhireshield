@@ -311,7 +311,8 @@ const RegisterCompany = () => {
                   </div>
                   <div className="flex gap-4">
                     <button type="button" onClick={handleBack} className="w-1/3 border-2 border-slate-200 text-[#496279] py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white">Return</button>
-                    <button type="button" onClick={handleSubmit} disabled={loading} className="w-2/3 bg-[#4c8051] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3d6641] transition-all disabled:opacity-50 active:scale-95">
+                    <button type="button" onClick={handleSubmit} disabled={loading} className="w-2/3 bg-[#4c8051] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-xl hover:bg-[#3d6641] transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center gap-2">
+                      {loading && <i className="fas fa-circle-notch fa-spin"></i>}
                       {loading ? 'Creating Account...' : 'Create Company Account'}
                     </button>
                   </div>

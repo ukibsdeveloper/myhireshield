@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Breadcrumb from '../components/Breadcrumb';
 
 const CompanyUploadDocuments = () => {
   const [employees, setEmployees] = useState([]);
@@ -84,6 +85,13 @@ const CompanyUploadDocuments = () => {
       <Navbar scrolled={true} isAuthenticated={true} />
 
       <div className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
+        <div className="flex justify-between items-center mb-6">
+          <Breadcrumb />
+          <Link to="/dashboard/company" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#4c8051] transition-all">
+            <i className="fas fa-arrow-left"></i>
+            Back to Dashboard
+          </Link>
+        </div>
 
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 animate-on-scroll">
@@ -105,11 +113,10 @@ const CompanyUploadDocuments = () => {
 
           {/* Status Messages */}
           {status.msg && (
-            <div className={`mb-6 p-4 rounded-2xl text-sm font-bold ${
-              status.type === 'success'
-                ? 'bg-[#4c8051]/10 text-[#4c8051] border border-[#4c8051]/20'
-                : 'bg-rose-50 text-rose-600 border border-rose-200'
-            }`}>
+            <div className={`mb-6 p-4 rounded-2xl text-sm font-bold ${status.type === 'success'
+              ? 'bg-[#4c8051]/10 text-[#4c8051] border border-[#4c8051]/20'
+              : 'bg-rose-50 text-rose-600 border border-rose-200'
+              }`}>
               <i className={`fas ${status.type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-2`}></i>
               {status.msg}
             </div>

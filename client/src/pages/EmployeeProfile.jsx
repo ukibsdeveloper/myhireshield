@@ -4,6 +4,8 @@ import { useParams } from 'react-router-dom'; // URL se ID lene ke liye
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Breadcrumb from '../components/Breadcrumb';
+import { Link } from 'react-router-dom';
 
 const EmployeeProfile = () => {
   const { id } = useParams(); // URL parameter
@@ -23,8 +25,8 @@ const EmployeeProfile = () => {
     overallScore: 88
   };
 
-  const API_BASE = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000' 
+  const API_BASE = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
     : 'https://api.myhireshield.com';
 
   useEffect(() => {
@@ -32,20 +34,20 @@ const EmployeeProfile = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        
+
         // Agar ID hai toh searched profile, warna logged-in user ki profile
         const targetId = id || user?._id;
-        
+
         if (!targetId && window.location.hostname !== 'localhost') {
-           setError("Profile information missing.");
-           return;
+          setError("Profile information missing.");
+          return;
         }
 
         // Backend call for profile data
         const res = await axios.get(`${API_BASE}/api/employees/profile/${targetId || ''}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         if (res.data.success) {
           setData(res.data.data);
         }
@@ -61,12 +63,12 @@ const EmployeeProfile = () => {
   }, [id, user, API_BASE]);
 
   // Fallback Logic
-  const profile = data?.employee || (window.location.hostname === 'localhost' ? mockProfile : null); 
+  const profile = data?.employee || (window.location.hostname === 'localhost' ? mockProfile : null);
 
   if (loading && window.location.hostname !== 'localhost') {
     return (
       <div className="min-h-screen bg-[#fcfaf9] flex items-center justify-center">
-         <i className="fas fa-spinner fa-spin text-4xl text-[#496279]"></i>
+        <i className="fas fa-spinner fa-spin text-4xl text-[#496279]"></i>
       </div>
     );
   }
@@ -77,15 +79,22 @@ const EmployeeProfile = () => {
       <Navbar scrolled={true} isAuthenticated={true} user={user} />
 
       <div className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
-        
+        <div className="flex justify-between items-center mb-6">
+          <Breadcrumb />
+          <Link to={user?.role === 'company' ? '/dashboard/company' : '/dashboard/employee'} className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#4c8051] transition-all">
+            <i className="fas fa-arrow-left"></i>
+            Back to Dashboard
+          </Link>
+        </div>
+
         {/* Certificate Card Header */}
         <div className="bg-white border border-slate-100 rounded-[4rem] shadow-xl overflow-hidden relative mb-12 animate-in-scroll">
           <div className="h-40 bg-[#496279] relative overflow-hidden text-white flex items-center px-12 border-b border-white/5">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-[#4c8051] opacity-20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
-             <div className="relative z-10">
-                <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-2 opacity-60">Verified Professional Profile</p>
-                <h2 className="text-2xl font-black uppercase tracking-tighter">Official Shield Certificate</h2>
-             </div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#4c8051] opacity-20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+            <div className="relative z-10">
+              <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-2 opacity-60">Verified Professional Profile</p>
+              <h2 className="text-2xl font-black uppercase tracking-tighter">Official Shield Certificate</h2>
+            </div>
           </div>
 
           <div className="px-10 pb-16 text-center">
@@ -97,11 +106,11 @@ const EmployeeProfile = () => {
               </div>
               {profile?.verified && (
                 <div className="absolute -bottom-2 -right-2 bg-[#4c8051] text-white h-10 w-10 rounded-xl flex items-center justify-center border-4 border-white shadow-lg">
-                   <i className="fas fa-check"></i>
+                  <i className="fas fa-check"></i>
                 </div>
               )}
             </div>
-            
+
             <h1 className="text-5xl font-black text-[#496279] uppercase tracking-tighter leading-none mb-2">
               {profile?.firstName} <span className="text-[#4c8051]">{profile?.lastName}</span>
             </h1>
@@ -125,9 +134,9 @@ const EmployeeProfile = () => {
         </div>
 
         <div className="text-center opacity-30">
-            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.4em]">
-               HireShield Professional Verification v2.4 // Verified Profile ID: {profile?._id?.toUpperCase() || 'DEMO-PROFILE'}
-            </p>
+          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.4em]">
+            HireShield Professional Verification v2.4 // Verified Profile ID: {profile?._id?.toUpperCase() || 'DEMO-PROFILE'}
+          </p>
         </div>
       </div>
       <Footer />
