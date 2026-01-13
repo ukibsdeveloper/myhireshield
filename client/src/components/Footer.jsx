@@ -3,16 +3,24 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t border-slate-100 pt-20 pb-10 selection:bg-[#4c8051]/10">
-      <div className="container mx-auto px-6 max-w-7xl">
+    <footer className="relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border-t border-slate-200">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, #4c8051 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
+
+      <div className="relative container mx-auto px-6 max-w-7xl">
 
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 py-16">
 
-          {/* 1. Brand & Value Prop */}
-          <div className="lg:col-span-4 flex flex-col items-center lg:items-start">
-            <Link to="/" className="flex items-center gap-3 mb-6 group">
-              <div className="h-12 w-12 overflow-hidden rounded-xl border border-slate-200 shadow-sm transition-transform group-hover:scale-105 bg-white">
+          {/* 1. Brand Section - Enhanced */}
+          <div className="lg:col-span-4 flex flex-col">
+            <Link to="/" className="inline-flex items-center gap-3 mb-6 group w-fit">
+              <div className="h-14 w-14 overflow-hidden rounded-2xl border-2 border-slate-200/80 shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-hover:border-[#4c8051]/30 bg-white">
                 <img
                   src="/logo.jpg"
                   alt="MyHireShield Logo"
@@ -20,110 +28,132 @@ const Footer = () => {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black text-[#496279] tracking-tighter uppercase leading-none">
+                <span className="text-2xl font-black text-[#496279] tracking-tight leading-none">
                   Hire<span className="text-[#4c8051]">Shield</span>
                 </span>
-                <span className="text-[9px] font-bold tracking-[0.2em] text-slate-400 uppercase mt-1">
+                <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase mt-1.5">
                   Verification Platform
                 </span>
               </div>
             </Link>
 
-            <p className="text-slate-500 text-sm leading-relaxed mb-8 font-medium max-w-sm text-center lg:text-left">
-              MyHireShield is a well-structured & high-tech background verification platform that offers accurate employee data that ensures trustworthiness and helps to make transparent hiring decisions.
+            <p className="text-slate-600 text-[15px] leading-relaxed mb-8 font-medium max-w-sm">
+              A cutting-edge background verification platform ensuring trustworthy hiring decisions through accurate employee data verification.
             </p>
-          </div>
 
-          {/* 2. Navigation Links */}
-          <div className="lg:col-span-6 grid grid-cols-2 gap-8">
-            {/* For Employees */}
-            <div>
-              <h4 className="font-black text-[#496279] text-[11px] uppercase tracking-[0.2em] mb-7 border-b border-slate-50 pb-2">
-                For Employees
-              </h4>
-              <ul className="space-y-4">
-                <li><Link to="/register/employee" className="footer-link">Claim My Profile</Link></li>
-                <li><Link to="/dashboard/employee" className="footer-link">View Trust Score</Link></li>
-                <li><Link to="/verify/documents" className="footer-link">Document Center</Link></li>
-                <li><Link to="/consent" className="footer-link">Privacy Settings</Link></li>
-              </ul>
-            </div>
-
-            {/* For Companies */}
-            <div>
-              <h4 className="font-black text-[#496279] text-[11px] uppercase tracking-[0.2em] mb-7 border-b border-slate-50 pb-2">
-                For Companies
-              </h4>
-              <ul className="space-y-4">
-                <li><Link to="/register/company" className="footer-link">Business Registration</Link></li>
-                <li><Link to="/employee/search" className="footer-link">Candidate Search</Link></li>
-                <li><Link to="/dashboard/company" className="footer-link">Enterprise Dashboard</Link></li>
-                <li><Link to="/review/submit" className="footer-link">Submit Employee Audit</Link></li>
-                <li><Link to="/review/manage" className="footer-link">History Records</Link></li>
-              </ul>
+            {/* Social Media Links */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Follow Us</span>
+              <div className="flex gap-2">
+                <a href="#" className="social-icon">
+                  <i className="fab fa-linkedin-in"></i>
+                </a>
+                <a href="#" className="social-icon">
+                  <i className="fab fa-twitter"></i>
+                </a>
+                <a href="#" className="social-icon">
+                  <i className="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" className="social-icon">
+                  <i className="fab fa-instagram"></i>
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* 3. Support & Contact - PHONE UPDATED HERE */}
-          <div className="lg:col-span-2 flex flex-col">
-            <h4 className="font-black text-[#496279] text-[11px] uppercase tracking-[0.2em] mb-7 border-b border-slate-50 pb-2">
-              Support Center
+          {/* 2. Quick Links - For Employees */}
+          <div className="lg:col-span-2">
+            <h4 className="font-black text-[#496279] text-xs uppercase tracking-wider mb-6 pb-3 border-b-2 border-[#4c8051]/20">
+              For Employees
             </h4>
-            <div className="space-y-6">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Call Support</span>
-                <a href="tel:+919910048130" className="text-sm font-bold text-[#496279] hover:text-[#4c8051] transition-colors flex items-center gap-2">
-                  <i className="fas fa-phone-alt text-[10px]"></i>
-                  +91 9910048130
+            <ul className="space-y-3.5">
+              <li><Link to="/register/employee" className="footer-link">Claim My Profile</Link></li>
+              <li><Link to="/dashboard/employee" className="footer-link">View Trust Score</Link></li>
+              <li><Link to="/verify/documents" className="footer-link">Document Center</Link></li>
+              <li><Link to="/consent" className="footer-link">Privacy Settings</Link></li>
+            </ul>
+          </div>
+
+          {/* 3. Quick Links - For Companies */}
+          <div className="lg:col-span-2">
+            <h4 className="font-black text-[#496279] text-xs uppercase tracking-wider mb-6 pb-3 border-b-2 border-[#4c8051]/20">
+              For Companies
+            </h4>
+            <ul className="space-y-3.5">
+              <li><Link to="/register/company" className="footer-link">Business Registration</Link></li>
+              <li><Link to="/employee/search" className="footer-link">Candidate Search</Link></li>
+              <li><Link to="/dashboard/company" className="footer-link">Enterprise Dashboard</Link></li>
+              <li><Link to="/review/submit" className="footer-link">Submit Employee Audit</Link></li>
+              <li><Link to="/review/manage" className="footer-link">History Records</Link></li>
+            </ul>
+          </div>
+
+          {/* 4. Resources & Legal */}
+          <div className="lg:col-span-2">
+            <h4 className="font-black text-[#496279] text-xs uppercase tracking-wider mb-6 pb-3 border-b-2 border-[#4c8051]/20">
+              Resources
+            </h4>
+            <ul className="space-y-3.5">
+              <li><a href="/#faq" className="footer-link">FAQs & Help</a></li>
+              <li><Link to="/terms" className="footer-link">Terms & Conditions</Link></li>
+              <li><Link to="/privacy" className="footer-link">Privacy Policy</Link></li>
+              <li><Link to="/refund-policy" className="footer-link">Refund Policy</Link></li>
+              <li><Link to="/disclaimer" className="footer-link">Disclaimer</Link></li>
+            </ul>
+          </div>
+
+          {/* 5. Contact Information */}
+          <div className="lg:col-span-2">
+            <h4 className="font-black text-[#496279] text-xs uppercase tracking-wider mb-6 pb-3 border-b-2 border-[#4c8051]/20">
+              Get In Touch
+            </h4>
+            <div className="space-y-5">
+              {/* Phone */}
+              <div className="group">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-2">Phone</span>
+                <a href="tel:+919910048130" className="contact-link">
+                  <i className="fas fa-phone-alt text-[#4c8051]"></i>
+                  <span>+91 9910048130</span>
                 </a>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Email Support</span>
-                <a href="mailto:ukibsdeveloper786@gmail.com" className="text-sm font-bold text-[#496279] hover:text-[#4c8051] transition-colors flex items-center gap-2">
-                  <i className="fas fa-envelope text-[10px]"></i>
-                  ukibsdeveloper786@gmail.com
+
+              {/* Email */}
+              <div className="group">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-2">Email</span>
+                <a href="mailto:ukibsdeveloper786@gmail.com" className="contact-link">
+                  <i className="fas fa-envelope text-[#4c8051]"></i>
+                  <span className="break-all">ukibsdeveloper786@gmail.com</span>
                 </a>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Common</span>
-                <a href="/#faq" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
-                  FAQs & Help
-                </a>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Legal</span>
-                <Link to="/terms" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
-                  Terms & Conditions
-                </Link>
-                <Link to="/privacy" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
-                  Privacy Policy
-                </Link>
-                <Link to="/refund-policy" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
-                  Refund Policy
-                </Link>
-                <Link to="/disclaimer" className="text-sm font-bold text-[#496279] hover:text-[#4c8051]">
-                  Disclaimer
-                </Link>
+
+              {/* Status Badge */}
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-green-50 px-3 py-2 rounded-lg border border-emerald-200/50">
+                <div className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4c8051] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-[#4c8051]"></span>
+                </div>
+                <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">24/7 Active</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Compliance Section */}
-        <div className="pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              © 2026 MyHireShield Platform. Professional Verification Service.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-6">
+        {/* Bottom Bar */}
+        <div className="border-t border-slate-200 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#4c8051] animate-pulse"></div>
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Active</span>
+              <p className="text-xs font-semibold text-slate-500">
+                © 2026 <span className="text-[#496279] font-bold">MyHireShield</span>. All rights reserved.
+              </p>
             </div>
-            <Link to="/terms" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">Terms & Conditions</Link>
-            <Link to="/privacy" className="text-[9px] font-black text-slate-400 hover:text-[#496279] uppercase tracking-widest">Privacy Policy</Link>
+
+            <div className="flex items-center gap-4 text-xs">
+              <span className="text-slate-400 font-medium">Secured Verification Platform</span>
+              <div className="flex items-center gap-2">
+                <i className="fas fa-shield-alt text-[#4c8051]"></i>
+                <span className="text-slate-500 font-semibold">SSL Encrypted</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -131,15 +161,77 @@ const Footer = () => {
       <style dangerouslySetInnerHTML={{
         __html: `
         .footer-link {
-          font-size: 13px;
-          font-weight: 700;
-          color: #94a3b8;
-          transition: all 0.2s;
-          display: block;
+          font-size: 14px;
+          font-weight: 600;
+          color: #64748b;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          position: relative;
+        }
+        .footer-link:before {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: -2px;
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #4c8051, #6ba36f);
+          transition: width 0.3s ease;
         }
         .footer-link:hover {
           color: #496279;
           transform: translateX(4px);
+        }
+        .footer-link:hover:before {
+          width: 100%;
+        }
+        
+        .contact-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #475569;
+          transition: all 0.3s ease;
+          padding: 8px 12px;
+          border-radius: 8px;
+          background: white;
+          border: 1px solid #e2e8f0;
+        }
+        .contact-link:hover {
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          border-color: #4c8051;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(76, 128, 81, 0.1);
+        }
+        .contact-link i {
+          font-size: 12px;
+          width: 16px;
+          text-align: center;
+        }
+        
+        .social-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: white;
+          border: 2px solid #e2e8f0;
+          color: #64748b;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        }
+        .social-icon:hover {
+          background: linear-gradient(135deg, #4c8051 0%, #6ba36f 100%);
+          border-color: #4c8051;
+          color: white;
+          transform: translateY(-3px);
+          box-shadow: 0 8px 16px rgba(76, 128, 81, 0.25);
         }
       `}} />
     </footer>
