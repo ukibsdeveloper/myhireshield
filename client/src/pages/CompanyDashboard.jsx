@@ -186,8 +186,10 @@ const CompanyDashboard = () => {
             <div className="space-y-4">
                {[
                  { to: "/employee/search", icon: 'fa-search', title: 'Identity Search' },
+                 { to: "/company/upload-documents", icon: 'fa-upload', title: 'Upload Documents' },
                  { to: "/review/submit", icon: 'fa-file-shield', title: 'Submit Audit' },
                  { to: "/review/manage", icon: 'fa-database', title: 'Managed History' },
+                 { to: "/verify/documents", icon: 'fa-file-check', title: 'Document Verification' },
                ].map((action, i) => (
                  <Link key={i} to={action.to} className="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-3xl hover:border-[#4c8051] transition-all shadow-sm group hover:-translate-y-1">
                     <span className="text-[10px] font-black text-[#496279] tracking-widest">{action.title}</span>

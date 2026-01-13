@@ -23,7 +23,7 @@ import ConsentForm from './pages/ConsentForm';
 import ReputationReport from './pages/ReputationReport';
 import Checkout from './pages/Checkout';
 import UpdateProfile from './pages/UpdateProfile';
-import AddEmployee from './pages/AddEmployee'; // Ye line missing hai, ise add karein
+import CompanyUploadDocuments from './pages/CompanyUploadDocuments';
 
 /* ==========================================
    PRODUCTION CONFIGURATION
@@ -88,8 +88,8 @@ function App() {
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register/company" element={<PublicRoute><RegisterCompany /></PublicRoute>} />
         <Route 
-          path="/add-employee" 
-          element={<ProtectedRoute allowedRoles={['company']}><AddEmployee /></ProtectedRoute>} 
+          path="/company/upload-documents" 
+          element={<ProtectedRoute allowedRoles={['company']}><CompanyUploadDocuments /></ProtectedRoute>} 
         />
         {/* Legal & Shared Pages */}
         <Route path="/terms" element={<Terms />} />
@@ -142,7 +142,7 @@ function App() {
           element={<ProtectedRoute><EmployeeProfile /></ProtectedRoute>} 
         />
         <Route path="/settings" element={<ProtectedRoute><UpdateProfile /></ProtectedRoute>} />
-        <Route path="/upload/documents" element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>} />
+        <Route path="/upload/documents" element={<ProtectedRoute allowedRoles={['employee']}><UploadDocuments /></ProtectedRoute>} />
         
         {/* 404 Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

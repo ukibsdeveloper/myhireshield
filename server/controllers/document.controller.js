@@ -115,24 +115,24 @@ async function updateEmployeeVerificationStatus(employeeId) {
 
 // --- MAIN CONTROLLERS ---
 
-// @desc    Upload document and trigger auto-verification
-// @route   POST /api/documents/upload
-export const uploadDocument = async (req, res) => {
+// @desc    Company uploads document for employee verification
+// @route   POST /api/documents/company-upload
+export const companyUploadDocument = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
-    const { documentType, documentNumber } = req.body;
+    const { employeeId, documentType, documentNumber, verificationNotes } = req.body;
 
-    // 1. Find Employee
-    const employee = await Employee.findOne({ userId: req.user._id });
+    // 1. Validate Employee exists
+    const employee = await Employee.findById(employeeId);
     if (!employee) {
-      if (req.file) fs.unlinkSync(req.file.path); // Clean up file
-      return res.status(404).json({ success: false, message: 'Employee profile not found' });
+      if (req.file) fs.unlinkSync(req.file.path);
+      return res.status(404).json({ success: false, message: 'Employee not found' });
     }
 
-    // 2. Create Document Entry
+    // 2. Create Document Entry with comprehensive verification fields
     const document = await Document.create({
       employeeId: employee._id,
       documentType,
@@ -141,32 +141,44 @@ export const uploadDocument = async (req, res) => {
       filePath: req.file.path,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
-      uploadedBy: req.user._id
+      uploadedBy: req.user._id,
+      verificationStatus: 'pending',
+      verificationNotes,
+      // Initialize comprehensive verification fields
+      backgroundCheck: {
+        policeVerification: { status: 'pending', checkedAt: null, result: null },
+        courtRecords: { status: 'pending', checkedAt: null, result: null },
+        addressVerification: { status: 'pending', checkedAt: null, result: null },
+        employmentVerification: { status: 'pending', checkedAt: null, result: null },
+        educationVerification: { status: 'pending', checkedAt: null, result: null },
+        referenceCheck: { status: 'pending', checkedAt: null, result: null },
+        criminalBackground: { status: 'pending', checkedAt: null, result: null }
+      }
     });
 
-    // 3. Automated Verification Logic
+    // 3. Perform initial auto-verification
     const verificationResult = await performAutoVerification(document);
     document.autoVerification = verificationResult;
-    
+
+    // 4. If auto-verification passes, move to under_review for manual checks
     if (verificationResult.passed) {
-      document.verificationStatus = 'verified';
-      document.verifiedAt = new Date();
-    } else {
       document.verificationStatus = 'under_review';
     }
-    
+
     await document.save();
 
-    // 4. Update Employee Badge Progress
+    // 5. Update Employee Badge Progress
     await updateEmployeeVerificationStatus(employee._id);
 
-    // 5. Audit Logging
+    // 6. Audit Logging
     await AuditLog.createLog({
       userId: req.user._id,
       userEmail: req.user.email,
       userRole: req.user.role,
-      eventType: 'document_uploaded',
+      eventType: 'document_uploaded_by_company',
       eventData: {
+        employeeId: employee._id,
+        employeeName: `${employee.firstName} ${employee.lastName}`,
         documentType,
         fileName: req.file.filename,
         autoVerified: verificationResult.passed
@@ -175,27 +187,31 @@ export const uploadDocument = async (req, res) => {
       status: 'success'
     });
 
-    // 6. Send Email Notification
+    // 7. Send Email Notification to Employee
     try {
       await sendEmail({
-        to: req.user.email,
-        subject: 'Document Uploaded - MyHireShield',
-        template: 'documentUploaded',
+        to: employee.email,
+        subject: 'Document Verification Started - MyHireShield',
+        template: 'documentVerificationStarted',
         data: {
           employeeName: `${employee.firstName} ${employee.lastName}`,
           documentType: documentType.toUpperCase(),
-          status: document.verificationStatus
+          companyName: req.user.companyName || 'Your Company'
         }
       });
     } catch (mailError) {
       console.error('Email notification failed but upload was successful');
     }
 
-    res.status(201).json({ success: true, message: 'Document uploaded and verified', data: document });
+    res.status(201).json({
+      success: true,
+      message: 'Document uploaded and verification process initiated',
+      data: document
+    });
 
   } catch (error) {
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-    console.error('Upload Error:', error);
+    console.error('Company Upload Error:', error);
     res.status(500).json({ success: false, message: 'Server error during upload' });
   }
 };
@@ -228,6 +244,177 @@ export const getEmployeeDocuments = async (req, res) => {
     res.status(200).json({ success: true, data: documents });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching documents' });
+  }
+};
+
+// @desc    Perform comprehensive background verification
+// @route   POST /api/documents/:id/background-check
+export const performBackgroundCheck = async (req, res) => {
+  try {
+    const { checkType, result, notes } = req.body;
+    const document = await Document.findById(req.params.id);
+
+    if (!document) {
+      return res.status(404).json({ success: false, message: 'Document not found' });
+    }
+
+    // Validate check type
+    const validCheckTypes = [
+      'policeVerification', 'courtRecords', 'addressVerification',
+      'employmentVerification', 'educationVerification', 'referenceCheck', 'criminalBackground'
+    ];
+
+    if (!validCheckTypes.includes(checkType)) {
+      return res.status(400).json({ success: false, message: 'Invalid check type' });
+    }
+
+    // Update background check status
+    document.backgroundCheck[checkType] = {
+      status: result, // 'passed', 'failed', 'pending'
+      checkedAt: new Date(),
+      result: notes || '',
+      checkedBy: req.user._id
+    };
+
+    // Calculate overall verification status
+    await updateOverallVerificationStatus(document);
+
+    await document.save();
+
+    // Audit logging
+    await AuditLog.createLog({
+      userId: req.user._id,
+      userEmail: req.user.email,
+      userRole: req.user.role,
+      eventType: 'background_check_performed',
+      eventData: {
+        documentId: document._id,
+        checkType,
+        result,
+        employeeId: document.employeeId
+      },
+      ipAddress: req.ip,
+      status: 'success'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `${checkType} check completed`,
+      data: document.backgroundCheck[checkType]
+    });
+
+  } catch (error) {
+    console.error('Background check error:', error);
+    res.status(500).json({ success: false, message: 'Background check failed' });
+  }
+};
+
+// Helper function to update overall verification status
+async function updateOverallVerificationStatus(document) {
+  const checks = document.backgroundCheck;
+  const criticalChecks = ['policeVerification', 'courtRecords', 'criminalBackground'];
+  const allChecks = Object.values(checks);
+
+  // Check if all critical checks are passed
+  const criticalPassed = criticalChecks.every(check =>
+    checks[check].status === 'passed'
+  );
+
+  // Check if any check failed
+  const anyFailed = allChecks.some(check => check.status === 'failed');
+
+  if (anyFailed) {
+    document.verificationStatus = 'rejected';
+    document.rejectionReason = 'Failed background verification check(s)';
+  } else if (criticalPassed && allChecks.every(check => check.status !== 'pending')) {
+    document.verificationStatus = 'verified';
+    document.verifiedAt = new Date();
+    document.verifiedBy = document.backgroundCheck.criminalBackground.checkedBy;
+  } else {
+    document.verificationStatus = 'under_review';
+  }
+
+  // Update employee verification status
+  await updateEmployeeVerificationStatus(document.employeeId);
+}
+
+// @desc    Get all employees for company document upload
+// @route   GET /api/documents/employees
+export const getEmployeesForUpload = async (req, res) => {
+  try {
+    // For now, return all employees (in production, filter by company relationship)
+    // TODO: Add company-employee relationship
+    const employees = await Employee.find({ profileVisible: true })
+      .select('firstName lastName email phone currentDesignation verificationPercentage verified')
+      .sort({ createdAt: -1 });
+
+    const formattedEmployees = employees.map(emp => ({
+      id: emp._id,
+      name: `${emp.firstName} ${emp.lastName}`,
+      email: emp.email,
+      phone: emp.phone,
+      designation: emp.currentDesignation,
+      verificationPercentage: emp.verificationPercentage || 0,
+      verified: emp.verified || false
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: formattedEmployees.length,
+      data: formattedEmployees
+    });
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    res.status(500).json({ success: false, message: 'Error fetching employees' });
+  }
+};
+
+// @desc    Get all documents pending verification (for companies)
+// @route   GET /api/documents/pending-verification
+export const getPendingVerifications = async (req, res) => {
+  try {
+    // Find all documents that need manual verification
+    const pendingDocuments = await Document.find({ 
+      verificationStatus: { $in: ['under_review', 'pending'] }
+    })
+    .populate({
+      path: 'employeeId',
+      select: 'firstName lastName email phone',
+      populate: {
+        path: 'userId',
+        select: 'email'
+      }
+    })
+    .populate('uploadedBy', 'email')
+    .sort({ uploadedAt: -1 });
+
+    // Format the response for the frontend
+    const formattedDocuments = pendingDocuments.map(doc => ({
+      id: doc._id,
+      employeeId: doc.employeeId._id,
+      employeeName: `${doc.employeeId.firstName} ${doc.employeeId.lastName}`,
+      employeeEmail: doc.employeeId.email || doc.employeeId.userId?.email,
+      documentType: doc.documentType,
+      documentNumber: doc.documentNumber,
+      status: doc.verificationStatus,
+      uploadedAt: doc.uploadedAt,
+      fileName: doc.fileName,
+      fileSize: doc.fileSize,
+      mimeType: doc.mimeType,
+      autoVerification: doc.autoVerification,
+      rejectionReason: doc.rejectionReason,
+      backgroundCheck: doc.backgroundCheck,
+      verificationNotes: doc.verificationNotes
+    }));
+
+    res.status(200).json({ 
+      success: true, 
+      count: formattedDocuments.length,
+      data: formattedDocuments 
+    });
+  } catch (error) {
+    console.error('Error fetching pending verifications:', error);
+    res.status(500).json({ success: false, message: 'Error fetching pending verifications' });
   }
 };
 

@@ -55,8 +55,55 @@ const documentSchema = new mongoose.Schema({
   },
   verifiedAt: Date,
   rejectionReason: String,
-  
-  // Automated Verification & OCR
+
+  // Comprehensive Background Verification Checks
+  backgroundCheck: {
+    policeVerification: {
+      status: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      checkedAt: Date,
+      result: String,
+      checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    courtRecords: {
+      status: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      checkedAt: Date,
+      result: String,
+      checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    addressVerification: {
+      status: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      checkedAt: Date,
+      result: String,
+      checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    employmentVerification: {
+      status: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      checkedAt: Date,
+      result: String,
+      checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    educationVerification: {
+      status: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      checkedAt: Date,
+      result: String,
+      checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    referenceCheck: {
+      status: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      checkedAt: Date,
+      result: String,
+      checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    criminalBackground: {
+      status: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      checkedAt: Date,
+      result: String,
+      checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    }
+  },
+
+  // Verification Notes
+  verificationNotes: String,
   autoVerification: {
     attempted: { type: Boolean, default: false },
     success: { type: Boolean, default: false },

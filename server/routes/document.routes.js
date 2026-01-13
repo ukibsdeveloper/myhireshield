@@ -1,10 +1,14 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import Employee from '../models/Employee.model.js';
 import {
-  uploadDocument,
+  companyUploadDocument,
+  getEmployeesForUpload,
   getEmployeeDocuments,
   verifyDocument,
+  performBackgroundCheck,
+  getPendingVerifications,
   deleteDocument
 } from '../controllers/document.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
@@ -19,17 +23,25 @@ const router = express.Router();
  * Note: Sabhi document routes protected hain security reasons se.
  */
 
-// 1. Upload Document (Employee Only)
-// Sequence: Auth -> Role Check -> Rate Limit -> File Upload -> Data Validation -> Error Handler -> Controller
+// 1. Company Upload Document (Company Only)
+// For comprehensive background verification
 router.post(
-  '/upload',
+  '/company-upload',
   protect,
-  authorize('employee'),
+  authorize('company'),
   uploadLimiter,
   upload.single('document'),
   validateDocumentUpload,
-  handleMulterError, // Catching file size/type errors specifically
-  uploadDocument
+  handleMulterError,
+  companyUploadDocument
+);
+
+// 2. Get Employees for Upload (Company Only)
+router.get(
+  '/employees',
+  protect,
+  authorize('company'),
+  getEmployeesForUpload
 );
 
 // 2. Get Employee Documents (Employee owner or Company)
@@ -39,7 +51,7 @@ router.get(
   getEmployeeDocuments
 );
 
-// 3. Verify/Reject Document (Company/Admin Only)
+// 4. Verify/Reject Document (Company/Admin Only)
 router.put(
   '/:id/verify',
   protect,
@@ -47,7 +59,23 @@ router.put(
   verifyDocument
 );
 
-// 4. Delete Document (Employee Owner Only)
+// 5. Perform Background Check (Company Only)
+router.post(
+  '/:id/background-check',
+  protect,
+  authorize('company'),
+  performBackgroundCheck
+);
+
+// 7. Get All Pending Verifications (Company/Admin Only)
+router.get(
+  '/pending-verification',
+  protect,
+  authorize('company', 'admin'),
+  getPendingVerifications
+);
+
+// 8. Delete Document (Employee Owner Only)
 router.delete(
   '/:id',
   protect,
@@ -55,14 +83,19 @@ router.delete(
   deleteDocument
 );
 
-// 5. Get My Documents (Employee Only)
+// 9. Get My Documents (Employee Only)
 router.get(
   '/my',
   protect,
   authorize('employee'),
   async (req, res) => {
     try {
-      const documents = await Document.find({ employeeId: req.user.profileId })
+      const employee = await Employee.findOne({ userId: req.user._id });
+      if (!employee) {
+        return res.status(404).json({ success: false, message: 'Employee profile not found' });
+      }
+
+      const documents = await Document.find({ employeeId: employee._id })
         .sort({ createdAt: -1 });
 
       res.status(200).json({
@@ -79,7 +112,7 @@ router.get(
   }
 );
 
-// 6. Download Document
+// 10. Download Document
 router.get(
   '/:id/download',
   protect,
@@ -95,11 +128,14 @@ router.get(
       }
 
       // Check if user owns the document or is a company
-      if (req.user.role === 'employee' && document.employeeId.toString() !== req.user.profileId.toString()) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied'
-        });
+      if (req.user.role === 'employee') {
+        const employee = await Employee.findOne({ userId: req.user._id });
+        if (!employee || document.employeeId.toString() !== employee._id.toString()) {
+          return res.status(403).json({
+            success: false,
+            message: 'Access denied'
+          });
+        }
       }
 
       const filePath = path.join(__dirname, '..', 'uploads', 'documents', document.fileName);
