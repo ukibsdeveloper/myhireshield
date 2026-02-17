@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import { documentAPI } from '../utils/api';
 import toast from 'react-hot-toast';
+import { formatDateDDMMYYYY } from '../utils/helpers';
 
 const VerifyDocuments = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -100,10 +101,10 @@ const VerifyDocuments = () => {
 
       <Navbar scrolled={true} isAuthenticated={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-24 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-32 sm:pb-24 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <Breadcrumb />
-          <Link to="/dashboard/company" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
+          <Link to="/dashboard/company" className="group flex items-center gap-4 text-xs font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
             Back to Dashboard
           </Link>
@@ -113,7 +114,7 @@ const VerifyDocuments = () => {
         <div className="relative mb-20">
           <div className="absolute -top-10 -left-10 w-64 h-64 bg-[#4c8051] opacity-[0.03] rounded-full blur-[100px]"></div>
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-xs font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
               Verification Command Center
             </div>
@@ -129,11 +130,11 @@ const VerifyDocuments = () => {
         {/* QUEUE STATISTICS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl">
-            <p className="text-[9px] font-black text-slate-300 tracking-widest mb-2">Pending</p>
+            <p className="text-xs font-black text-slate-300 tracking-widest mb-2">Pending</p>
             <h4 className="text-5xl font-black tracking-tighter text-[#496279]">{submissions.filter(s => s.status !== 'verified').length}</h4>
           </div>
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl">
-            <p className="text-[9px] font-black text-slate-300 tracking-widest mb-2">Verified</p>
+            <p className="text-xs font-black text-slate-300 tracking-widest mb-2">Verified</p>
             <h4 className="text-5xl font-black tracking-tighter text-[#4c8051]">{submissions.filter(s => s.status === 'verified').length}</h4>
           </div>
         </div>
@@ -148,17 +149,17 @@ const VerifyDocuments = () => {
                 <div className="w-20 h-20 border-4 border-slate-100 rounded-full"></div>
                 <div className="absolute inset-0 border-t-4 border-[#4c8051] rounded-full animate-spin"></div>
               </div>
-              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Loading records...</p>
+              <p className="text-xs font-black tracking-[0.5em] animate-pulse">Loading records...</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-slate-50">
-                    <th className="pb-10 pl-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Name</th>
-                    <th className="pb-10 px-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Document</th>
-                    <th className="pb-10 px-6 text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">Date</th>
-                    <th className="pb-10 pr-6 text-[10px] font-black text-slate-300 tracking-[0.3em] text-right uppercase">Action</th>
+                    <th className="pb-10 pl-6 text-xs font-black text-slate-300 tracking-[0.3em] uppercase">Name</th>
+                    <th className="pb-10 px-6 text-xs font-black text-slate-300 tracking-[0.3em] uppercase">Document</th>
+                    <th className="pb-10 px-6 text-xs font-black text-slate-300 tracking-[0.3em] uppercase">Date</th>
+                    <th className="pb-10 pr-6 text-xs font-black text-slate-300 tracking-[0.3em] text-right uppercase">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -171,25 +172,25 @@ const VerifyDocuments = () => {
                           </div>
                           <div>
                             <p className="font-black text-lg tracking-tight group-hover:text-[#4c8051] transition-colors uppercase">{sub.employeeName}</p>
-                            <p className="text-[8px] text-slate-300 font-black tracking-widest">{sub.employeeEmail}</p>
+                            <p className="text-[11px] text-slate-300 font-black tracking-widest">{sub.employeeEmail}</p>
                           </div>
                         </div>
                       </td>
                       <td className="py-10 px-6">
-                        <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[9px] font-black tracking-[0.2em]">
+                        <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-black tracking-[0.2em]">
                           <i className="fas fa-file-invoice text-[#4c8051]"></i>
                           {sub.documentType}
                         </div>
                       </td>
                       <td className="py-10 px-6">
-                        <p className="text-[9px] font-black text-slate-400 tracking-[0.2em]">{new Date(sub.uploadedAt).toLocaleDateString()}</p>
-                        <p className="text-[8px] font-bold text-slate-200 tracking-widest uppercase">ID Ref: {sub.id.slice(-8).toUpperCase()}</p>
+                        <p className="text-xs font-black text-slate-400 tracking-[0.2em]">{formatDateDDMMYYYY(sub.uploadedAt)}</p>
+                        <p className="text-[11px] font-bold text-slate-200 tracking-widest uppercase">ID Ref: {sub.id.slice(-8).toUpperCase()}</p>
                       </td>
                       <td className="py-10 pr-6 text-right">
                         <div className="flex items-center justify-end gap-4">
                           <button
                             onClick={() => openBackgroundCheckModal(sub)}
-                            className="px-8 py-4 bg-[#496279] text-white text-[10px] font-black tracking-widest rounded-2xl shadow-lg hover:bg-[#4c8051] transition-all active:scale-95 uppercase"
+                            className="px-8 py-4 bg-[#496279] text-white text-xs font-black tracking-widest rounded-2xl shadow-lg hover:bg-[#4c8051] transition-all active:scale-95 uppercase"
                           >
                             Review
                           </button>
@@ -219,12 +220,12 @@ const VerifyDocuments = () => {
 
               <div className="flex justify-between items-start mb-16">
                 <div>
-                  <div className="inline-flex items-center gap-3 px-3 py-1 bg-slate-50 rounded-lg text-[9px] font-black tracking-[0.3em] mb-4">
+                  <div className="inline-flex items-center gap-3 px-3 py-1 bg-slate-50 rounded-lg text-xs font-black tracking-[0.3em] mb-4">
                     <i className="fas fa-microchip text-[#4c8051]"></i>
                     Session ID: {Math.random().toString(36).substring(7).toUpperCase()}
                   </div>
                   <h2 className="text-4xl font-black tracking-tighter uppercase leading-none mb-2">Verify Identity & <span className="text-[#4c8051]">Background.</span></h2>
-                  <p className="text-slate-400 font-bold text-[10px] tracking-[0.4em]">Target: {selectedDocument.employeeName} | Type: {selectedDocument.documentType}</p>
+                  <p className="text-slate-400 font-bold text-xs tracking-[0.4em]">Target: {selectedDocument.employeeName} | Type: {selectedDocument.documentType}</p>
                 </div>
                 <button
                   onClick={() => setSelectedDocument(null)}
@@ -244,22 +245,22 @@ const VerifyDocuments = () => {
                     {['policeVerification', 'courtRecords', 'addressVerification', 'employmentVerification', 'educationVerification', 'referenceCheck', 'criminalBackground'].map(key => (
                       <div key={key} className="bg-slate-50/50 border border-slate-100 rounded-[2rem] p-6 hover:border-[#4c8051]/30 transition-all group/cell">
                         <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-black tracking-[0.3em] group-hover/cell:text-[#4c8051] transition-colors">{key.replace(/([A-Z])/g, ' $1')}</span>
+                          <span className="text-xs font-black tracking-[0.3em] group-hover/cell:text-[#4c8051] transition-colors">{key.replace(/([A-Z])/g, ' $1')}</span>
                           <div className="flex items-center gap-6">
-                            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg text-[8px] font-black tracking-widest ${backgroundChecks[key]?.status === 'passed' ? 'bg-[#4c8051]/10 text-[#4c8051]' : 'bg-slate-100 text-slate-400'}`}>
+                            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg text-[11px] font-black tracking-widest ${backgroundChecks[key]?.status === 'passed' ? 'bg-[#4c8051]/10 text-[#4c8051]' : 'bg-slate-100 text-slate-400'}`}>
                               <span className={`h-1.5 w-1.5 rounded-full ${backgroundChecks[key]?.status === 'passed' ? 'bg-[#4c8051]' : 'bg-slate-300'}`}></span>
                               {backgroundChecks[key]?.status || 'PENDING'}
                             </div>
                             <button
                               onClick={() => performCheck(key)}
-                              className="h-10 w-10 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-[10px] hover:bg-[#496279] hover:text-white transition-all shadow-sm"
+                              className="h-10 w-10 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-xs hover:bg-[#496279] hover:text-white transition-all shadow-sm"
                             >
                               <i className="fas fa-bolt"></i>
                             </button>
                           </div>
                         </div>
                         {backgroundChecks[key]?.result && (
-                          <p className="mt-4 text-[9px] font-bold text-slate-400 normal-case leading-relaxed p-4 bg-white/50 rounded-xl shadow-sm italic">
+                          <p className="mt-4 text-xs font-bold text-slate-400 normal-case leading-relaxed p-4 bg-white/50 rounded-xl shadow-sm italic">
                             "{backgroundChecks[key].result}"
                           </p>
                         )}
@@ -275,17 +276,17 @@ const VerifyDocuments = () => {
                   </h3>
                   <div className="bg-slate-50 border border-slate-100 rounded-[3rem] p-10 h-full relative overflow-hidden flex flex-col items-center justify-center text-center group/asset">
                     <i className="fas fa-file-pdf text-8xl text-slate-100 group-hover/asset:text-[#4c8051]/20 transition-all duration-1000 mb-8"></i>
-                    <p className="text-[10px] font-black tracking-[0.4em] mb-4">File Name: {selectedDocument.fileName}</p>
+                    <p className="text-xs font-black tracking-[0.4em] mb-4">File Name: {selectedDocument.fileName}</p>
                     <a
                       href={`/uploads/documents/${selectedDocument.fileName}`}
                       target="_blank"
-                      className="px-10 py-5 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-widest hover:bg-[#496279] hover:text-white transition-all shadow-sm"
+                      className="px-10 py-5 bg-white border border-slate-100 rounded-2xl text-xs font-black tracking-widest hover:bg-[#496279] hover:text-white transition-all shadow-sm"
                     >
                       VIEW DOCUMENT
                     </a>
                     <div className="mt-10 p-6 bg-white/50 border border-dashed border-slate-100 rounded-2xl w-full">
-                      <p className="text-[9px] font-black text-slate-300 tracking-widest mb-2">Notes</p>
-                      <p className="text-[10px] font-bold leading-relaxed opacity-60 normal-case italic">
+                      <p className="text-xs font-black text-slate-300 tracking-widest mb-2">Notes</p>
+                      <p className="text-xs font-bold leading-relaxed opacity-60 normal-case italic">
                         {selectedDocument.verificationNotes || "No notes provided."}
                       </p>
                     </div>

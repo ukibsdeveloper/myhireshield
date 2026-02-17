@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import DateInput from '../components/DateInput';
+import PageMeta from '../components/PageMeta';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,8 +13,6 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    firstName: '',
-    dateOfBirth: '',
     rememberMe: false
   });
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,9 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(user.role === 'company' ? '/dashboard/company' : '/dashboard/employee');
+      if (user.role === 'admin') navigate('/admin/verify-reviews');
+      else if (user.role === 'company') navigate('/dashboard/company');
+      else navigate('/dashboard/employee');
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -49,12 +51,10 @@ const Login = () => {
           password: formData.password
         };
       } else {
-        // Employee login: Name + DOB + DOB as password (as per backend logic)
-        const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); // Remove hyphens for password
+        // Employee login: Email + Password (secure authentication)
         credentials = {
-          firstName: formData.firstName.trim().toUpperCase(),
-          dateOfBirth: formData.dateOfBirth,
-          password: cleanDOB // Password is clean DOB (YYYYMMDD)
+          email: formData.email,
+          password: formData.password
         };
       }
 
@@ -62,11 +62,14 @@ const Login = () => {
       const result = await login(credentials, role);
 
       if (result.success) {
-        toast.success(`Welcome back, ${result.user.firstName || result.user.companyName}! 🎉`, {
+        const displayName = result.user.profile?.firstName || result.user.profile?.companyName || (result.user.role === 'company' ? 'Company' : 'User');
+        toast.success(`Welcome back, ${displayName}! 🎉`, {
           id: loadingToast,
         });
         // Navigation handled by useEffect, but adding fallback
-        navigate(result.user.role === 'company' ? '/dashboard/company' : '/dashboard/employee');
+        if (result.user.role === 'admin') navigate('/admin/verify-reviews');
+        else if (result.user.role === 'company') navigate('/dashboard/company');
+        else navigate('/dashboard/employee');
       } else {
         toast.error(result.error || 'Identity credentials mismatch', {
           id: loadingToast,
@@ -87,6 +90,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex bg-white overflow-hidden selection:bg-[#4c8051]/20">
+      <PageMeta title="Login" description="Sign in to your HireShield account as a company or employee." canonical="/login" noIndex />
       {/* LEFT SIDE: Visual Brand Portal */}
       <div className="hidden lg:flex w-1/2 relative bg-[#496279] items-center justify-center p-12">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -124,7 +128,7 @@ const Login = () => {
                   key={r}
                   type="button"
                   onClick={() => { setRole(r); setError(''); }}
-                  className={`flex-1 py-3.5 rounded-xl text-[10px] font-black tracking-[0.2em] transition-all uppercase ${role === r ? 'bg-white text-[#496279] shadow-md' : 'text-slate-500 hover:text-[#496279]'
+                  className={`flex-1 py-3.5 rounded-xl text-xs font-black tracking-[0.2em] transition-all uppercase ${role === r ? 'bg-white text-[#496279] shadow-md' : 'text-slate-500 hover:text-[#496279]'
                     }`}
                 >
                   {r === 'company' ? 'Company' : 'Employee'}
@@ -133,7 +137,7 @@ const Login = () => {
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in duration-300">
+              <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in duration-300">
                 <i className="fas fa-exclamation-circle"></i> {error}
               </div>
             )}
@@ -142,12 +146,13 @@ const Login = () => {
               {role === 'company' ? (
                 <>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Work Email Address</label>
+                    <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">Work Email Address</label>
                     <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="example@company.com" required />
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-2 ml-1">
-                      <label className="text-[10px] font-black text-slate-400 tracking-widest">Password</label>
+                      <label className="text-xs font-black text-slate-400 tracking-widest">Password</label>
+                      <Link to="/forgot-password" className="text-xs font-bold text-[#4c8051] hover:underline">Forgot password?</Link>
                     </div>
                     <div className="relative">
                       <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="••••••••" required />
@@ -160,15 +165,17 @@ const Login = () => {
               ) : (
                 <>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">First Name (As per ID Card)</label>
+                    <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">First Name (As per ID Card)</label>
                     <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="EX: RAHUL" required />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Date of Birth</label>
-                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClass} required />
-                  </div>
+                  <DateInput
+                    label="Date of Birth"
+                    value={formData.dateOfBirth}
+                    onChange={(val) => setFormData(prev => ({ ...prev, dateOfBirth: val }))}
+                    required
+                  />
                   <div className="p-4 bg-[#4c8051]/5 rounded-xl border border-[#4c8051]/10">
-                    <p className="text-[9px] font-bold text-[#4c8051] leading-tight tracking-wider">
+                    <p className="text-xs font-bold text-[#4c8051] leading-tight tracking-wider">
                       <i className="fas fa-info-circle mr-1"></i> Employees must be registered by their company to log in.
                     </p>
                   </div>

@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { camelCaseName } from '../utils/helpers';
 import toast from 'react-hot-toast';
+import DateInput from '../components/DateInput';
 
 const RegisterEmployee = () => {
   const navigate = useNavigate();
-  const { registerEmployee } = useAuth(); // AuthContext ka method use karenge
+  const { registerEmployee, resendVerification } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showVerificationNotice, setShowVerificationNotice] = useState(false);
+  const [successEmail, setSuccessEmail] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
 
   // ORIGINAL STATE MAINTAINED
   const [formData, setFormData] = useState({
@@ -60,8 +65,8 @@ const RegisterEmployee = () => {
     try {
       // BACKEND SYNC: Nested address object taiyaar karna
       const payload = {
-        firstName: formData.firstName.trim().toUpperCase(),
-        lastName: formData.lastName.trim().toUpperCase(),
+        firstName: camelCaseName(formData.firstName.trim()),
+        lastName: camelCaseName(formData.lastName.trim()),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
         phone: formData.phone,
@@ -80,10 +85,9 @@ const RegisterEmployee = () => {
       const result = await registerEmployee(payload);
 
       if (result.success) {
-        toast.success('🎉 Account Created! Please check your email to verify.', {
-          duration: 5000,
-        });
-        setTimeout(() => navigate('/login'), 2000);
+        setSuccessEmail(formData.email);
+        setShowVerificationNotice(true);
+        toast.success('Account created! Check your email to verify.');
       } else {
         toast.error(result.error || 'Registration failed. Please try again.');
         setError(result.error || 'Registration failed. Please try again.');
@@ -97,7 +101,42 @@ const RegisterEmployee = () => {
     }
   };
 
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    const result = await resendVerification(successEmail);
+    setResendLoading(false);
+    if (result.success) toast.success('Verification email sent. Check your inbox.');
+    else toast.error(result.error || 'Failed to send');
+  };
+
   const inputClass = "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#4c8051] focus:border-transparent outline-none transition-all font-medium text-[#496279] shadow-sm";
+
+  if (showVerificationNotice) {
+    return (
+      <div className="min-h-screen flex bg-[#fcfaf9] items-center justify-center px-6">
+        <div className="max-w-md w-full text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#4c8051]/10 text-[#4c8051] mb-6">
+            <i className="fas fa-envelope-circle-check text-3xl"></i>
+          </div>
+          <h1 className="text-2xl font-black text-[#496279] mb-2">Check your email</h1>
+          <p className="text-slate-500 text-sm mb-6">
+            We sent a verification link to <strong>{successEmail}</strong>. Click the link to verify your account.
+          </p>
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              disabled={resendLoading}
+              className="w-full py-4 bg-[#496279] text-white rounded-xl font-bold text-xs tracking-widest uppercase hover:bg-[#3a4e61] disabled:opacity-60 transition-colors"
+            >
+              {resendLoading ? 'Sending...' : 'Resend verification email'}
+            </button>
+            <Link to="/login" className="text-[#496279] font-bold text-sm hover:text-[#4c8051]">Go to login</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-white overflow-hidden selection:bg-[#dd8d88]/30 font-sans antialiased">
@@ -126,12 +165,12 @@ const RegisterEmployee = () => {
             <div className="text-left group cursor-default">
               <i className="fas fa-id-card text-[#4c8051] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
               <h4 className="text-white font-black text-xs tracking-widest">Verified Account</h4>
-              <p className="text-white/40 text-[10px] mt-1 tracking-tighter">Secure & Trusted</p>
+              <p className="text-white/40 text-xs mt-1 tracking-tighter">Secure & Trusted</p>
             </div>
             <div className="text-left group cursor-default">
               <i className="fas fa-chart-line text-[#dd8d88] text-2xl mb-4 transition-transform group-hover:scale-110"></i>
               <h4 className="text-white font-black text-xs tracking-widest">Trust Score</h4>
-              <p className="text-white/40 text-[10px] mt-1 tracking-tighter">Standard Honesty</p>
+              <p className="text-white/40 text-xs mt-1 tracking-tighter">Standard Honesty</p>
             </div>
           </div>
         </div>
@@ -144,7 +183,7 @@ const RegisterEmployee = () => {
             <img src="/logo.jpg" className="h-8 w-8 rounded-lg" alt="logo" />
             <span className="text-sm font-black text-[#496279] uppercase tracking-tighter">HireShield</span>
           </Link>
-          <Link to="/login" className="text-[10px] font-black text-[#4c8051]">Sign In</Link>
+          <Link to="/login" className="text-xs font-black text-[#4c8051]">Sign In</Link>
         </div>
 
         <div className="flex-grow flex items-center justify-center px-6 md:px-12 lg:px-20 py-16">
@@ -155,7 +194,7 @@ const RegisterEmployee = () => {
             </div>
 
             {error && (
-              <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 animate-in slide-in-from-top duration-300">
+              <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-in slide-in-from-top duration-300">
                 <i className="fas fa-exclamation-circle"></i> {error}
               </div>
             )}
@@ -163,44 +202,48 @@ const RegisterEmployee = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">First Name *</label>
+                  <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">First Name *</label>
                   <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={inputClass} placeholder="First Name" required />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Last Name *</label>
+                  <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">Last Name *</label>
                   <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className={inputClass} placeholder="Last Name" required />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Email Address *</label>
+                  <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">Email Address *</label>
                   <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="name@email.com" required />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Phone Number *</label>
+                  <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">Phone Number *</label>
                   <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="10 Digits" required maxLength="10" />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Password *</label>
+                  <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">Password *</label>
                   <input type="password" name="password" value={formData.password} onChange={handleChange} className={inputClass} placeholder="6+ Characters" required />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Confirm Password *</label>
+                  <label className="block text-xs font-black text-slate-400 tracking-widest mb-2 ml-1">Confirm Password *</label>
                   <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="Verify Password" required />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 tracking-widest mb-2 ml-1">Date of Birth *</label>
-                  <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClass} required />
+                  <DateInput
+                    label="Date of Birth"
+                    value={formData.dateOfBirth}
+                    onChange={(val) => setFormData(prev => ({ ...prev, dateOfBirth: val }))}
+                    required
+                  />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Gender *</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Gender *</label>
                   <select name="gender" value={formData.gender} onChange={handleChange} className={inputClass} required>
                     <option value="">Select</option>
                     <option value="male">Male</option>
@@ -212,15 +255,15 @@ const RegisterEmployee = () => {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">City *</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">City *</label>
                   <input type="text" name="city" value={formData.city} onChange={handleChange} className={inputClass} required />
                 </div>
                 <div className="col-span-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">State *</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">State *</label>
                   <input type="text" name="state" value={formData.state} onChange={handleChange} className={inputClass} required />
                 </div>
                 <div className="col-span-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Zip *</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Zip *</label>
                   <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={inputClass} required maxLength="6" />
                 </div>
               </div>
@@ -228,7 +271,7 @@ const RegisterEmployee = () => {
               <div className="p-5 bg-white border border-slate-200 rounded-2xl shadow-inner">
                 <div className="flex items-start gap-3">
                   <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} className="mt-1 w-4 h-4 accent-[#496279] cursor-pointer" required />
-                  <label className="text-[10px] font-black text-slate-500 leading-relaxed tracking-wider">
+                  <label className="text-xs font-black text-slate-500 leading-relaxed tracking-wider">
                     I agree to the <Link to="/terms" className="text-[#496279] underline">Terms of Service</Link> and <Link to="/privacy" className="text-[#496279] underline">Privacy Policy</Link>
                   </label>
                 </div>
@@ -241,7 +284,7 @@ const RegisterEmployee = () => {
             </form>
 
             <div className="mt-10 text-center border-t border-slate-100 pt-8">
-              <p className="text-[10px] font-black text-slate-400 tracking-widest">
+              <p className="text-xs font-black text-slate-400 tracking-widest">
                 Already have an account? <Link to="/login" className="text-[#4c8051] ml-2 hover:underline underline-offset-4">Login Here</Link>
               </p>
             </div>
@@ -249,7 +292,7 @@ const RegisterEmployee = () => {
         </div>
 
         <div className="p-8 text-center lg:text-left opacity-30">
-          <p className="text-[9px] font-bold text-slate-400 tracking-[0.3em]">© 2026 HireShield Network</p>
+          <p className="text-xs font-bold text-slate-400 tracking-[0.3em]">© 2026 HireShield Network</p>
         </div>
       </div>
     </div>

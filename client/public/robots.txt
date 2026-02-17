@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register/company
+Allow: /register/employee
+Allow: /terms
+Allow: /privacy
+Allow: /consent
+Allow: /refund-policy
+Allow: /disclaimer
+Allow: /blog
+Allow: /blog/
+
+Disallow: /dashboard/
+Disallow: /company/
+Disallow: /employee/add
+Disallow: /employee/search
+Disallow: /employee/profile
+Disallow: /review/submit
+Disallow: /review/manage
+Disallow: /review/edit/
+Disallow: /verify/documents
+Disallow: /reputation-report
+Disallow: /checkout
+Disallow: /settings
+Disallow: /admin/
+Disallow: /forgot-password
+Disallow: /reset-password/
+Disallow: /verify-email/
+
+Sitemap: https://myhireshield.com/sitemap.xml

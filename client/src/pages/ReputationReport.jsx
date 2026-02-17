@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
+import { formatDateDDMMYYYY } from '../utils/helpers';
+import { analyticsAPI } from '../utils/api';
 
 const ReputationReport = () => {
   const { user, hasPaidForReport } = useAuth();
@@ -17,13 +18,8 @@ const ReputationReport = () => {
 
     const fetchReport = async () => {
       try {
-        const token = localStorage.getItem('token');
-        // Backend se real analytics fetch kar rahe hain
-        const res = await axios.get('/api/analytics/employee', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (res.data.success) {
+        const res = await analyticsAPI.getEmployeeAnalytics();
+        if (res?.data?.success) {
           setReportData(res.data.data);
         }
       } catch (err) {
@@ -36,7 +32,7 @@ const ReputationReport = () => {
     if (user) fetchReport();
   }, [user, hasPaidForReport]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-[10px] tracking-[0.3em]">Building Trust Report...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-xs tracking-[0.3em]">Building Trust Report...</div>;
 
   // Real Score from Database
   const overallScore = reportData?.overallScore || 0;
@@ -54,10 +50,10 @@ const ReputationReport = () => {
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.02] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       <Navbar scrolled={true} isAuthenticated={true} user={user} />
 
-      <div className="container mx-auto px-6 pt-32 pb-20 max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-28 sm:pb-20 max-w-5xl">
         <div className="flex justify-between items-center mb-6">
           <Breadcrumb />
-          <Link to="/dashboard/employee" className="inline-flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-400 hover:text-[#4c8051] transition-all">
+          <Link to="/dashboard/employee" className="inline-flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 hover:text-[#4c8051] transition-all">
             <i className="fas fa-arrow-left"></i>
             Back to Dashboard
           </Link>
@@ -66,7 +62,7 @@ const ReputationReport = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#4c8051]/10 rounded-lg text-[#4c8051] text-[9px] font-black tracking-widest mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#4c8051]/10 rounded-lg text-[#4c8051] text-xs font-black tracking-widest mb-3">
               Certified Professional Report
             </div>
             <h1 className="text-4xl font-black text-[#496279] tracking-tighter uppercase">
@@ -77,15 +73,15 @@ const ReputationReport = () => {
             {isUnlocked && (
               <button
                 onClick={() => window.print()}
-                className="flex items-center gap-3 px-6 py-3 bg-[#496279] text-white rounded-2xl text-[10px] font-black tracking-widest shadow-xl hover:bg-[#4c8051] transition-all"
+                className="flex items-center gap-3 px-6 py-3 bg-[#496279] text-white rounded-2xl text-xs font-black tracking-widest shadow-xl hover:bg-[#4c8051] transition-all"
               >
                 <i className="fas fa-file-pdf"></i>
                 Download PDF
               </button>
             )}
             <div className="px-6 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm text-center">
-              <p className="text-[8px] font-black text-slate-300 tracking-widest mb-1">Employee Profile</p>
-              <span className="text-[10px] font-black text-[#496279] tracking-tighter uppercase">{user?.firstName} {user?.lastName}</span>
+              <p className="text-[11px] font-black text-slate-300 tracking-widest mb-1">Employee Profile</p>
+              <span className="text-xs font-black text-[#496279] tracking-tighter uppercase">{user?.firstName} {user?.lastName}</span>
             </div>
           </div>
         </div>
@@ -94,7 +90,7 @@ const ReputationReport = () => {
         {isUnlocked && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 animate-in fade-in zoom-in">
             <div className="p-8 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
-              <h4 className="text-[10px] font-black text-slate-400 tracking-widest mb-6">Performance History (Real-time)</h4>
+              <h4 className="text-xs font-black text-slate-400 tracking-widest mb-6">Performance History (Real-time)</h4>
               <div className="flex items-end gap-2 h-32">
                 {[40, 70, overallScore, 60, 85].map((h, i) => (
                   <div key={i} className="flex-1 rounded-t-xl transition-all duration-1000"
@@ -106,7 +102,7 @@ const ReputationReport = () => {
             <div className="p-8 bg-white rounded-[3rem] border border-slate-100 shadow-sm flex flex-col justify-center">
               <div className="flex items-center gap-4 mb-4">
                 <div className={`w-3 h-3 rounded-full ${overallScore > 60 ? 'bg-[#4c8051]' : 'bg-[#dd8d88]'}`}></div>
-                <p className="text-[10px] font-black text-[#496279] tracking-widest">
+                <p className="text-xs font-black text-[#496279] tracking-widest">
                   {overallScore > 60 ? 'Low Risk Profile' : 'Needs Verification'}
                 </p>
               </div>
@@ -121,16 +117,16 @@ const ReputationReport = () => {
         <div className="bg-white border border-slate-100 rounded-[3.5rem] p-10 shadow-xl mb-12 relative overflow-hidden">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="text-center md:text-left">
-              <p className="text-[10px] font-black text-slate-300 tracking-[0.3em] mb-4">Total Trust Score</p>
+              <p className="text-xs font-black text-slate-300 tracking-[0.3em] mb-4">Total Trust Score</p>
               <h2 className="text-9xl font-black text-[#496279] tracking-tighter leading-none">{overallScore}</h2>
-              <p className="text-[#4c8051] font-black text-[10px] tracking-widest mt-4">
+              <p className="text-[#4c8051] font-black text-xs tracking-widest mt-4">
                 {overallScore >= 75 ? 'Top Verified Talent' : 'Verified Profile'}
               </p>
             </div>
             <div className="space-y-4">
               {parameters.map((p, i) => (
                 <div key={i} className="space-y-1">
-                  <div className="flex justify-between text-[9px] font-black tracking-widest text-slate-400">
+                  <div className="flex justify-between text-xs font-black tracking-widest text-slate-400">
                     <span>{p.label}</span>
                     <span>{p.score}/10</span>
                   </div>
@@ -157,8 +153,8 @@ const ReputationReport = () => {
                     </div>
                     <h4 className="font-black text-[#496279] uppercase text-sm tracking-tight">{rev.companyId?.companyName}</h4>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
-                    {new Date(rev.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">
+                    {formatDateDDMMYYYY(rev.createdAt)}
                   </span>
                 </div>
                 <p className="text-sm font-medium text-slate-500 leading-relaxed italic border-l-4 border-slate-50 pl-6 uppercase tracking-tight">
@@ -167,7 +163,7 @@ const ReputationReport = () => {
               </div>
             )) : (
               <div className="text-center py-10 bg-white rounded-[3rem] border-dashed border-2 border-slate-100">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No Verified Reviews Found</p>
+                <p className="text-xs font-black text-slate-300 uppercase tracking-widest">No Verified Reviews Found</p>
               </div>
             )}
           </div>
@@ -195,7 +191,7 @@ const ReputationReport = () => {
         </div>
 
         <div className="mt-20 text-center opacity-30">
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.5em]">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.5em]">
             HireShield Verified Network // Profile ID: {user?._id?.toUpperCase()}
           </p>
         </div>

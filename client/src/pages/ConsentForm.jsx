@@ -12,7 +12,7 @@ const ConsentForm = () => {
 
       <Navbar scrolled={true} isAuthenticated={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-20 max-w-3xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-28 sm:pb-20 max-w-3xl">
         <div className="bg-white border border-slate-100 rounded-[3.5rem] shadow-2xl p-10 md:p-16 relative overflow-hidden animate-on-scroll">
 
           <div className="flex items-center gap-4 mb-12">
@@ -21,7 +21,7 @@ const ConsentForm = () => {
             </div>
             <div>
               <h1 className="text-3xl font-black text-[#496279] tracking-tighter leading-none">Safe Hiring Consent.</h1>
-              <p className="text-[10px] font-black text-slate-400 tracking-[0.3em] mt-2">Form ID: HS-CONSENT-2026</p>
+              <p className="text-xs font-black text-slate-400 tracking-[0.3em] mt-2">Form ID: HS-CONSENT-2026</p>
             </div>
           </div>
 
@@ -72,7 +72,7 @@ const ConsentForm = () => {
           </div>
 
           <div className="mt-12 pt-8 border-t border-slate-50 text-center opacity-40">
-            <p className="text-[9px] font-bold text-slate-400 tracking-[0.4em]">
+            <p className="text-xs font-bold text-slate-400 tracking-[0.4em]">
               Secure Authorization // HireShield Safe Hiring Platform
             </p>
           </div>

@@ -1,15 +1,17 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import PageMeta from '../components/PageMeta';
 
 const Privacy = () => {
   return (
     <div className="min-h-screen bg-[#fcfaf9] selection:bg-[#4c8051]/30">
+      <PageMeta title="Privacy Policy" description="HireShield privacy policy and data protection." canonical="/privacy" />
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.02] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
       <Navbar scrolled={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-28 sm:pb-20 max-w-4xl">
         <div className="bg-white border border-slate-100 rounded-[3.5rem] shadow-2xl p-10 md:p-16 relative overflow-hidden animate-on-scroll">
 
           {/* Top Security Badge */}
@@ -19,7 +21,7 @@ const Privacy = () => {
             </div>
             <div>
               <h1 className="text-3xl font-black text-[#496279] tracking-tighter leading-none">Privacy Policy.</h1>
-              <p className="text-[10px] font-black text-slate-400 tracking-[0.3em] mt-2">Data Protection ID: HS-DP-2026</p>
+              <p className="text-xs font-black text-slate-400 tracking-[0.3em] mt-2">Data Protection ID: HS-DP-2026</p>
             </div>
           </div>
 
@@ -60,7 +62,7 @@ const Privacy = () => {
             {/* Footer Note */}
             <div className="mt-16 p-8 bg-[#fcfaf9] rounded-[2.5rem] border border-slate-100 text-center">
               <i className="fas fa-shield-halved text-[#4c8051] text-3xl mb-4 opacity-40"></i>
-              <p className="text-[10px] font-bold text-slate-400 tracking-widest leading-relaxed">
+              <p className="text-xs font-bold text-slate-400 tracking-widest leading-relaxed">
                 By using HireShield, you allow the platform to manage and display your verification records to authorized companies.
               </p>
             </div>

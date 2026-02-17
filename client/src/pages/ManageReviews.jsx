@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import toast from 'react-hot-toast';
 import { reviewAPI } from '../utils/api';
+import { formatDateDDMMYYYY } from '../utils/helpers';
 
 const ManageReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -64,10 +64,10 @@ const ManageReviews = () => {
 
       <Navbar scrolled={true} isAuthenticated={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-24 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-32 sm:pb-24 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <Breadcrumb />
-          <Link to="/dashboard/company" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
+          <Link to="/dashboard/company" className="group flex items-center gap-4 text-xs font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
             Back to Dashboard
           </Link>
@@ -77,7 +77,7 @@ const ManageReviews = () => {
         <div className="relative mb-20 flex flex-col md:flex-row justify-between items-end gap-12">
           <div className="absolute -top-10 -left-10 w-64 h-64 bg-[#4c8051] opacity-[0.03] rounded-full blur-[100px]"></div>
           <div className="relative z-10 flex-1">
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-xs font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
               Live History
             </div>
@@ -92,7 +92,7 @@ const ManageReviews = () => {
             <Link to="/review/submit" className="group bg-[#496279] text-white px-12 py-6 rounded-[2.5rem] font-black text-[11px] tracking-[0.4em] shadow-2xl hover:bg-[#4c8051] transition-all relative overflow-hidden flex items-center gap-4">
               <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
               <span className="relative z-10">Rate Employee</span>
-              <i className="fas fa-plus relative z-10 text-[10px]"></i>
+              <i className="fas fa-plus relative z-10 text-xs"></i>
             </Link>
           </div>
         </div>
@@ -105,13 +105,13 @@ const ManageReviews = () => {
               <input
                 type="text"
                 placeholder="SEARCH EMPLOYEES..."
-                className="bg-transparent outline-none w-full font-black text-[10px] tracking-widest placeholder:text-slate-200"
+                className="bg-transparent outline-none w-full font-black text-xs tracking-widest placeholder:text-slate-200"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <select
-              className="bg-slate-50 border border-slate-100 px-6 py-4 rounded-2xl font-black text-[9px] tracking-widest outline-none focus:border-[#4c8051]"
+              className="bg-slate-50 border border-slate-100 px-6 py-4 rounded-2xl font-black text-xs tracking-widest outline-none focus:border-[#4c8051]"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -120,7 +120,7 @@ const ManageReviews = () => {
               <option value="lowest">Lowest Rated</option>
             </select>
           </div>
-          <div className="text-[9px] font-black text-slate-300 tracking-[0.3em]">
+          <div className="text-xs font-black text-slate-300 tracking-[0.3em]">
             {processedReviews.length} Reviews Found
           </div>
         </div>
@@ -133,11 +133,11 @@ const ManageReviews = () => {
                 <div className="w-20 h-20 border-4 border-slate-100 rounded-full"></div>
                 <div className="absolute inset-0 border-t-4 border-[#4c8051] rounded-full animate-spin"></div>
               </div>
-              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Loading reviews...</p>
+              <p className="text-xs font-black tracking-[0.5em] animate-pulse">Loading reviews...</p>
             </div>
           ) : processedReviews.length > 0 ? (
             processedReviews.map((r, i) => (
-              <div key={r._id} className="group bg-white border border-slate-100 p-10 md:p-14 rounded-[4rem] hover:shadow-2xl hover:border-[#4c8051]/20 transition-all duration-700 flex flex-col lg:flex-row gap-12 items-center relative overflow-hidden">
+              <div key={r._id} className="group bg-white border border-slate-100 p-10 md:p-14 rounded-[3rem] shadow-md hover:shadow-2xl hover:border-[#4c8051]/40 transition-all duration-500 flex flex-col lg:flex-row gap-12 items-center relative overflow-hidden ring-1 ring-slate-100 hover:ring-[#4c8051]/20">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#496279] opacity-[0.01] rounded-full blur-[80px] group-hover:opacity-[0.05] transition-all"></div>
 
                 {/* Subject Info */}
@@ -146,16 +146,24 @@ const ManageReviews = () => {
                     <div className="h-24 w-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-3xl font-black text-[#496279] border border-slate-100 shadow-inner group-hover:bg-[#496279] group-hover:text-white transition-all duration-500">
                       {r.employeeId?.firstName?.charAt(0)}
                     </div>
-                    <div className="absolute -bottom-2 -right-2 h-8 w-8 bg-[#4c8051] rounded-xl shadow-lg flex items-center justify-center text-white text-[10px]">
+                    <div className="absolute -bottom-2 -right-2 h-8 w-8 bg-[#4c8051] rounded-xl shadow-lg flex items-center justify-center text-white text-xs">
                       <i className="fas fa-check"></i>
                     </div>
                   </div>
                   <div>
                     <h3 className="text-3xl font-black tracking-tighter leading-none mb-3 group-hover:text-[#4c8051] transition-colors">{r.employeeId?.firstName} {r.employeeId?.lastName}</h3>
-                    <div className="flex items-center gap-4 opacity-40">
-                      <span className="text-[9px] font-black tracking-widest">{r.employmentDetails?.designation || 'ENTRY'}</span>
+                    <div className="flex items-center gap-4 opacity-40 flex-wrap">
+                      <span className="text-xs font-black tracking-widest">{r.employmentDetails?.designation || 'ENTRY'}</span>
                       <span className="h-1 w-1 bg-slate-400 rounded-full"></span>
-                      <span className="text-[9px] font-black tracking-widest">{new Date(r.createdAt).toLocaleDateString('en-GB')}</span>
+                      <span className="text-xs font-black tracking-widest">{formatDateDDMMYYYY(r.createdAt)}</span>
+                      {r.moderationStatus && (
+                        <>
+                          <span className="h-1 w-1 bg-slate-400 rounded-full"></span>
+                          <span className={`text-xs font-black tracking-widest px-2 py-0.5 rounded ${r.moderationStatus === 'approved' ? 'bg-emerald-100 text-emerald-700' : r.moderationStatus === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {r.moderationStatus.toUpperCase()}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -171,7 +179,7 @@ const ManageReviews = () => {
                 {/* Performance Actions */}
                 <div className="flex items-center gap-12 w-full lg:w-auto justify-between lg:justify-end">
                   <div className="text-right">
-                    <p className="text-[9px] font-black text-slate-300 tracking-[0.4em] mb-2 uppercase">Overall Rating</p>
+                    <p className="text-xs font-black text-slate-300 tracking-[0.4em] mb-2 uppercase">Overall Rating</p>
                     <div className="flex items-baseline gap-1">
                       <span className="text-5xl font-black tracking-tighter text-[#496279] group-hover:text-[#4c8051] transition-colors">{Math.round(r.averageRating * 10) / 10}</span>
                       <span className="text-base font-black opacity-20">/10</span>
@@ -192,7 +200,7 @@ const ManageReviews = () => {
                     </Link>
                     <Link
                       to={`/employee/${r.employeeId?._id}`}
-                      className="px-8 py-5 bg-[#496279] text-white rounded-2xl font-black text-[9px] tracking-widest hover:bg-[#4c8051] shadow-lg hover:shadow-2xl transition-all"
+                      className="px-8 py-5 bg-[#496279] text-white rounded-2xl font-black text-xs tracking-widest hover:bg-[#4c8051] shadow-lg hover:shadow-2xl transition-all"
                     >
                       VIEW PROFILE
                     </Link>
@@ -201,15 +209,15 @@ const ManageReviews = () => {
               </div>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[5rem] border-2 border-dashed border-slate-100 text-center animate-in fade-in duration-1000">
+            <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 text-center animate-in fade-in duration-1000 shadow-md">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-8 opacity-30">
                 <i className="fas fa-scroll text-2xl"></i>
               </div>
               <h3 className="text-xl font-black tracking-tighter mb-4 opacity-50">No Reviews.</h3>
-              <p className="text-[10px] font-black text-slate-400 tracking-[0.3em] max-w-xs leading-relaxed">
+              <p className="text-xs font-black text-slate-400 tracking-[0.3em] max-w-xs leading-relaxed">
                 You haven't submitted any employee reviews yet.
               </p>
-              <Link to="/review/submit" className="mt-10 px-10 py-5 bg-[#496279] text-white rounded-2xl font-black text-[10px] tracking-widest hover:bg-[#4c8051] transition-all">
+              <Link to="/review/submit" className="mt-10 px-10 py-5 bg-[#496279] text-white rounded-2xl font-black text-xs tracking-widest hover:bg-[#4c8051] transition-all">
                 Submit First Review
               </Link>
             </div>

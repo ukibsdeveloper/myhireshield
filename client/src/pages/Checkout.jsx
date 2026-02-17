@@ -5,22 +5,63 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import toast from 'react-hot-toast';
+import api from '../utils/api';
+import { loadRazorpayScript } from '../utils/razorpay';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { setPaymentStatus } = useAuth();
   const [processing, setProcessing] = useState(false);
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setProcessing(true);
     const toastId = toast.loading('Connecting to Secure Payment...');
-
-    setTimeout(() => {
+    // 1. Load Razorpay script
+    const loaded = await loadRazorpayScript();
+    if (!loaded) {
+      toast.error('Failed to load payment gateway.', { id: toastId });
       setProcessing(false);
-      setPaymentStatus(true);
-      toast.success('Payment Successful. Report Unlocked.', { id: toastId });
-      navigate('/reputation-report');
-    }, 2500);
+      return;
+    }
+    try {
+      // 2. Create order on backend
+      const { data } = await api.post('/payment/order', { amount: 99, currency: 'INR' });
+      if (!data.success) throw new Error('Order creation failed');
+      const order = data.order;
+      // 3. Open Razorpay checkout
+      const options = {
+        key: order.key_id || import.meta.env.VITE_RAZORPAY_KEY_ID, // fallback to env if not sent
+        amount: order.amount,
+        currency: order.currency,
+        name: 'MyHireShield',
+        description: 'Unlock Reputation Report',
+        order_id: order.id,
+        handler: async function (response) {
+          // 4. Verify payment on backend
+          const verifyRes = await api.post('/payment/verify', response);
+          if (verifyRes.data.success) {
+            setPaymentStatus(true);
+            toast.success('Payment Successful. Report Unlocked.', { id: toastId });
+            navigate('/reputation-report');
+          } else {
+            toast.error('Payment verification failed.', { id: toastId });
+          }
+        },
+        prefill: {},
+        theme: { color: '#4c8051' },
+        modal: {
+          ondismiss: () => {
+            setProcessing(false);
+            toast.dismiss(toastId);
+          }
+        }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      toast.error('Payment failed: ' + (err?.message || 'Unknown error'), { id: toastId });
+      setProcessing(false);
+    }
   };
 
   return (
@@ -28,10 +69,10 @@ const Checkout = () => {
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       <Navbar scrolled={true} isAuthenticated={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-20 flex flex-col items-center">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-28 sm:pb-20 flex flex-col items-center">
         <div className="max-w-xl w-full mb-12 flex justify-between items-center opacity-60">
           <Breadcrumb />
-          <Link to="/dashboard/employee" className="inline-flex items-center gap-2 text-[10px] font-black tracking-widest hover:text-[#4c8051] transition-all">
+          <Link to="/dashboard/employee" className="inline-flex items-center gap-2 text-xs font-black tracking-widest hover:text-[#4c8051] transition-all">
             <i className="fas fa-arrow-left"></i>
             Back to Dashboard
           </Link>
@@ -45,14 +86,14 @@ const Checkout = () => {
               <i className="fas fa-lock-open text-4xl text-[#496279] group-hover:scale-110 transition-transform"></i>
             </div>
 
-            <h2 className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mb-4">Secure Payment</h2>
+            <h2 className="text-xs font-black text-slate-300 uppercase tracking-[0.5em] mb-4">Secure Payment</h2>
             <h3 className="text-4xl font-black text-[#496279] tracking-tighter mb-4">Unlock Your <span className="text-[#4c8051]">Report.</span></h3>
 
             <div className="my-12 relative">
               <div className="absolute -inset-4 bg-[#4c8051]/5 blur-2xl rounded-full"></div>
               <div className="relative">
                 <p className="text-8xl font-black text-[#496279] tracking-tighter leading-none">₹99</p>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">One-Time Access Fee</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-4">One-Time Access Fee</p>
               </div>
             </div>
 
@@ -64,8 +105,8 @@ const Checkout = () => {
               ].map((b, i) => (
                 <div key={i} className="flex justify-between items-start gap-4">
                   <div>
-                    <p className="text-[10px] font-black uppercase text-[#496279] tracking-widest mb-1">{b.l}</p>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">{b.d}</p>
+                    <p className="text-xs font-black uppercase text-[#496279] tracking-widest mb-1">{b.l}</p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{b.d}</p>
                   </div>
                   <i className="fas fa-check-circle text-[#4c8051] text-xs mt-1"></i>
                 </div>
@@ -93,7 +134,7 @@ const Checkout = () => {
               </span>
             </button>
 
-            <p className="mt-10 text-[9px] font-black text-slate-300 uppercase tracking-[0.3em] flex items-center gap-3">
+            <p className="mt-10 text-xs font-black text-slate-300 uppercase tracking-[0.3em] flex items-center gap-3">
               <i className="fas fa-lock text-[#4c8051]"></i>
               Secure & Encrypted Transaction
             </p>

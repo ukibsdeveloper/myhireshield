@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
+import { employeeAPI } from '../utils/api';
 
 const EmployeeSearch = () => {
   const [fullName, setFullName] = useState('');
@@ -24,15 +24,12 @@ const EmployeeSearch = () => {
     setSearched(true);
     setDisplayCount(5); // Reset pagination on new search
     try {
-      const res = await axios.get(`/api/employees/search`, {
-        params: {
-          query: fullName.trim().toUpperCase(),
-          dob: dob || undefined
-        }
+      const res = await employeeAPI.search({
+        query: fullName.trim().toUpperCase(),
+        dob: dob || undefined
       });
-
-      if (res.data.success) {
-        setResults(res.data.data);
+      if (res?.data?.success) {
+        setResults(res.data.data ?? []);
       } else {
         setResults([]);
       }
@@ -66,10 +63,10 @@ const EmployeeSearch = () => {
 
       <Navbar scrolled={true} isAuthenticated={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-24 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-32 sm:pb-24 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <Breadcrumb />
-          <Link to="/dashboard/company" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
+          <Link to="/dashboard/company" className="group flex items-center gap-4 text-xs font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
             Back to Dashboard
           </Link>
@@ -79,7 +76,7 @@ const EmployeeSearch = () => {
         <div className="relative mb-20">
           <div className="absolute -top-10 -left-10 w-64 h-64 bg-[#4c8051] opacity-[0.03] rounded-full blur-[100px]"></div>
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-xs font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
               Search Active
             </div>
@@ -97,7 +94,7 @@ const EmployeeSearch = () => {
           <div className="absolute -inset-4 bg-gradient-to-r from-[#4c8051]/10 via-[#496279]/10 to-[#dd8d88]/10 rounded-[4rem] blur-2xl opacity-50"></div>
           <div className="relative bg-white border border-slate-100 p-8 md:p-10 rounded-[4rem] shadow-2xl flex flex-col md:flex-row gap-8 items-center">
             <div className="flex-1 w-full space-y-2">
-              <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-2">Employee Name</label>
+              <label className="text-xs font-black text-slate-300 tracking-[0.3em] ml-2">Employee Name</label>
               <div className="flex items-center gap-4 px-8 py-5 bg-slate-50 border border-slate-100 rounded-3xl focus-within:border-[#4c8051] transition-all group">
                 <i className="fas fa-search text-slate-300 group-focus-within:text-[#4c8051] transition-colors"></i>
                 <input
@@ -112,28 +109,25 @@ const EmployeeSearch = () => {
             </div>
 
             <div className="flex-1 w-full space-y-2">
-              <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-2">Date of Birth</label>
-              <div className="flex items-center gap-4 px-8 py-5 bg-slate-50 border border-slate-100 rounded-3xl focus-within:border-[#4c8051] transition-all group">
-                <i className="fas fa-calendar-day text-slate-300 group-focus-within:text-[#4c8051] transition-colors"></i>
-                <input
-                  type="date"
-                  className="w-full bg-transparent outline-none font-black text-sm tracking-widest text-slate-400"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                />
-              </div>
+              <DateInput
+                label="Date of Birth"
+                value={dob}
+                onChange={setDob}
+                required
+                className="w-full bg-transparent outline-none font-black text-sm tracking-widest text-slate-400"
+              />
             </div>
 
             <div className="md:pt-6">
               <button
                 onClick={handleSearch}
                 disabled={loading || !fullName.trim()}
-                className="relative group bg-[#496279] text-white px-12 py-6 rounded-[2.5rem] font-black text-[10px] tracking-[0.4em] shadow-2xl hover:bg-[#4c8051] transition-all disabled:opacity-30 disabled:grayscale overflow-hidden"
+                className="relative group bg-[#496279] text-white px-12 py-6 rounded-[2.5rem] font-black text-xs tracking-[0.4em] shadow-2xl hover:bg-[#4c8051] transition-all disabled:opacity-30 disabled:grayscale overflow-hidden"
               >
                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                 <span className="relative z-10 flex items-center gap-3">
                   {loading ? <i className="fas fa-circle-notch fa-spin"></i> : 'Search Now'}
-                  <i className="fas fa-bolt text-[8px] opacity-50"></i>
+                  <i className="fas fa-bolt text-[11px] opacity-50"></i>
                 </span>
               </button>
             </div>
@@ -145,7 +139,7 @@ const EmployeeSearch = () => {
           <div className="mb-12 flex flex-col md:flex-row gap-8 items-center justify-between p-8 bg-white border border-slate-100 rounded-[3rem] shadow-sm animate-in fade-in duration-1000">
             <div className="flex items-center gap-8 w-full md:w-auto">
               <div className="space-y-2 flex-1 md:flex-initial">
-                <label className="text-[8px] font-black text-slate-300 tracking-[0.3em] ml-2">Min Score: {minScore}%</label>
+                <label className="text-[11px] font-black text-slate-300 tracking-[0.3em] ml-2">Min Score: {minScore}%</label>
                 <input
                   type="range" min="0" max="100"
                   value={minScore}
@@ -154,11 +148,11 @@ const EmployeeSearch = () => {
                 />
               </div>
               <div className="space-y-2 flex-1 md:flex-initial">
-                <label className="text-[8px] font-black text-slate-300 tracking-[0.3em] ml-2">Sort By</label>
+                <label className="text-[11px] font-black text-slate-300 tracking-[0.3em] ml-2">Sort By</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="block w-full bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl text-[9px] font-black tracking-widest outline-none focus:border-[#4c8051]"
+                  className="block w-full bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl text-xs font-black tracking-widest outline-none focus:border-[#4c8051]"
                 >
                   <option value="relevant">Relevance</option>
                   <option value="score-desc">High Score First</option>
@@ -166,7 +160,7 @@ const EmployeeSearch = () => {
                 </select>
               </div>
             </div>
-            <div className="text-[9px] font-black text-slate-300 tracking-[0.2em]">
+            <div className="text-xs font-black text-slate-300 tracking-[0.2em]">
               Found {processedResults.length} Employees
             </div>
           </div>
@@ -180,7 +174,7 @@ const EmployeeSearch = () => {
                 <div className="w-20 h-20 border-4 border-slate-100 rounded-full"></div>
                 <div className="absolute inset-0 border-t-4 border-[#4c8051] rounded-full animate-spin"></div>
               </div>
-              <p className="text-[10px] font-black tracking-[0.5em] animate-pulse">Searching...</p>
+              <p className="text-xs font-black tracking-[0.5em] animate-pulse">Searching...</p>
             </div>
           ) : visibleResults.length > 0 ? (
             <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-4">
@@ -203,17 +197,17 @@ const EmployeeSearch = () => {
                     <div>
                       <div className="flex items-center gap-4 mb-2">
                         <h4 className="text-3xl font-black tracking-tighter leading-none">{emp.firstName} {emp.lastName}</h4>
-                        <span className="px-3 py-1 bg-[#4c8051]/5 text-[#4c8051] text-[8px] font-black rounded-lg tracking-widest">Verified</span>
+                        <span className="px-3 py-1 bg-[#4c8051]/5 text-[#4c8051] text-[11px] font-black rounded-lg tracking-widest">Verified</span>
                       </div>
-                      <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em]">{emp.currentDesignation || 'EMPLOYEE'}</p>
+                      <p className="text-xs font-bold text-slate-400 tracking-[0.2em]">{emp.currentDesignation || 'EMPLOYEE'}</p>
                       <div className="mt-6 flex gap-6 opacity-40">
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-map-marker-alt text-[8px]"></i>
-                          <span className="text-[8px] font-black tracking-widest">Identity Verified</span>
+                          <i className="fas fa-map-marker-alt text-[11px]"></i>
+                          <span className="text-[11px] font-black tracking-widest">Identity Verified</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-shield-alt text-[8px]"></i>
-                          <span className="text-[8px] font-black tracking-widest">Trusted Profile</span>
+                          <i className="fas fa-shield-alt text-[11px]"></i>
+                          <span className="text-[11px] font-black tracking-widest">Trusted Profile</span>
                         </div>
                       </div>
                     </div>
@@ -221,13 +215,13 @@ const EmployeeSearch = () => {
 
                   <div className="flex items-center gap-12 relative z-10 w-full md:w-auto justify-between md:justify-end">
                     <div className="text-right">
-                      <p className="text-[10px] font-black text-slate-300 tracking-[0.4em] mb-2">Trust Score</p>
+                      <p className="text-xs font-black text-slate-300 tracking-[0.4em] mb-2">Trust Score</p>
                       <div className="flex items-baseline gap-1">
                         <span className="text-5xl font-black tracking-tighter text-[#496279] group-hover:text-[#4c8051] transition-colors">{emp.overallScore || '0'}</span>
                         <span className="text-base font-black opacity-20">%</span>
                       </div>
                     </div>
-                    <Link to={`/employee/${emp._id}`} className="bg-[#496279] text-white px-10 py-5 rounded-[2rem] font-black text-[10px] tracking-[0.3em] shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all">
+                    <Link to={`/employee/${emp._id}`} className="bg-[#496279] text-white px-10 py-5 rounded-[2rem] font-black text-xs tracking-[0.3em] shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all">
                       View Profile
                     </Link>
                   </div>
@@ -238,7 +232,7 @@ const EmployeeSearch = () => {
                 <div className="text-center pt-10">
                   <button
                     onClick={() => setDisplayCount(prev => prev + 5)}
-                    className="bg-white border border-slate-100 px-12 py-5 rounded-3xl text-[10px] font-black tracking-[0.5em] text-slate-400 hover:text-[#496279] hover:border-[#496279]/20 transition-all shadow-sm"
+                    className="bg-white border border-slate-100 px-12 py-5 rounded-3xl text-xs font-black tracking-[0.5em] text-slate-400 hover:text-[#496279] hover:border-[#496279]/20 transition-all shadow-sm"
                   >
                     Show More
                   </button>
@@ -251,7 +245,7 @@ const EmployeeSearch = () => {
                 <i className="fas fa-user-times text-2xl"></i>
               </div>
               <h3 className="text-xl font-black tracking-tighter mb-4 opacity-50">No Results.</h3>
-              <p className="text-[10px] font-black text-slate-400 tracking-[0.3em] max-w-xs leading-relaxed">
+              <p className="text-xs font-black text-slate-400 tracking-[0.3em] max-w-xs leading-relaxed">
                 No matching employees found. Please check the name or date of birth.
               </p>
             </div>

@@ -1,3 +1,11 @@
+// Convert a string to CamelCase (each word capitalized, rest lowercase)
+export const camelCaseName = (str) => {
+  if (!str) return '';
+  return str
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
 // MyHireShield - Helper Functions
 
 // Score calculation and display
@@ -31,7 +39,7 @@ export const getScoreColorClass = (score) => {
   return 'score-poor';
 };
 
-// Date formatting
+// Date formatting - use DD-MM-YYYY everywhere on the website
 export const formatDate = (date) => {
   if (!date) return 'N/A';
   return new Date(date).toLocaleDateString('en-IN', {
@@ -39,6 +47,17 @@ export const formatDate = (date) => {
     month: 'long',
     day: 'numeric'
   });
+};
+
+/** Short format: DD-MM-YYYY (date-month-year) for display across site */
+export const formatDateDDMMYYYY = (date) => {
+  if (!date) return 'N/A';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return 'N/A';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
 };
 
 export const formatDateTime = (date) => {
@@ -265,5 +284,3 @@ export const downloadFile = (blob, filename) => {
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
 };
-
-export default api;

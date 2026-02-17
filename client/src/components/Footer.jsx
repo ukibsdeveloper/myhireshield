@@ -31,7 +31,7 @@ const Footer = () => {
                 <span className="text-2xl font-black text-[#496279] tracking-tight leading-none">
                   Hire<span className="text-[#4c8051]">Shield</span>
                 </span>
-                <span className="text-[10px] font-bold tracking-wider text-slate-400 mt-1.5">
+                <span className="text-[11px] font-bold tracking-wider text-slate-400 mt-1.5">
                   Trusted Hiring Platform
                 </span>
               </div>
@@ -45,16 +45,16 @@ const Footer = () => {
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-slate-400 tracking-wider">Follow Us</span>
               <div className="flex gap-2">
-                <a href="#" className="social-icon">
+                <a href="https://www.linkedin.com/company/myhireshield" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="LinkedIn">
                   <i className="fab fa-linkedin-in"></i>
                 </a>
-                <a href="#" className="social-icon">
+                <a href="https://twitter.com/myhireshield" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Twitter">
                   <i className="fab fa-twitter"></i>
                 </a>
-                <a href="#" className="social-icon">
+                <a href="https://www.facebook.com/myhireshield" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
                   <i className="fab fa-facebook-f"></i>
                 </a>
-                <a href="#" className="social-icon">
+                <a href="https://www.instagram.com/myhireshield" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
                   <i className="fab fa-instagram"></i>
                 </a>
               </div>
@@ -95,6 +95,7 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3.5">
               <li><a href="/#faq" className="footer-link">FAQs & Help</a></li>
+              <li><Link to="/blog" className="footer-link">Blog & Resources</Link></li>
               <li><Link to="/terms" className="footer-link">Terms & Conditions</Link></li>
               <li><Link to="/privacy" className="footer-link">Privacy Policy</Link></li>
               <li><Link to="/refund-policy" className="footer-link">Refund Policy</Link></li>
@@ -110,7 +111,7 @@ const Footer = () => {
             <div className="space-y-5">
               {/* Phone */}
               <div className="group">
-                <span className="text-[11px] font-bold text-slate-400 tracking-wide block mb-2">Phone</span>
+                <span className="text-xs font-bold text-slate-400 tracking-wide block mb-2">Phone</span>
                 <a href="tel:+919910048130" className="contact-link">
                   <i className="fas fa-phone-alt text-[#4c8051]"></i>
                   <span>+91 9910048130</span>
@@ -119,7 +120,7 @@ const Footer = () => {
 
               {/* Email */}
               <div className="group">
-                <span className="text-[11px] font-bold text-slate-400 tracking-wide block mb-2">Email</span>
+                <span className="text-xs font-bold text-slate-400 tracking-wide block mb-2">Email</span>
                 <a href="mailto:ukibsdeveloper786@gmail.com" className="contact-link">
                   <i className="fas fa-envelope text-[#4c8051]"></i>
                   <span className="break-all">ukibsdeveloper786@gmail.com</span>
@@ -132,7 +133,7 @@ const Footer = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4c8051] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-[#4c8051]"></span>
                 </div>
-                <span className="text-[10px] font-black text-emerald-700 tracking-wider">24/7 Active</span>
+                <span className="text-xs font-black text-emerald-700 tracking-wider">24/7 Active</span>
               </div>
             </div>
           </div>

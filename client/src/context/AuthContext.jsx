@@ -136,6 +136,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const resendVerification = async (email) => {
+    try {
+      const response = await api.post('/auth/resend-verification', { email });
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.message || 'Failed to send verification email' };
+    }
+  };
+
+  const refreshUser = async () => {
+    if (!token) return;
+    try {
+      const response = await api.get('/auth/me');
+      if (response.data.success) setUser(response.data.user);
+    } catch (_) {}
+  };
+
   const value = {
     user,
     token,
@@ -146,10 +163,13 @@ export const AuthProvider = ({ children }) => {
     registerEmployee,
     updateProfile,
     changePassword,
+    resendVerification,
+    refreshUser,
     setPaymentStatus,
     isAuthenticated: !!user,
     isCompany: user?.role === 'company',
     isEmployee: user?.role === 'employee',
+    emailVerified: user?.emailVerified ?? true,
     hasPaidForReport: user?.isPaid || false
   };
 

@@ -28,7 +28,7 @@ const Breadcrumb = ({ items }) => {
             {breadcrumbs.map((crumb, index) => (
                 <React.Fragment key={crumb.path}>
                     {index > 0 && (
-                        <i className="fas fa-chevron-right text-[10px] text-slate-300"></i>
+                        <i className="fas fa-chevron-right text-xs text-slate-300"></i>
                     )}
                     {index === breadcrumbs.length - 1 ? (
                         <span className="font-bold text-[#496279] text-xs uppercase tracking-wider">
@@ -39,7 +39,7 @@ const Breadcrumb = ({ items }) => {
                             to={crumb.path}
                             className="text-slate-400 hover:text-[#4c8051] transition-colors font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5"
                         >
-                            {index === 0 && <i className="fas fa-home text-[10px]"></i>}
+                            {index === 0 && <i className="fas fa-home text-xs"></i>}
                             {crumb.label}
                         </Link>
                     )}

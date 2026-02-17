@@ -1,33 +1,45 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from './context/AuthContext';
+import { AccessibilityProvider } from './context/AccessibilityContext';
+import SkipLink from './components/SkipLink';
 import ScrollToTop from './components/ScrollToTop';
 import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './components/ErrorBoundary';
 
-// Pages
+// Eager-load critical above-the-fold pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import RegisterCompany from './pages/RegisterCompany';
 import RegisterEmployee from './pages/RegisterEmployee';
-import CompanyDashboard from './pages/CompanyDashboard';
-import EmployeeDashboard from './pages/EmployeeDashboard';
-import AddEmployee from './pages/AddEmployee';
-import EmployeeSearch from './pages/EmployeeSearch';
-import EmployeeProfile from './pages/EmployeeProfile';
-import SubmitReview from './pages/SubmitReview';
-import ManageReviews from './pages/ManageReviews';
-import VerifyDocuments from './pages/VerifyDocuments';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import ConsentForm from './pages/ConsentForm';
-import RefundPolicy from './pages/RefundPolicy';
-import Disclaimer from './pages/Disclaimer';
-import ReputationReport from './pages/ReputationReport';
-import Checkout from './pages/Checkout';
-import UpdateProfile from './pages/UpdateProfile';
-import CompanyUploadDocuments from './pages/CompanyUploadDocuments';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 import NotFound from './pages/NotFound';
+
+// Lazy-load dashboards, review flows, and document-heavy pages
+const CompanyDashboard = lazy(() => import('./pages/CompanyDashboard'));
+const EmployeeDashboard = lazy(() => import('./pages/EmployeeDashboard'));
+const AddEmployee = lazy(() => import('./pages/AddEmployee'));
+const EmployeeSearch = lazy(() => import('./pages/EmployeeSearch'));
+const EmployeeProfile = lazy(() => import('./pages/EmployeeProfile'));
+const SubmitReview = lazy(() => import('./pages/SubmitReview'));
+const ManageReviews = lazy(() => import('./pages/ManageReviews'));
+const VerifyDocuments = lazy(() => import('./pages/VerifyDocuments'));
+const ReputationReport = lazy(() => import('./pages/ReputationReport'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const UpdateProfile = lazy(() => import('./pages/UpdateProfile'));
+const CompanyUploadDocuments = lazy(() => import('./pages/CompanyUploadDocuments'));
+const AdminModerateReviews = lazy(() => import('./pages/AdminModerateReviews'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const ConsentForm = lazy(() => import('./pages/ConsentForm'));
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
+const Disclaimer = lazy(() => import('./pages/Disclaimer'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
 
 /* CONFIGURATION */
 const isLocalhost = window.location.hostname === 'localhost';
@@ -39,20 +51,23 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#fcfaf9]" aria-label="Loading">
+    <div className="text-center">
+      <i className="fas fa-shield-halved fa-spin text-4xl text-[#496279] mb-4" aria-hidden />
+      <p className="text-[#496279] font-black uppercase tracking-widest text-xs">Loading...</p>
+    </div>
+  </div>
+);
+
 /* GUARDS */
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, user, loading } = useAuth();
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fcfaf9]">
-      <div className="text-center">
-        <i className="fas fa-shield-halved fa-spin text-4xl text-[#496279] mb-4"></i>
-        <p className="text-[#496279] font-black uppercase tracking-widest text-[10px]">Validating Access...</p>
-      </div>
-    </div>
-  );
+  if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    return <Navigate to={user?.role === 'company' ? '/dashboard/company' : '/dashboard/employee'} replace />;
+    const fallback = user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'company' ? '/dashboard/company' : '/dashboard/employee';
+    return <Navigate to={fallback} replace />;
   }
   return children;
 };
@@ -60,74 +75,101 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
   if (isAuthenticated) {
-    return <Navigate to={user?.role === 'company' ? "/dashboard/company" : "/dashboard/employee"} replace />;
+    const to = user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'company' ? '/dashboard/company' : '/dashboard/employee';
+    return <Navigate to={to} replace />;
   }
   return children;
 };
 
 function App() {
   return (
-    <div className="App">
-      <ScrollToTop />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-          success: {
+    <AccessibilityProvider>
+      <div className="App">
+        <SkipLink />
+        <ScrollToTop />
+        <Toaster
+          position="top-right"
+          toastOptions={{
             duration: 3000,
-            iconTheme: {
-              primary: '#4c8051',
-              secondary: '#fff',
+            style: {
+              background: '#363636',
+              color: '#fff',
             },
-          },
-          error: {
-            duration: 4000,
-            iconTheme: {
-              primary: '#dd8d88',
-              secondary: '#fff',
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#4c8051',
+                secondary: '#fff',
+              },
             },
-          },
-        }}
-      />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/register/company" element={<PublicRoute><RegisterCompany /></PublicRoute>} />
-        <Route path="/register/employee" element={<PublicRoute><RegisterEmployee /></PublicRoute>} />
+            error: {
+              duration: 4000,
+              iconTheme: {
+                primary: '#dd8d88',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+        <main id="main-content" tabIndex={-1} role="main">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path="/register/company" element={<PublicRoute><RegisterCompany /></PublicRoute>} />
+              <Route path="/register/employee" element={<PublicRoute><RegisterEmployee /></PublicRoute>} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
-        {/* Company Routes */}
-        <Route path="/company/upload-documents" element={<ProtectedRoute allowedRoles={['company']}><CompanyUploadDocuments /></ProtectedRoute>} />
-        <Route path="/dashboard/company" element={<ProtectedRoute allowedRoles={['company']}><CompanyDashboard /></ProtectedRoute>} />
-        <Route path="/employee/add" element={<ProtectedRoute allowedRoles={['company']}><AddEmployee /></ProtectedRoute>} />
-        <Route path="/review/submit" element={<ProtectedRoute allowedRoles={['company']}><SubmitReview /></ProtectedRoute>} />
-        <Route path="/review/edit/:id" element={<ProtectedRoute allowedRoles={['company']}><SubmitReview /></ProtectedRoute>} />
-        <Route path="/review/manage" element={<ProtectedRoute allowedRoles={['company']}><ManageReviews /></ProtectedRoute>} />
-        <Route path="/verify/documents" element={<ProtectedRoute allowedRoles={['company']}><VerifyDocuments /></ProtectedRoute>} />
-        <Route path="/employee/search" element={<ProtectedRoute allowedRoles={['company']}><EmployeeSearch /></ProtectedRoute>} />
+              {/* Company Routes */}
+              <Route path="/company/upload-documents" element={<ProtectedRoute allowedRoles={['company']}><CompanyUploadDocuments /></ProtectedRoute>} />
+              <Route path="/dashboard/company" element={<ProtectedRoute allowedRoles={['company']}><CompanyDashboard /></ProtectedRoute>} />
+              <Route path="/employee/add" element={<ProtectedRoute allowedRoles={['company']}><AddEmployee /></ProtectedRoute>} />
+              <Route path="/review/submit" element={<ProtectedRoute allowedRoles={['company']}><SubmitReview /></ProtectedRoute>} />
+              <Route path="/review/edit/:id" element={<ProtectedRoute allowedRoles={['company']}><SubmitReview /></ProtectedRoute>} />
+              <Route path="/review/manage" element={<ProtectedRoute allowedRoles={['company']}><ManageReviews /></ProtectedRoute>} />
+              <Route path="/verify/documents" element={<ProtectedRoute allowedRoles={['company']}><VerifyDocuments /></ProtectedRoute>} />
+              <Route path="/employee/search" element={<ProtectedRoute allowedRoles={['company']}><EmployeeSearch /></ProtectedRoute>} />
 
-        {/* Employee Routes */}
-        <Route path="/dashboard/employee" element={<ProtectedRoute allowedRoles={['employee']}><EmployeeDashboard /></ProtectedRoute>} />
-        <Route path="/reputation-report" element={<ProtectedRoute allowedRoles={['employee']}><ReputationReport /></ProtectedRoute>} />
-        <Route path="/checkout" element={<ProtectedRoute allowedRoles={['employee']}><Checkout /></ProtectedRoute>} />
-        <Route path="/employee/profile" element={<ProtectedRoute allowedRoles={['employee']}><EmployeeProfile /></ProtectedRoute>} />
+              {/* Employee Routes */}
+              <Route path="/dashboard/employee" element={<ProtectedRoute allowedRoles={['employee']}><EmployeeDashboard /></ProtectedRoute>} />
+              <Route path="/reputation-report" element={<ProtectedRoute allowedRoles={['employee']}><ReputationReport /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute allowedRoles={['employee']}><Checkout /></ProtectedRoute>} />
+              <Route path="/employee/profile" element={<ProtectedRoute allowedRoles={['employee']}><EmployeeProfile /></ProtectedRoute>} />
 
-        {/* Shared Routes */}
-        <Route path="/employee/:id" element={<ProtectedRoute><EmployeeProfile /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><UpdateProfile /></ProtectedRoute>} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/consent" element={<ConsentForm />} />
-        <Route path="/refund-policy" element={<RefundPolicy />} />
-        <Route path="/disclaimer" element={<Disclaimer />} />
+              {/* Admin */}
+              <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/verify-reviews" element={<ProtectedRoute allowedRoles={['admin']}><AdminModerateReviews /></ProtectedRoute>} />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </div>
+              {/* Shared Routes */}
+              <Route path="/employee/:id" element={<ProtectedRoute><EmployeeProfile /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><UpdateProfile /></ProtectedRoute>} />
+
+              {/* Public static & blog */}
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/consent" element={<ConsentForm />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </main>
+      </div>
+    </AccessibilityProvider>
   );
 }
 
-export default App;
+function AppWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}
+
+export default AppWithErrorBoundary;

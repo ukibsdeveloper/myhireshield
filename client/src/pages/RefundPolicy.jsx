@@ -9,7 +9,7 @@ const RefundPolicy = () => {
 
       <Navbar scrolled={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-28 sm:pb-20 max-w-4xl">
         <div className="bg-white border border-slate-100 rounded-[3.5rem] shadow-2xl p-10 md:p-16 relative overflow-hidden animate-on-scroll">
 
           <div className="flex items-center gap-4 mb-12">
@@ -18,7 +18,7 @@ const RefundPolicy = () => {
             </div>
             <div>
               <h1 className="text-3xl font-black text-[#496279] tracking-tighter leading-none">Refund Policy.</h1>
-              <p className="text-[10px] font-black text-slate-400 tracking-[0.3em] mt-2">Policy ID: HS-REFUND-2026</p>
+              <p className="text-xs font-black text-slate-400 tracking-[0.3em] mt-2">Policy ID: HS-REFUND-2026</p>
             </div>
           </div>
 
@@ -70,12 +70,12 @@ const RefundPolicy = () => {
             <div className="w-20 h-20 border-4 border-slate-100 rounded-full flex items-center justify-center mb-4">
               <i className="fas fa-shield-halved text-slate-200 text-3xl"></i>
             </div>
-            <p className="text-[9px] font-black text-slate-300 tracking-[0.5em]">HireShield Certified Policy</p>
+            <p className="text-xs font-black text-slate-300 tracking-[0.5em]">HireShield Certified Policy</p>
           </div>
         </div>
 
         <div className="mt-12 text-center opacity-40">
-          <p className="text-[10px] font-bold text-slate-500 tracking-widest">
+          <p className="text-xs font-bold text-slate-500 tracking-widest">
             Questions? Contact our Support Team at +91 9910048130
           </p>
         </div>

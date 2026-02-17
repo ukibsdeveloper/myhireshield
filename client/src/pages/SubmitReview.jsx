@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import toast from 'react-hot-toast';
+import DateInput from '../components/DateInput';
 
 const SubmitReview = () => {
   const { id } = useParams();
@@ -155,10 +156,10 @@ const SubmitReview = () => {
 
       <Navbar scrolled={true} isAuthenticated={true} />
 
-      <div className="container mx-auto px-6 pt-32 pb-24 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 pt-32 pb-32 sm:pb-24 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <Breadcrumb />
-          <Link to="/review/manage" className="group flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
+          <Link to="/review/manage" className="group flex items-center gap-4 text-xs font-black tracking-[0.3em] text-slate-400 hover:text-[#496279] transition-all">
             <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
             Back to History
           </Link>
@@ -168,7 +169,7 @@ const SubmitReview = () => {
         <div className="relative mb-20">
           <div className="absolute -top-10 -left-10 w-64 h-64 bg-[#4c8051] opacity-[0.03] rounded-full blur-[100px]"></div>
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-[10px] font-black tracking-[0.3em] mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border border-slate-100 rounded-2xl text-xs font-black tracking-[0.3em] mb-8 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#4c8051] animate-pulse"></span>
               {isEditMode ? 'Edit Review' : 'New Review'}
             </div>
@@ -190,11 +191,11 @@ const SubmitReview = () => {
                 <i className="fas fa-shield-halved text-3xl text-[#496279]/20"></i>
               </div>
               <h2 className="text-3xl font-black tracking-tighter mb-4">Find Employee</h2>
-              <p className="text-slate-400 font-bold text-[10px] tracking-[0.4em] mb-12">Search to start rating</p>
+              <p className="text-slate-400 font-bold text-xs tracking-[0.4em] mb-12">Search to start rating</p>
 
               <div className="grid md:grid-cols-2 gap-6 w-full max-w-xl">
                 <div className="space-y-2 text-left">
-                  <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-4">Employee Name</label>
+                  <label className="text-xs font-black text-slate-300 tracking-[0.3em] ml-4">Employee Name</label>
                   <input
                     type="text"
                     placeholder="Full Legal Name"
@@ -205,12 +206,10 @@ const SubmitReview = () => {
                   />
                 </div>
                 <div className="space-y-2 text-left">
-                  <label className="text-[9px] font-black text-slate-300 tracking-[0.3em] ml-4">Date of Birth</label>
-                  <input
-                    type="date"
-                    className={inputClass}
+                  <DateInput
+                    label="Date of Birth"
                     value={searchDob}
-                    onChange={(e) => setSearchDob(e.target.value)}
+                    onChange={setSearchDob}
                   />
                 </div>
                 <button
@@ -242,23 +241,23 @@ const SubmitReview = () => {
                 </div>
               </div>
               <div className="flex-1 text-center md:text-left">
-                <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black tracking-[0.4em] mb-4 text-[#4c8051]">
+                <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-black tracking-[0.4em] mb-4 text-[#4c8051]">
                   Verified
                 </div>
                 <h3 className="text-4xl md:text-6xl font-black tracking-tighter leading-none mb-2">{employee.firstName} {employee.lastName}</h3>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 mt-6 opacity-60">
                   <div className="flex items-center gap-2">
-                    <i className="fas fa-fingerprint text-[10px]"></i>
-                    <span className="text-[10px] font-black tracking-[0.2em]">{employee._id.slice(-12).toUpperCase()}</span>
+                    <i className="fas fa-fingerprint text-xs"></i>
+                    <span className="text-xs font-black tracking-[0.2em]">{employee._id.slice(-12).toUpperCase()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <i className="fas fa-envelope text-[10px]"></i>
-                    <span className="text-[10px] font-black tracking-[0.2em]">{employee.email}</span>
+                    <i className="fas fa-envelope text-xs"></i>
+                    <span className="text-xs font-black tracking-[0.2em]">{employee.email}</span>
                   </div>
                 </div>
               </div>
               {!isEditMode && (
-                <button type="button" onClick={() => setEmployee(null)} className="text-[10px] font-black tracking-[0.4em] text-white/20 hover:text-[#dd8d88] transition-colors py-4 border-b border-white/5">
+                <button type="button" onClick={() => setEmployee(null)} className="text-xs font-black tracking-[0.4em] text-white/20 hover:text-[#dd8d88] transition-colors py-4 border-b border-white/5">
                   Cancel
                 </button>
               )}
@@ -274,7 +273,7 @@ const SubmitReview = () => {
                   {Object.keys(formData.ratings).map(key => (
                     <div key={key} className="group">
                       <div className="flex justify-between items-center mb-6">
-                        <label className="text-[10px] font-black tracking-[0.3em] group-hover:text-[#4c8051] transition-colors">
+                        <label className="text-xs font-black tracking-[0.3em] group-hover:text-[#4c8051] transition-colors">
                           {key.replace(/([A-Z])/g, ' $1')}
                         </label>
                         <span className="text-2xl font-black tracking-tighter text-[#4c8051]">{formData.ratings[key]}</span>
@@ -298,7 +297,7 @@ const SubmitReview = () => {
 
               {/* LOGISTICS & ASSETS */}
               <div className="space-y-12">
-                <div className="bg-white border border-slate-100 rounded-[4rem] p-10 shadow-sm">
+                <div className="bg-white border border-slate-100 rounded-[3rem] p-10 shadow-md hover:shadow-2xl transition-all duration-500">
                   <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em] mb-8">Work Details</h3>
                   <div className="space-y-6">
                     <input type="text" placeholder="Designation" required className={inputClass}
@@ -318,16 +317,20 @@ const SubmitReview = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <p className="text-[9px] font-black text-slate-300 tracking-widest ml-3 text-center">Joining Date</p>
-                        <input type="date" required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black text-slate-400 outline-none focus:border-[#4c8051]"
+                        <DateInput
+                          label="Joining Date (Date – Month – Year)"
                           value={formData.employmentDetails.startDate}
-                          onChange={(e) => handleEmploymentChange('startDate', e.target.value)} />
+                          onChange={(val) => handleEmploymentChange('startDate', val)}
+                          required
+                        />
                       </div>
                       <div className="space-y-2">
-                        <p className="text-[9px] font-black text-slate-300 tracking-widest ml-3 text-center">Relieving Date</p>
-                        <input type="date" required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black text-slate-400 outline-none focus:border-[#4c8051]"
+                        <DateInput
+                          label="Relieving Date (Date – Month – Year)"
                           value={formData.employmentDetails.endDate}
-                          onChange={(e) => handleEmploymentChange('endDate', e.target.value)} />
+                          onChange={(val) => handleEmploymentChange('endDate', val)}
+                          required
+                        />
                       </div>
                     </div>
                   </div>
@@ -338,20 +341,20 @@ const SubmitReview = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-100 rounded-3xl hover:border-[#4c8051] transition-all cursor-pointer group text-center">
                       <i className={`fas ${files.govId ? 'fa-check text-[#4c8051]' : 'fa-fingerprint text-slate-200'} text-xl mb-3`}></i>
-                      <span className="text-[8px] font-black tracking-widest leading-tight">
+                      <span className="text-[11px] font-black tracking-widest leading-tight">
                         {files.govId ? 'UPLOADED' : 'ID CARD'}
                       </span>
                       <input type="file" className="hidden" onChange={(e) => setFiles({ ...files, govId: e.target.files[0] })} />
                     </label>
                     <label className="flex flex-col items-center justify-center p-6 bg-slate-50 border-2 border-dashed border-slate-100 rounded-3xl hover:border-[#4c8051] transition-all cursor-pointer group text-center">
                       <i className={`fas ${files.expCert ? 'fa-check text-[#4c8051]' : 'fa-file-invoice text-slate-200'} text-xl mb-3`}></i>
-                      <span className="text-[8px] font-black tracking-widest leading-tight">
+                      <span className="text-[11px] font-black tracking-widest leading-tight">
                         {files.expCert ? 'UPLOADED' : 'EXP LETTER'}
                       </span>
                       <input type="file" className="hidden" onChange={(e) => setFiles({ ...files, expCert: e.target.files[0] })} />
                     </label>
                   </div>
-                  <p className="text-[8px] font-black text-slate-300 text-center mt-4">Note: New files will replace old ones.</p>
+                  <p className="text-[11px] font-black text-slate-300 text-center mt-4">Note: New files will replace old ones.</p>
                 </div>
               </div>
             </div>
@@ -360,7 +363,7 @@ const SubmitReview = () => {
               <div className="flex justify-between items-center mb-8">
                 <h3 className="text-[11px] font-black text-slate-300 tracking-[0.5em]">Feedback</h3>
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-black tracking-[0.2em]">Eligible for Re-Hire</span>
+                  <span className="text-xs font-black tracking-[0.2em]">Eligible for Re-Hire</span>
                   <div
                     onClick={() => setFormData({ ...formData, wouldRehire: !formData.wouldRehire })}
                     className={`w-14 h-8 rounded-full p-1 cursor-pointer transition-colors duration-500 ${formData.wouldRehire ? 'bg-[#4c8051]' : 'bg-slate-100'}`}
@@ -376,7 +379,7 @@ const SubmitReview = () => {
                 onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
               />
               <div className="mt-8 flex justify-between items-center opacity-40">
-                <p className="text-[9px] font-black tracking-[0.4em]">Characters: {formData.comment.length}/50 Min</p>
+                <p className="text-xs font-black tracking-[0.4em]">Characters: {formData.comment.length}/50 Min</p>
                 <i className="fas fa-lock text-xs"></i>
               </div>
             </div>

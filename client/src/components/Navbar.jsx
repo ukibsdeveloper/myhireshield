@@ -48,7 +48,7 @@ const Navbar = ({ scrolled }) => {
                 <span className={`text-lg md:text-xl font-black transition-colors duration-500 ${isMobileMenuOpen ? 'text-white' : 'text-[#496279]'}`}>
                   Hire<span className={isMobileMenuOpen ? 'text-white/80' : 'text-[#4c8051]'}>Shield</span>
                 </span>
-                <span className="text-[8px] md:text-[10px] font-bold tracking-[0.2em] text-[#dd8d88]">Simple & Safe Hiring</span>
+                <span className="text-xs md:text-xs font-bold tracking-[0.2em] text-[#dd8d88]">Simple & Safe Hiring</span>
               </div>
             </Link>
 
@@ -56,15 +56,18 @@ const Navbar = ({ scrolled }) => {
             <div className="hidden md:flex items-center bg-[#496279]/5 rounded-full px-1.5 py-1 border border-[#496279]/5">
               {isHomePage ? (
                 <>
-                  <a href="#features" className="px-6 py-2 text-[11px] font-black tracking-widest text-[#496279]/70 hover:text-[#496279] transition-all hover:bg-white rounded-full">
+                  <a href="#features" className="px-6 py-2 text-xs font-black tracking-widest text-[#496279]/70 hover:text-[#496279] transition-all hover:bg-white rounded-full">
                     Features
                   </a>
-                  <a href="#process" className="px-6 py-2 text-[11px] font-black tracking-widest text-[#496279]/70 hover:text-[#496279] transition-all hover:bg-white rounded-full">
+                  <a href="#process" className="px-6 py-2 text-xs font-black tracking-widest text-[#496279]/70 hover:text-[#496279] transition-all hover:bg-white rounded-full">
                     Process
                   </a>
+                  <Link to="/blog" className="px-6 py-2 text-xs font-black tracking-widest text-[#496279]/70 hover:text-[#496279] transition-all hover:bg-white rounded-full">
+                    Blog
+                  </Link>
                 </>
               ) : (
-                <Link to="/" className="px-6 py-2 text-[11px] font-black tracking-widest text-[#496279]/70 hover:text-[#496279] transition-all hover:bg-white rounded-full">
+                <Link to="/" className="px-6 py-2 text-xs font-black tracking-widest text-[#496279]/70 hover:text-[#496279] transition-all hover:bg-white rounded-full">
                   <i className="fas fa-arrow-left mr-2"></i> Home
                 </Link>
               )}
@@ -75,23 +78,31 @@ const Navbar = ({ scrolled }) => {
               <div className="hidden md:flex items-center gap-4">
                 {isAuthenticated ? (
                   <>
+                    {user?.role === 'admin' && (
+                      <Link
+                        to="/admin/dashboard"
+                        className="px-5 py-2.5 bg-[#dd8d88] text-white text-xs font-black tracking-widest rounded-xl active:scale-95 transition-all"
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
                     <Link
-                      to={user?.role === 'company' ? "/dashboard/company" : "/dashboard/employee"}
-                      className="px-6 py-2.5 bg-[#496279] text-white text-[11px] font-black tracking-widest rounded-xl active:scale-95 transition-all shadow-lg shadow-[#496279]/20"
+                      to={user?.role === 'company' ? "/dashboard/company" : user?.role === 'admin' ? "/admin/dashboard" : "/dashboard/employee"}
+                      className="px-6 py-2.5 bg-[#496279] text-white text-xs font-black tracking-widest rounded-xl active:scale-95 transition-all shadow-lg shadow-[#496279]/20"
                     >
                       Dashboard
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="text-[10px] font-black tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
+                      className="text-xs font-black tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
                     >
                       Logout
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="text-[11px] font-black tracking-widest text-[#496279] px-2 hover:text-[#4c8051] transition-colors">Log In</Link>
-                    <Link to="/register/company" className="px-6 py-2.5 bg-[#4c8051] text-white text-[11px] font-black tracking-widest rounded-xl shadow-lg shadow-[#4c8051]/20 active:scale-95 transition-all">Get Started</Link>
+                    <Link to="/login" className="text-xs font-black tracking-widest text-[#496279] px-2 hover:text-[#4c8051] transition-colors">Log In</Link>
+                    <Link to="/register/company" className="px-6 py-2.5 bg-[#4c8051] text-white text-xs font-black tracking-widest rounded-xl shadow-lg shadow-[#4c8051]/20 active:scale-95 transition-all">Get Started</Link>
                   </>
                 )}
               </div>
@@ -105,38 +116,38 @@ const Navbar = ({ scrolled }) => {
       </div>
 
       {/* MOBILE BOTTOM TAB BAR */}
-      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-[110]">
-        <div className="bg-[#496279]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3 flex justify-between items-center text-white">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[110]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="mx-4 mb-4 bg-[#496279]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-4 sm:px-6 py-3 flex justify-between items-center text-white">
           <Link to="/" className={`flex flex-col items-center gap-1 ${isHomePage ? 'text-[#4c8051]' : 'opacity-60'}`}>
             <i className="fas fa-home text-lg"></i>
-            <span className="text-[8px] font-black tracking-widest">Home</span>
+            <span className="text-xs font-black tracking-widest">Home</span>
           </Link>
 
-          <Link to={isAuthenticated ? (user?.role === 'company' ? "/dashboard/company" : "/dashboard/employee") : "/login"} className="flex flex-col items-center gap-1 opacity-60">
+          <Link to={isAuthenticated ? (user?.role === 'admin' ? "/admin/dashboard" : user?.role === 'company' ? "/dashboard/company" : "/dashboard/employee") : "/login"} className="flex flex-col items-center gap-1 opacity-60">
             <i className="fas fa-th-large text-lg"></i>
-            <span className="text-[8px] font-black tracking-widest">Dashboard</span>
+            <span className="text-xs font-black tracking-widest">Dashboard</span>
           </Link>
 
-          <div className="relative -top-8">
-            <Link to="/register/company" className="w-14 h-14 bg-[#4c8051] rounded-full border-4 border-[#fcfaf9] shadow-[0_10px_20px_rgba(76,128,81,0.4)] flex items-center justify-center text-white scale-110 active:scale-90 transition-transform">
+          <div className="relative -top-6 sm:-top-8">
+            <Link to="/register/company" className="w-12 h-12 sm:w-14 sm:h-14 bg-[#4c8051] rounded-full border-4 border-[#fcfaf9] shadow-[0_10px_20px_rgba(76,128,81,0.4)] flex items-center justify-center text-white scale-110 active:scale-90 transition-transform">
               <i className="fas fa-plus text-xl"></i>
             </Link>
           </div>
 
           <Link to="/settings" className="flex flex-col items-center gap-1 opacity-60">
             <i className="fas fa-cog text-lg"></i>
-            <span className="text-[8px] font-black tracking-widest">Settings</span>
+            <span className="text-xs font-black tracking-widest">Settings</span>
           </Link>
 
           {isAuthenticated ? (
             <button onClick={handleLogout} className="flex flex-col items-center gap-1 text-rose-400">
               <i className="fas fa-sign-out-alt text-lg"></i>
-              <span className="text-[8px] font-black tracking-widest">Logout</span>
+              <span className="text-xs font-black tracking-widest">Logout</span>
             </button>
           ) : (
             <Link to="/login" className="flex flex-col items-center gap-1 opacity-60">
               <i className="fas fa-user-circle text-lg"></i>
-              <span className="text-[8px] font-black tracking-widest">Login</span>
+              <span className="text-xs font-black tracking-widest">Login</span>
             </Link>
           )}
         </div>
