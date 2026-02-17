@@ -128,7 +128,6 @@ const companySchema = new mongoose.Schema({
 });
 
 // Indexes
-companySchema.index({ userId: 1 });
 companySchema.index({ email: 1 });
 companySchema.index({ companyName: 'text' });
 companySchema.index({ verified: 1 });

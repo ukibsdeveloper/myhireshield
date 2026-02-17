@@ -12,7 +12,7 @@ import {
 } from '../controllers/employee.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 import { searchLimiter } from '../middleware/rateLimiter.js';
-import { validateEmployeeSearch } from '../middleware/validation.middleware.js';
+import { validateEmployeeSearch, validateIdParam } from '../middleware/validation.middleware.js';
 
 const router = express.Router();
 
@@ -25,10 +25,10 @@ const router = express.Router();
 router.get('/search', searchLimiter, validateEmployeeSearch, searchEmployees);
 
 // Public Profile View
-router.get('/:id', getEmployeeById);
+router.get('/:id', validateIdParam('id'), getEmployeeById);
 
 // Public Stats (Ratings & Scores)
-router.get('/:id/stats', getEmployeeStats);
+router.get('/:id/stats', validateIdParam('id'), getEmployeeStats);
 
 /**
  * --- PROTECTED ROUTES (Employee Only) ---

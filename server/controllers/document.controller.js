@@ -342,18 +342,32 @@ async function updateOverallVerificationStatus(document) {
 // @route   GET /api/documents/employees
 export const getEmployeesForUpload = async (req, res) => {
   try {
-    // For now, return all employees (in production, filter by company relationship)
-    // TODO: Add company-employee relationship
-    const employees = await Employee.find({ profileVisible: true })
-      .select('firstName lastName email phone currentDesignation verificationPercentage verified')
+    // Get company ID from authenticated user
+    const company = await Company.findOne({ userId: req.user._id });
+    if (!company) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Company profile not found' 
+      });
+    }
+
+    // Filter employees by company relationship (createdBy field)
+    const employees = await Employee.find({ 
+      createdBy: company._id,
+      employmentStatus: 'active',
+      profileVisible: true 
+    })
+      .select('firstName lastName email phone designation verificationPercentage verified employeeId department')
       .sort({ createdAt: -1 });
 
     const formattedEmployees = employees.map(emp => ({
       id: emp._id,
+      employeeId: emp.employeeId,
       name: `${emp.firstName} ${emp.lastName}`,
       email: emp.email,
       phone: emp.phone,
-      designation: emp.currentDesignation,
+      designation: emp.designation,
+      department: emp.department,
       verificationPercentage: emp.verificationPercentage || 0,
       verified: emp.verified || false
     }));

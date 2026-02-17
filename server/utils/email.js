@@ -120,13 +120,73 @@ export const emailTemplates = {
   // 3. VERIFY EMAIL
   verifyEmail: (userName, verificationLink) => ({
     subject: 'Verify Your Email - MyHireShield',
-    html: ``
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #496279 0%, #4c8051 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #fcfaf9; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #eee; }
+          .button { display: inline-block; padding: 12px 30px; background: #496279; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Verify Your Email</h1>
+            <p>HireShield – Secure Hiring</p>
+          </div>
+          <div class="content">
+            <p>Hello ${userName},</p>
+            <p>Please verify your email by clicking the button below.</p>
+            <p style="text-align: center; margin: 24px 0;">
+              <a href="${verificationLink}" class="button">Verify Email</a>
+            </p>
+            <p class="footer">If you did not request this, you can ignore this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
   }),
 
   // 4. RESET PASSWORD
   resetPassword: (userName, resetLink) => ({
     subject: 'Reset Your Password - MyHireShield',
-    html: ``
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #496279 0%, #4c8051 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #fcfaf9; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #eee; }
+          .button { display: inline-block; padding: 12px 30px; background: #496279; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Reset Your Password</h1>
+            <p>HireShield – Secure Hiring</p>
+          </div>
+          <div class="content">
+            <p>Hello ${userName},</p>
+            <p>We received a request to reset your password. Click the button below to set a new password. This link is valid for 1 hour.</p>
+            <p style="text-align: center; margin: 24px 0;">
+              <a href="${resetLink}" class="button">Reset Password</a>
+            </p>
+            <p class="footer">If you did not request this, you can ignore this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
   }),
 
   // 5. NEW REVIEW NOTIFICATION

@@ -7,6 +7,82 @@ const employeeSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    required: true,
+    index: true // Improve lookup performance for Company Dashboard
+  },
+  // Employment Information
+  employeeId: {
+    type: String,
+    unique: true,
+    required: true,
+    index: true
+  },
+  department: {
+    type: String,
+    required: true
+  },
+  designation: {
+    type: String,
+    required: true
+  },
+  employmentType: {
+    type: String,
+    enum: ['permanent', 'contract', 'intern', 'probation'],
+    default: 'permanent'
+  },
+  employmentStatus: {
+    type: String,
+    enum: ['active', 'inactive', 'terminated', 'resigned'],
+    default: 'active'
+  },
+  dateOfJoining: {
+    type: Date,
+    required: true
+  },
+  dateOfLeaving: {
+    type: Date
+  },
+  workLocation: {
+    type: String,
+    required: true
+  },
+  reportingManager: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee'
+  },
+  teamMembers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee'
+  }],
+  // Company Relationships
+  previousCompanies: [{
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company'
+    },
+    fromDate: Date,
+    toDate: Date,
+    designation: String,
+    reasonForLeaving: String
+  }],
+  // Access Control
+  permissions: {
+    canViewReports: {
+      type: Boolean,
+      default: false
+    },
+    canManageTeam: {
+      type: Boolean,
+      default: false
+    },
+    canAccessDocuments: {
+      type: Boolean,
+      default: true
+    }
+  },
   // Personal Information
   firstName: {
     type: String,
@@ -170,11 +246,11 @@ const employeeSchema = new mongoose.Schema({
 });
 
 // Fix: Robust Indexing for EmployeeSearch.jsx logic
-employeeSchema.index({ userId: 1 });
 employeeSchema.index({ email: 1 });
 employeeSchema.index({ firstName: 1, lastName: 1, dateOfBirth: 1 }); // Multi-key index for search
 employeeSchema.index({ firstName: 'text', lastName: 'text' });
 employeeSchema.index({ overallScore: -1 });
+employeeSchema.index({ createdAt: -1 }); // Optimize "Recent Employees" Sort
 
 // Virtual for full name
 employeeSchema.virtual('fullName').get(function () {
@@ -192,10 +268,14 @@ employeeSchema.virtual('verificationPercentage').get(function () {
   return Math.min(score, 100);
 });
 
-// Update overall score based on reviews
+// Update overall score based on approved reviews only
 employeeSchema.methods.updateScore = async function () {
   const Review = mongoose.model('Review');
-  const reviews = await Review.find({ employeeId: this._id });
+  const reviews = await Review.find({
+    employeeId: this._id,
+    isActive: true,
+    $or: [{ moderationStatus: 'approved' }, { moderationStatus: { $exists: false } }]
+  });
 
   if (reviews.length === 0) {
     this.overallScore = 0;

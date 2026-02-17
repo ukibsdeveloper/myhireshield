@@ -14,7 +14,7 @@ import {
 import { protect, authorize } from '../middleware/auth.middleware.js';
 import { uploadLimiter } from '../middleware/rateLimiter.js';
 import { upload, handleMulterError } from '../middleware/upload.middleware.js';
-import { validateDocumentUpload } from '../middleware/validation.middleware.js';
+import { validateDocumentUpload, validateIdParam } from '../middleware/validation.middleware.js';
 
 const router = express.Router();
 
@@ -48,6 +48,7 @@ router.get(
 router.get(
   '/employee/:employeeId',
   protect,
+  validateIdParam('employeeId'),
   getEmployeeDocuments
 );
 
@@ -56,6 +57,7 @@ router.put(
   '/:id/verify',
   protect,
   authorize('company', 'admin'),
+  validateIdParam('id'),
   verifyDocument
 );
 
@@ -64,6 +66,7 @@ router.post(
   '/:id/background-check',
   protect,
   authorize('company'),
+  validateIdParam('id'),
   performBackgroundCheck
 );
 
@@ -80,6 +83,7 @@ router.delete(
   '/:id',
   protect,
   authorize('employee'),
+  validateIdParam('id'),
   deleteDocument
 );
 
@@ -116,10 +120,11 @@ router.get(
 router.get(
   '/:id/download',
   protect,
+  validateIdParam('id'),
   async (req, res) => {
     try {
       const document = await Document.findById(req.params.id);
-      
+
       if (!document) {
         return res.status(404).json({
           success: false,
@@ -139,7 +144,7 @@ router.get(
       }
 
       const filePath = path.join(__dirname, '..', 'uploads', 'documents', document.fileName);
-      
+
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({
           success: false,

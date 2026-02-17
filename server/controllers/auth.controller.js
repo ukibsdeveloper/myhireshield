@@ -4,7 +4,9 @@ import Employee from '../models/Employee.model.js';
 import AuditLog from '../models/AuditLog.model.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { sendEmail } from '../utils/email.js';
+import { sendEmail, emailTemplates } from '../utils/email.js';
+import { camelCaseName } from '../utils/helpers.js';
+import { safeError } from '../middleware/security.middleware.js';
 
 // --- UTILITIES ---
 const generateToken = (id) => {
@@ -28,7 +30,12 @@ const getDeviceInfo = (req) => {
 // @desc    Register company
 export const registerCompany = async (req, res) => {
   try {
-    const { companyName, email, password, industry, companySize, address, contactPerson, website, gstin, cin } = req.body;
+    let { companyName, email, password, industry, companySize, address, contactPerson, website, gstin, cin } = req.body;
+    // Standardize companyName and contactPerson.name to CamelCase
+    companyName = camelCaseName(companyName);
+    if (contactPerson && contactPerson.name) {
+      contactPerson.name = camelCaseName(contactPerson.name);
+    }
 
     // 1. Check if user exists
     const existingUser = await User.findOne({ email });
@@ -37,12 +44,12 @@ export const registerCompany = async (req, res) => {
     }
 
     // 2. Create User
-    const user = new User({ 
-      email, 
-      password, 
+    const user = new User({
+      email,
+      password,
       role: 'company',
       isActive: true,
-      emailVerified: true 
+      emailVerified: true
     });
     await user.save();
 
@@ -65,17 +72,30 @@ export const registerCompany = async (req, res) => {
     user.profileId = company._id;
     await user.save();
 
+    // Send Welcome Email to Company
+    try {
+      await sendEmail(emailTemplates.welcome(companyName, 'Company') ? {
+        to: email,
+        ...emailTemplates.welcome(companyName, 'Company')
+      } : {});
+    } catch (mailError) {
+      console.error('Welcome email failed:', mailError);
+    }
+
     res.status(201).json({ success: true, message: 'Company registered successfully!' });
   } catch (error) {
     console.error('Registration Error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: safeError(error, 'Registration failed') });
   }
 };
 
 // @desc    Register employee
 export const registerEmployee = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phone, dateOfBirth, gender, city, state, pincode } = req.body;
+    let { firstName, lastName, email, password, phone, dateOfBirth, gender, city, state, pincode } = req.body;
+    // Standardize firstName and lastName to CamelCase
+    firstName = camelCaseName(firstName);
+    lastName = camelCaseName(lastName);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -84,81 +104,86 @@ export const registerEmployee = async (req, res) => {
 
     const user = await User.create({ email, password, role: 'employee' });
 
-// auth.controller.js ke registerEmployee function mein (Line 90-95 ke paas)
-const employee = await Employee.create({
-  userId: user._id,
-  firstName: firstName.trim().toUpperCase(), // uppercase add kiya
-  lastName: lastName.trim().toUpperCase(),   // uppercase add kiya
-  email, 
-  phone, 
-  dateOfBirth, // Ye String format (YYYY-MM-DD) mein hi jayega jo sahi hai
-  gender: gender.toLowerCase(),
-  address: { city, state, pincode, country: 'India' }
-});
+    // auth.controller.js ke registerEmployee function mein (Line 90-95 ke paas)
+    const employee = await Employee.create({
+      userId: user._id,
+      firstName: firstName,
+      lastName: lastName,
+      email,
+      phone,
+      dateOfBirth, // Ye String format (YYYY-MM-DD) mein hi jayega jo sahi hai
+      gender: gender.toLowerCase(),
+      address: { city, state, pincode, country: 'India' }
+    });
 
     user.profileId = employee._id;
     await user.save();
 
-    const token = crypto.randomBytes(32).toString('hex');
-    user.emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
-    user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
-    await user.save();
-
+    // No email verification for employees
     await AuditLog.createLog({
       userId: user._id, userEmail: email, userRole: 'employee',
       eventType: 'user_registration', ...getDeviceInfo(req), status: 'success'
     });
 
-    res.status(201).json({ success: true, message: 'Employee registered. Check email.' });
+    res.status(201).json({ success: true, message: 'Employee registered.' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error registering employee' });
+    res.status(500).json({ success: false, message: safeError(error, 'Registration failed') });
   }
 };
 
-// @desc    Login user (Company: Email | Employee: Name+DOB)
+// @desc    Login user (Email + Password for both roles)
 export const login = async (req, res) => {
   try {
-    const { role, password, email, firstName, dateOfBirth } = req.body;
+    const { role, password, email } = req.body;
 
-    if (!role || !password) {
-      return res.status(400).json({ success: false, message: 'Missing credentials' });
+    if (!role || !password || !email) {
+      return res.status(400).json({ success: false, message: 'Email and password required' });
     }
 
     let user;
     let profileData;
 
-    if (role === 'company') {
-      if (!email) return res.status(400).json({ success: false, message: 'Email required' });
-      user = await User.findOne({ email, role }).select('+password');
-    } 
-else if (role === 'employee') {
-  if (!firstName || !dateOfBirth) return res.status(400).json({ success: false, message: 'Name and DOB required' });
-  
-  profileData = await Employee.findOne({ 
-    firstName: firstName.trim().toUpperCase(), // RegExp ki zaroorat nahi, direct match karein
-    dateOfBirth 
-  });
-
-      if (profileData) {
-        user = await User.findOne({ _id: profileData.userId, role }).select('+password');
-      }
-    }
+    // Unified authentication: email + password for both roles
+    user = await User.findOne({ email, role }).select('+password');
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    // Get profile data based on role
+    if (role === 'company') {
+      profileData = await Company.findOne({ userId: user._id });
+    } else if (role === 'employee') {
+      profileData = await Employee.findOne({ userId: user._id });
+    }
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       await user.incLoginAttempts();
+      // Audit log failed login attempt
+      try {
+        await AuditLog.createLog({
+          userId: user._id, userEmail: user.email, userRole: user.role,
+          eventType: 'login_failed', ...getDeviceInfo(req), status: 'failure',
+          details: `Failed login attempt #${(user.loginAttempts || 0) + 1}`
+        });
+      } catch (e) { /* silent */ }
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Check if account is locked after failed attempts
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      return res.status(423).json({
+        success: false,
+        message: 'Account is temporarily locked due to multiple failed login attempts. Please try again later.'
+      });
     }
 
     await user.updateOne({ $set: { loginAttempts: 0, lastLogin: Date.now() }, $unset: { lockUntil: 1 } });
     const token = generateToken(user._id);
-    
+
     if (!profileData) {
-       profileData = role === 'company' 
+      profileData = role === 'company'
         ? await Company.findOne({ userId: user._id })
         : await Employee.findOne({ userId: user._id });
     }
@@ -168,8 +193,16 @@ else if (role === 'employee') {
       user: { id: user._id, email: user.email, role: user.role, profile: profileData }
     });
 
+    // Audit log successful login
+    try {
+      await AuditLog.createLog({
+        userId: user._id, userEmail: user.email, userRole: user.role,
+        eventType: 'user_login', ...getDeviceInfo(req), status: 'success'
+      });
+    } catch (e) { /* silent */ }
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Login error' });
+    res.status(500).json({ success: false, message: safeError(error, 'Login failed') });
   }
 };
 
@@ -177,13 +210,22 @@ else if (role === 'employee') {
 export const getMe = async (req, res) => {
   try {
     const user = req.user;
-    let profileData = user.role === 'company' 
+    let profileData = user.role === 'company'
       ? await Company.findOne({ userId: user._id })
       : await Employee.findOne({ userId: user._id });
 
-    res.status(200).json({ success: true, user: { id: user._id, email: user.email, role: user.role, profile: profileData } });
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        emailVerified: user.emailVerified,
+        profile: profileData
+      }
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching user' });
+    res.status(500).json({ success: false, message: safeError(error, 'Error fetching user') });
   }
 };
 
@@ -196,8 +238,8 @@ export const logout = async (req, res) => {
 // @desc    Verify email
 export const verifyEmail = async (req, res) => {
   const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-  const user = await User.findOne({ emailVerificationToken: hashedToken, emailVerificationExpires: { $gt: Date.now() } });
-  if (!user) return res.status(400).json({ success: false, message: 'Invalid token' });
+  const user = await User.findOne({ emailVerificationToken: hashedToken, emailVerificationExpires: { $gt: Date.now() }, role: 'company' });
+  if (!user) return res.status(400).json({ success: false, message: 'Invalid token or not a company account' });
 
   user.emailVerified = true;
   user.emailVerificationToken = undefined;
@@ -206,43 +248,109 @@ export const verifyEmail = async (req, res) => {
   res.status(200).json({ success: true, message: 'Email verified' });
 };
 
+// @desc    Resend verification email (authenticated or by email in body)
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    const email = req.body?.email || req.user?.email;
+    if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+
+    // Only allow for companies
+    const user = await User.findOne({ email, role: 'company' });
+    if (!user) return res.status(404).json({ success: false, message: 'Company user not found' });
+    if (user.emailVerified) return res.status(400).json({ success: false, message: 'Email already verified' });
+
+    const token = crypto.randomBytes(32).toString('hex');
+    user.emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
+    user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${token}`;
+    const template = emailTemplates.verifyEmail(user.email, verifyUrl);
+    await sendEmail({ to: user.email, subject: template.subject, html: template.html });
+    res.status(200).json({ success: true, message: 'Verification email sent' });
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    res.status(500).json({ success: false, message: safeError(error, 'Failed to send verification email') });
+  }
+};
+
 // @desc    Forgot Password
 export const forgotPassword = async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ email: req.body.email, role: 'company' });
 
-  const resetToken = crypto.randomBytes(32).toString('hex');
-  user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-  user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
-  await user.save();
+    // Security: Always return success to prevent email enumeration
+    if (!user) {
+      return res.status(200).json({ success: true, message: 'If an account exists, an email has been sent.' });
+    }
 
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-  await sendEmail({ to: user.email, subject: 'Password Reset', template: 'passwordReset', data: { name: user.email, resetUrl } });
-  res.status(200).json({ success: true, message: 'Email sent' });
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
+    await user.save();
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const template = emailTemplates.resetPassword(user.email, resetUrl);
+
+    await sendEmail({ to: user.email, subject: template.subject, html: template.html });
+
+    // Audit log
+    await AuditLog.createLog({
+      userId: user._id, userEmail: user.email, userRole: user.role,
+      eventType: 'password_reset_request', ...getDeviceInfo(req), status: 'success'
+    });
+
+    res.status(200).json({ success: true, message: 'If an account exists, an email has been sent.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: safeError(error, 'Error processing request') });
+  }
 };
 
 // @desc    Reset Password
 export const resetPassword = async (req, res) => {
-  const hashedToken = crypto.createHash('sha256').update(req.body.token).digest('hex');
-  const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } });
-  if (!user) return res.status(400).json({ success: false, message: 'Invalid token' });
+  try {
+    const hashedToken = crypto.createHash('sha256').update(req.body.token).digest('hex');
+    const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } });
 
-  user.password = req.body.password;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-  await user.save();
-  res.status(200).json({ success: true, message: 'Password reset successful' });
+    if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+
+    user.password = req.body.password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    // Audit log
+    await AuditLog.createLog({
+      userId: user._id, userEmail: user.email, userRole: user.role,
+      eventType: 'password_reset_success', ...getDeviceInfo(req), status: 'success'
+    });
+
+    res.status(200).json({ success: true, message: 'Password reset successful' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: safeError(error, 'Error resetting password') });
+  }
 };
 
 // @desc    Change Password
 export const changePassword = async (req, res) => {
-  const user = await User.findById(req.user._id).select('+password');
-  const isMatch = await user.comparePassword(req.body.currentPassword);
-  if (!isMatch) return res.status(401).json({ success: false, message: 'Old password wrong' });
+  try {
+    const user = await User.findById(req.user._id).select('+password');
+    const isMatch = await user.comparePassword(req.body.currentPassword);
+    if (!isMatch) return res.status(401).json({ success: false, message: 'Current password is incorrect' });
 
-  user.password = req.body.newPassword;
-  await user.save();
-  res.status(200).json({ success: true, message: 'Password changed' });
+    user.password = req.body.newPassword;
+    await user.save();
+
+    // Audit log
+    await AuditLog.createLog({
+      userId: user._id, userEmail: user.email, userRole: user.role,
+      eventType: 'password_change', ...getDeviceInfo(req), status: 'success'
+    });
+
+    res.status(200).json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: safeError(error, 'Error changing password') });
+  }
 };
 
 // @desc    Enable 2FA
@@ -278,7 +386,7 @@ export const enable2FA = async (req, res) => {
       data: { phoneNumber: user.phoneNumber }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error enabling 2FA' });
+    res.status(500).json({ success: false, message: safeError(error, 'Error enabling 2FA') });
   }
 };
 
@@ -300,7 +408,7 @@ export const verify2FA = async (req, res) => {
 
     res.status(200).json({ success: true, message: '2FA verified successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error verifying 2FA' });
+    res.status(500).json({ success: false, message: safeError(error, 'Error verifying 2FA') });
   }
 };
 
@@ -326,6 +434,6 @@ export const disable2FA = async (req, res) => {
 
     res.status(200).json({ success: true, message: '2FA disabled successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error disabling 2FA' });
+    res.status(500).json({ success: false, message: safeError(error, 'Error disabling 2FA') });
   }
 };

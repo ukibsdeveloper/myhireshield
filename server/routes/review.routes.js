@@ -6,11 +6,13 @@ import {
   updateReview,
   deleteReview,
   getReviewStats,
-  getReviewById
+  getReviewById,
+  getPendingReviews,
+  moderateReview
 } from '../controllers/review.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 import { reviewLimiter } from '../middleware/rateLimiter.js';
-import { validateReview } from '../middleware/validation.middleware.js';
+import { validateReview, validateIdParam } from '../middleware/validation.middleware.js';
 
 import { upload, handleMulterError } from '../middleware/upload.middleware.js';
 
@@ -22,10 +24,10 @@ const router = express.Router();
  */
 
 // Get all reviews for a specific employee
-router.get('/employee/:employeeId', getEmployeeReviews);
+router.get('/employee/:employeeId', validateIdParam('employeeId'), getEmployeeReviews);
 
 // Get aggregated statistics (Average ratings) for an employee
-router.get('/stats/:employeeId', getReviewStats);
+router.get('/stats/:employeeId', validateIdParam('employeeId'), getReviewStats);
 
 /**
  * --- PROTECTED ROUTES (Company Only) ---
@@ -52,13 +54,13 @@ router.post(
   '/',
   protect,
   authorize('company'),
+  reviewLimiter,
   upload.fields([
     { name: 'govId', maxCount: 1 },
     { name: 'expCert', maxCount: 1 }
   ]),
   handleMulterError,
   parseReviewData,
-  reviewLimiter,
   validateReview,
   createReview
 );
@@ -71,11 +73,27 @@ router.get(
   getCompanyReviews
 );
 
+// --- ADMIN: Verify reviews before they go live ---
+router.get(
+  '/admin/pending',
+  protect,
+  authorize('admin'),
+  getPendingReviews
+);
+router.put(
+  '/admin/:id/moderate',
+  protect,
+  authorize('admin'),
+  validateIdParam('id'),
+  moderateReview
+);
+
 // Get a single review by ID
 router.get(
   '/:id',
   protect,
   authorize('company'),
+  validateIdParam('id'),
   getReviewById
 );
 
@@ -84,6 +102,7 @@ router.put(
   '/:id',
   protect,
   authorize('company'),
+  validateIdParam('id'),
   validateReview,
   updateReview
 );
@@ -93,6 +112,7 @@ router.delete(
   '/:id',
   protect,
   authorize('company'),
+  validateIdParam('id'),
   deleteReview
 );
 

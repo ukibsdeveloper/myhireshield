@@ -26,7 +26,7 @@ const auditLogSchema = new mongoose.Schema({
       'two_factor_disabled',
       'failed_login_attempt',
       // Bureau Specific (New Nodes)
-      'employee_creation_by_company', 
+      'employee_creation_by_company',
       'score_decryption_payment',
       // Profile & Ledger Actions
       'profile_created',
@@ -88,12 +88,13 @@ const auditLogSchema = new mongoose.Schema({
 auditLogSchema.index({ userId: 1, timestamp: -1 });
 auditLogSchema.index({ eventType: 1, timestamp: -1 });
 auditLogSchema.index({ ipAddress: 1, timestamp: -1 });
+auditLogSchema.index({ createdAt: -1 }); // Optimize Admin Dashboard Sort
 
 // Automatically delete logs older than 2 years to keep DB lean
-auditLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 63072000 }); 
+auditLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 63072000 });
 
 // Static method to create audit log without breaking main logic
-auditLogSchema.statics.createLog = async function(data) {
+auditLogSchema.statics.createLog = async function (data) {
   try {
     const log = new this(data);
     await log.save();
@@ -105,14 +106,14 @@ auditLogSchema.statics.createLog = async function(data) {
 };
 
 // Security logic: Detect brute force or scraping
-auditLogSchema.statics.detectSuspiciousActivity = async function(userId) {
+auditLogSchema.statics.detectSuspiciousActivity = async function (userId) {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const failedLogins = await this.countDocuments({
     userId,
     eventType: 'failed_login_attempt',
     timestamp: { $gte: oneHourAgo }
   });
-  
+
   if (failedLogins >= 5) {
     return { suspicious: true, reason: 'Brute force suspected', count: failedLogins };
   }

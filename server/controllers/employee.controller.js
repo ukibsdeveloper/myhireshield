@@ -147,7 +147,11 @@ export const getEmployeeById = async (req, res) => {
     employee.lastViewedAt = new Date();
     await employee.save();
 
-    const reviews = await Review.find({ employeeId: employee._id, isActive: true })
+    const reviews = await Review.find({
+      employeeId: employee._id,
+      isActive: true,
+      $or: [{ moderationStatus: 'approved' }, { moderationStatus: { $exists: false } }]
+    })
       .populate('companyId', 'companyName industry logo')
       .sort({ createdAt: -1 });
 

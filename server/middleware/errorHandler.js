@@ -1,31 +1,31 @@
 /**
  * Global Error Handler Middleware
- * Sabhi controllers se aane wale errors yahan handle hote hain
+ * Production-safe: Never leaks internal details to the client
  */
 export const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Debugging ke liye console par error print karega
-  if (process.env.NODE_ENV === 'development') {
-    console.error('--- ERROR DEBUGGER ---');
-    console.error(err);
-  }
+  // Log full error in all environments (for server-side debugging)
+  console.error(`❌ [${req.requestId || 'NO-ID'}] ${req.method} ${req.originalUrl}`, {
+    error: err.message,
+    stack: err.stack,
+    ip: req.clientIP || req.ip,
+    userId: req.user?._id
+  });
 
-  // 1. Mongoose: Galat ID format (CastError)
+  // 1. Mongoose: Invalid ID format (CastError)
   if (err.name === 'CastError') {
-    const message = `Resource nahi mila. Galat ID format: ${err.value}`;
-    error = { message, statusCode: 404 };
+    error = { message: 'Resource not found. Invalid ID format.', statusCode: 404 };
   }
 
-  // 2. Mongoose: Duplicate Data (Email ya phone pehle se hai)
+  // 2. Mongoose: Duplicate Key (Email/Phone already exists)
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
-    const message = `${field.charAt(0).toUpperCase() + field.slice(1)} pehle se database mein maujood hai.`;
-    error = { message, statusCode: 400 };
+    const field = Object.keys(err.keyValue || {})[0] || 'field';
+    error = { message: `This ${field} is already registered.`, statusCode: 400 };
   }
 
-  // 3. Mongoose: Validation Error (Schema requirements fail)
+  // 3. Mongoose: Validation Error
   if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map(val => val.message).join(', ');
     error = { message, statusCode: 400 };
@@ -33,21 +33,44 @@ export const errorHandler = (err, req, res, next) => {
 
   // 4. JWT: Invalid Token
   if (err.name === 'JsonWebTokenError') {
-    const message = 'Authentication token sahi nahi hai. Please login karein.';
-    error = { message, statusCode: 401 };
+    error = { message: 'Authentication failed. Please login again.', statusCode: 401 };
   }
 
   // 5. JWT: Expired Token
   if (err.name === 'TokenExpiredError') {
-    const message = 'Aapka session khatam ho gaya hai. Please phir se login karein.';
-    error = { message, statusCode: 401 };
+    error = { message: 'Session expired. Please login again.', statusCode: 401 };
   }
 
-  // Final Response
-  res.status(error.statusCode || 500).json({
+  // 6. CORS Error
+  if (err.message && err.message.includes('CORS')) {
+    error = { message: 'Cross-origin request blocked.', statusCode: 403 };
+  }
+
+  // 7. Payload Too Large
+  if (err.type === 'entity.too.large') {
+    error = { message: 'Request payload too large.', statusCode: 413 };
+  }
+
+  // 8. Syntax Error (bad JSON)
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    error = { message: 'Invalid JSON in request body.', statusCode: 400 };
+  }
+
+  // Final Response — NEVER leak stack trace or internal details in production
+  const statusCode = error.statusCode || 500;
+  const response = {
     success: false,
-    message: error.message || 'Server mein kuch takleef hai (Server Error)',
-    // Stack trace sirf development mode mein dikhega security ke liye
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
+    message: statusCode === 500 && process.env.NODE_ENV === 'production'
+      ? 'Internal server error. Please try again later.'
+      : error.message || 'Server error',
+    requestId: req.requestId
+  };
+
+  // Stack trace ONLY in development
+  if (process.env.NODE_ENV === 'development') {
+    response.stack = err.stack;
+    response.detail = err.message;
+  }
+
+  res.status(statusCode).json(response);
 };

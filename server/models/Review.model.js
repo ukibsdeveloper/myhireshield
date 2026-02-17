@@ -35,7 +35,7 @@ const reviewSchema = new mongoose.Schema({
     },
     reasonForLeaving: String
   },
-  
+
   // --- ASSET NODES (New: Synchronized with SubmitReview.jsx) ---
   verificationAssets: {
     govId: { type: String }, // URL to uploaded Government ID
@@ -60,9 +60,15 @@ const reviewSchema = new mongoose.Schema({
   moderationStatus: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],
-    default: 'approved'
+    default: 'pending'
   },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  editHistory: [{
+    editedAt: Date,
+    editedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    changes: Object
+  }],
+  deletedAt: Date
 }, {
   timestamps: true
 });
@@ -71,14 +77,17 @@ const reviewSchema = new mongoose.Schema({
 reviewSchema.index({ companyId: 1, createdAt: -1 });
 reviewSchema.index({ employeeId: 1, createdAt: -1 });
 reviewSchema.index({ moderationStatus: 1 });
+// Performance: Optimize Score Calculation Query
+reviewSchema.index({ employeeId: 1, isActive: 1, moderationStatus: 1 });
+reviewSchema.index({ isActive: 1, createdAt: -1 }); // Optimize "Recent Reviews" Sort
 
 // Virtuals
-reviewSchema.virtual('averageRating').get(function() {
+reviewSchema.virtual('averageRating').get(function () {
   const ratings = Object.values(this.ratings);
   return ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
 });
 
-reviewSchema.virtual('daysSinceEmploymentEnded').get(function() {
+reviewSchema.virtual('daysSinceEmploymentEnded').get(function () {
   if (!this.employmentDetails.endDate) return null;
   const now = new Date();
   const endDate = new Date(this.employmentDetails.endDate);
@@ -87,7 +96,7 @@ reviewSchema.virtual('daysSinceEmploymentEnded').get(function() {
 });
 
 // Pre-save validation for 15-day window
-reviewSchema.pre('save', async function() {
+reviewSchema.pre('save', async function () {
   if (this.isNew) {
     const daysSince = this.daysSinceEmploymentEnded;
     // Window policy: Review must be within 15 days of exit
@@ -97,9 +106,10 @@ reviewSchema.pre('save', async function() {
   }
 });
 
-// Post-save: Trigger Employee Score Update
-reviewSchema.post('save', async function() {
+// Post-save: Trigger Employee Score Update (only for approved reviews)
+reviewSchema.post('save', async function () {
   try {
+    if (this.moderationStatus !== 'approved') return;
     const Employee = mongoose.model('Employee');
     const employee = await Employee.findById(this.employeeId);
     if (employee) await employee.updateScore();

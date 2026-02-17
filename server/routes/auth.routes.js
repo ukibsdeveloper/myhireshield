@@ -6,6 +6,7 @@ import {
   logout,
   getMe,
   verifyEmail,
+  resendVerificationEmail,
   forgotPassword,
   resetPassword,
   changePassword,
@@ -17,9 +18,13 @@ import { protect } from '../middleware/auth.middleware.js';
 import {
   validateCompanyRegistration,
   validateEmployeeRegistration,
-  validateLogin
+  validateLogin,
+  validatePasswordChange,
+  validatePasswordReset,
+  validateEmail,
+  validate2FACode
 } from '../middleware/validation.middleware.js';
-import { authLimiter, registerLimiter, loginLimiter } from '../middleware/rateLimiter.js';
+import { authLimiter, registerLimiter, loginLimiter, emailLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -27,21 +32,22 @@ const router = express.Router();
  * --- PUBLIC ROUTES ---
  */
 
-// Company Registration
+// Company Registration (Rate limited + Validated)
 router.post('/register/company', registerLimiter, validateCompanyRegistration, registerCompany);
 
-// Employee Registration
+// Employee Registration (Rate limited + Validated)
 router.post('/register/employee', registerLimiter, validateEmployeeRegistration, registerEmployee);
 
-// Login (Using loginLimiter for specific protection)
+// Login (Rate limited + Validated)
 router.post('/login', loginLimiter, validateLogin, login);
 
 // Email Verification
 router.get('/verify-email/:token', verifyEmail);
+router.post('/resend-verification', emailLimiter, resendVerificationEmail);
 
-// Password Management
-router.post('/forgot-password', authLimiter, forgotPassword);
-router.post('/reset-password', resetPassword);
+// Password Management (Rate limited + Validated)
+router.post('/forgot-password', emailLimiter, validateEmail, forgotPassword);
+router.post('/reset-password', authLimiter, validatePasswordReset, resetPassword);
 
 /**
  * --- PROTECTED ROUTES (Requires Token) ---
@@ -53,12 +59,12 @@ router.get('/me', protect, getMe);
 // Logout
 router.post('/logout', protect, logout);
 
-// Change Password (Auth required)
-router.put('/change-password', protect, changePassword);
+// Change Password (Auth required + Validated)
+router.put('/change-password', protect, validatePasswordChange, changePassword);
 
-// 2FA Routes
-router.post('/2fa/enable', protect, enable2FA);
-router.post('/2fa/verify', protect, verify2FA);
-router.post('/2fa/disable', protect, disable2FA);
+// 2FA Routes (Rate limited)
+router.post('/2fa/enable', protect, authLimiter, enable2FA);
+router.post('/2fa/verify', protect, authLimiter, validate2FACode, verify2FA);
+router.post('/2fa/disable', protect, authLimiter, disable2FA);
 
 export default router;

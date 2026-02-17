@@ -45,7 +45,8 @@ export const createReview = async (req, res) => {
       comment,
       wouldRehire: wouldRehire === 'true' || wouldRehire === true,
       tags: tags || [],
-      createdBy: req.user._id
+      createdBy: req.user._id,
+      moderationStatus: 'pending'
     };
 
     const review = await Review.create(reviewData);
@@ -88,7 +89,11 @@ export const getEmployeeReviews = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Employee profile is not public' });
     }
 
-    const reviews = await Review.find({ employeeId, isActive: true })
+    const reviews = await Review.find({
+      employeeId,
+      isActive: true,
+      $or: [{ moderationStatus: 'approved' }, { moderationStatus: { $exists: false } }]
+    })
       .populate('companyId', 'companyName industry logo verified')
       .sort({ createdAt: -1 });
 
@@ -160,6 +165,7 @@ export const updateReview = async (req, res) => {
     if (comment) { review.comment = comment; changes.comment = comment; }
     if (wouldRehire !== undefined) { review.wouldRehire = wouldRehire; changes.wouldRehire = wouldRehire; }
 
+    if (!review.editHistory) review.editHistory = [];
     review.editHistory.push({
       editedAt: Date.now(),
       editedBy: req.user._id,
@@ -201,6 +207,58 @@ export const deleteReview = async (req, res) => {
   }
 };
 
+// @desc    Get pending reviews (Admin only - for team verification)
+// @route   GET /api/reviews/admin/pending
+export const getPendingReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find({ isActive: true, moderationStatus: 'pending' })
+      .populate('employeeId', 'firstName lastName email')
+      .populate('companyId', 'companyName')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: reviews.length, data: reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching pending reviews' });
+  }
+};
+
+// @desc    Approve or reject review (Admin only)
+// @route   PUT /api/reviews/admin/:id/moderate
+export const moderateReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ success: false, message: 'Action must be approve or reject' });
+    }
+
+    const review = await Review.findById(id);
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+    if (review.moderationStatus !== 'pending') {
+      return res.status(400).json({ success: false, message: 'Review is not pending moderation' });
+    }
+
+    review.moderationStatus = action === 'approve' ? 'approved' : 'rejected';
+    review.verifiedBy = req.user._id;
+    review.verifiedAt = new Date();
+    await review.save();
+
+    if (review.moderationStatus === 'approved') {
+      const employee = await Employee.findById(review.employeeId);
+      if (employee) await employee.updateScore();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: action === 'approve' ? 'Review approved and now visible on the website' : 'Review rejected',
+      data: review
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Moderation failed' });
+  }
+};
+
 // @desc    Get review statistics using Aggregation Pipeline
 export const getReviewStats = async (req, res) => {
   try {
@@ -210,7 +268,8 @@ export const getReviewStats = async (req, res) => {
       {
         $match: {
           employeeId: new mongoose.Types.ObjectId(employeeId),
-          isActive: true
+          isActive: true,
+          $or: [{ moderationStatus: 'approved' }, { moderationStatus: { $exists: false } }]
         }
       },
       {
