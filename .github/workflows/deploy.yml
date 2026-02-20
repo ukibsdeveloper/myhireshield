@@ -18,10 +18,28 @@ jobs:
             cd /home/myhireshield/htdocs/myhireshield.com
             git config --global --add safe.directory /home/myhireshield/htdocs/myhireshield.com
             git pull origin main
-            cd client && npm install && npm run build
-            rm -rf ../assets
+            
+            # 1. Frontend Build
+            cd client
+            npm install
+            npm run build
+            
+            # 2. ATOMIC SWAP (Purana sab saaf karke naya copy)
+            # Hum folder ko pura khali karenge index.html aur assets sab ke liye
+            find /home/myhireshield/htdocs/myhireshield.com/ -maxdepth 1 ! -name 'client' ! -name 'backend' ! -name '.git' ! -name '.github' -type f -delete
+            rm -rf /home/myhireshield/htdocs/myhireshield.com/assets
+            
+            # Nayi files copy karo
             cp -r dist/* ../
-            cd ../backend && npm install
+            
+            # 3. Backend Setup
+            cd ../backend
+            npm install
             pm2 restart hireshield-api
+            
+            # 4. PURGE NGINX CACHE (Asli jad ye hai)
+            rm -rf /var/cache/nginx/*
+            
+            # 5. Permissions & Restart
             chown -R myhireshield:myhireshield /home/myhireshield/htdocs/myhireshield.com
-            systemctl reload nginx
+            systemctl restart nginx
