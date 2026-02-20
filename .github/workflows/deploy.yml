@@ -9,24 +9,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Execute Remote SSH Commands
-        uses: appleboy/ssh-action@master
+        # Yahan humne version fix kar diya hai taaki red line hat jaye
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: 62.72.57.197
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /home/myhireshield/htdocs/myhireshield.com
-            # Code update karo
             git config --global --add safe.directory /home/myhireshield/htdocs/myhireshield.com
             git pull origin main
             
-            # Frontend build karo
-            cd client && npm install && npm run build
+            # Frontend Build
+            cd client
+            npm install
+            npm run build
+            
+            # Clean old assets and copy new build
+            rm -rf ../assets
             cp -r dist/* ../
             
-            # Backend dependencies update aur restart
-            cd ../backend && npm install
+            # Backend Setup
+            cd ../backend
+            npm install
             pm2 restart hireshield-api
             
-            # Ownership fix (CloudPanel permissions)
+            # Final touch
             chown -R myhireshield:myhireshield /home/myhireshield/htdocs/myhireshield.com
+            systemctl reload nginx
