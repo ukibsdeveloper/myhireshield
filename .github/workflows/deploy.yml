@@ -1,15 +1,14 @@
-name: Auto Deploy MyHireShield
+name: Auto Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Execute Remote SSH Commands
-        # Yahan humne version fix kar diya hai taaki red line hat jaye
+      - name: SSH Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 62.72.57.197
@@ -19,21 +18,10 @@ jobs:
             cd /home/myhireshield/htdocs/myhireshield.com
             git config --global --add safe.directory /home/myhireshield/htdocs/myhireshield.com
             git pull origin main
-            
-            # Frontend Build
-            cd client
-            npm install
-            npm run build
-            
-            # Clean old assets and copy new build
+            cd client && npm install && npm run build
             rm -rf ../assets
             cp -r dist/* ../
-            
-            # Backend Setup
-            cd ../backend
-            npm install
+            cd ../backend && npm install
             pm2 restart hireshield-api
-            
-            # Final touch
             chown -R myhireshield:myhireshield /home/myhireshield/htdocs/myhireshield.com
             systemctl reload nginx
