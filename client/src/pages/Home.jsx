@@ -92,7 +92,7 @@ const Home = () => {
               </div>
 
               <h1 className="text-[32px] sm:text-5xl md:text-6xl lg:text-[76px] font-black text-[#496279] mb-6 sm:mb-8 leading-[1.1] tracking-[-0.03em]">
-                Smarter Hiring Starts with<br className="hidden md:block" />
+                Smarter Hiring Starts <br className="hidden md:block" />
                 <span className="text-[#4c8051] relative">
                   Verified Employee.
                   <svg className="absolute -bottom-2 left-0 w-full h-2 text-[#4c8051]/20" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 25 0, 50 5 T 100 5" stroke="currentColor" strokeWidth="4" fill="none" /></svg>
