@@ -44,13 +44,13 @@ export const AuthProvider = ({ children }) => {
    */
   const login = async (credentials, role) => {
     try {
-      // Backend expects: { email, password, role } OR { firstName, dateOfBirth, role }
       const response = await api.post('/auth/login', {
         ...credentials,
         role
       });
 
       if (!response.data.success) {
+        console.error('Login failed:', response.data.message);
         return {
           success: false,
           error: response.data.message || 'Login failed'
@@ -63,11 +63,12 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(userData);
 
-      return { success: true, user: userData };
+      return { success: true };
     } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
       return {
         success: false,
-        error: error.response?.data?.message || 'Authentication Protocol Failed'
+        error: error.response?.data?.message || 'An error occurred during login'
       };
     }
   };
@@ -81,31 +82,47 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Other functions remain robust but synced with backend paths
-  const registerCompany = async (companyData) => {
+  const registerCompany = async (data) => {
     try {
-      const response = await api.post('/auth/register/company', companyData);
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      console.error('Registration error:', error.response?.data);
+      const response = await api.post('/auth/register/company', data);
 
-      // Handle validation errors (array of errors)
-      if (error.response?.data?.errors) {
-        const errorMessages = error.response.data.errors.map(err => err.message).join(', ');
-        return { success: false, error: errorMessages };
+      if (!response.data.success) {
+        console.error('Company registration failed:', response.data.message);
+        return {
+          success: false,
+          error: response.data.message || 'Registration failed'
+        };
       }
 
-      // Handle single error message
-      const errorMessage = error.response?.data?.message || 'Registration failed';
-      return { success: false, error: errorMessage };
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      console.error('Registration error:', error.response?.data || error.message);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'An error occurred during registration'
+      };
     }
   };
 
-  const registerEmployee = async (employeeData) => {
+  const registerEmployee = async (data) => {
     try {
-      const response = await api.post('/auth/register/employee', employeeData);
+      const response = await api.post('/auth/register/employee', data);
+
+      if (!response.data.success) {
+        console.error('Employee registration failed:', response.data.message);
+        return {
+          success: false,
+          error: response.data.message || 'Registration failed'
+        };
+      }
+
       return { success: true, message: response.data.message };
     } catch (error) {
-      return { success: false, error: error.response?.data?.message || 'Registration failed' };
+      console.error('Registration error:', error.response?.data || error.message);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'An error occurred during registration'
+      };
     }
   };
 
