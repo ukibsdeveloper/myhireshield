@@ -84,8 +84,13 @@ export const registerCompany = async (req, res) => {
 
     res.status(201).json({ success: true, message: 'Company registered successfully!' });
   } catch (error) {
-    console.error('Registration Error:', error);
-    res.status(500).json({ success: false, message: safeError(error, 'Registration failed') });
+    console.error('❌ Company Registration Error:', {
+      message: error.message,
+      name: error.name,
+      code: error.code,
+      path: error.path
+    });
+    res.status(500).json({ success: false, message: safeError(error, 'Company registration failed. Please try again later.') });
   }
 };
 
@@ -127,7 +132,12 @@ export const registerEmployee = async (req, res) => {
 
     res.status(201).json({ success: true, message: 'Employee registered.' });
   } catch (error) {
-    res.status(500).json({ success: false, message: safeError(error, 'Registration failed') });
+    console.error('❌ Employee Registration Error:', {
+      message: error.message,
+      name: error.name,
+      code: error.code
+    });
+    res.status(500).json({ success: false, message: safeError(error, 'Employee registration failed. Please try again later.') });
   }
 };
 
@@ -202,7 +212,12 @@ export const login = async (req, res) => {
     } catch (e) { /* silent */ }
 
   } catch (error) {
-    res.status(500).json({ success: false, message: safeError(error, 'Login failed') });
+    console.error('❌ Login Error:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack ? error.stack.split('\n').slice(0, 2) : null
+    });
+    res.status(500).json({ success: false, message: safeError(error, 'Login failed. Please try again later.') });
   }
 };
 

@@ -115,22 +115,34 @@ app.use(securityHeaders);
 // 5. CORS — Strict origin control
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
-  process.env.PRODUCTION_URL
+  process.env.PRODUCTION_URL,
+  process.env.CORS_ORIGIN,
+  'https://myhireshield.com',
+  'https://www.myhireshield.com',
+  'http://myhireshield.com',
+  'http://www.myhireshield.com'
 ].filter(Boolean);
+
+console.log('🔓 CORS Allowed Origins:', allowedOrigins);
 
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    if (!origin) {
+      console.log('✅ No origin header - allowing request');
       return callback(null, true);
     }
+    if (allowedOrigins.includes(origin)) {
+      console.log(`✅ CORS: Allowing origin ${origin}`);
+      return callback(null, true);
+    }
+    console.warn(`❌ CORS: Blocked origin ${origin}`);
     return callback(new Error('CORS policy violation: Origin not allowed'), false);
   },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-Requested-With'],
   exposedHeaders: ['X-Request-Id'],
   maxAge: 86400 // Cache preflight for 24 hours
 };
@@ -192,7 +204,35 @@ app.get('/api/health', (req, res) => {
     message: 'MyHireShield API is active',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    requestId: req.requestId
+    requestId: req.requestId,
+    origin: req.get('origin') || 'No origin header',
+    mongoConnected: !!process.env.MONGODB_URI
+  });
+});
+
+// Diagnostic endpoint (unprotected)
+app.get('/api/diagnose', (req, res) => {
+  res.status(200).json({
+    success: true,
+    api: 'MyHireShield API',
+    status: 'operational',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    frontend: {
+      url: process.env.FRONTEND_URL,
+      productionUrl: process.env.PRODUCTION_URL,
+      corsOrigin: process.env.CORS_ORIGIN
+    },
+    requestInfo: {
+      origin: req.get('origin') || 'No origin header',
+      method: req.method,
+      ip: req.clientIP || req.ip,
+      userAgent: req.get('user-agent')
+    },
+    versions: {
+      node: process.version,
+      npm: 'Check package.json'
+    }
   });
 });
 

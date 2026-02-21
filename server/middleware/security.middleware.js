@@ -183,6 +183,13 @@ export const sanitizeFilePath = (filePath) => {
 // ─── 9. SAFE ERROR RESPONSE ──────────────────────────
 // Prevents leaking internal error details in production
 export const safeError = (error, defaultMsg = 'An error occurred') => {
+    // Always log the real error for debugging
+    console.error('⚠️ Error Details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack ? error.stack.split('\n').slice(0, 3) : null
+    });
+    
     if (process.env.NODE_ENV === 'production') {
         return defaultMsg;
     }

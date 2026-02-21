@@ -4,6 +4,13 @@ import toast from 'react-hot-toast';
 // API Base URL - in dev use '' (proxy); in prod use VITE_API_URL (e.g. https://api.example.com)
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
+// Log API configuration for debugging
+console.log('API Configuration:', {
+  baseURL: API_BASE_URL,
+  environment: import.meta.env.MODE,
+  production: import.meta.env.PROD
+});
+
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL || undefined,
@@ -11,6 +18,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 30000, // 30 seconds
+  withCredentials: true // Enable for CORS with credentials
 });
 
 // Request interceptor - add token to requests
@@ -33,6 +41,15 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     const message = error.response?.data?.message || 'Something went wrong';
+    const url = error.config?.url || 'unknown';
+
+    // Enhanced logging for debugging
+    console.error('API Error:', {
+      status,
+      message,
+      url,
+      error: error.response?.data || error.message
+    });
 
     if (status === 401) {
       // Unauthorized - clear token and redirect to login
@@ -56,10 +73,15 @@ api.interceptors.response.use(
       toast.error('Too many requests. Please try again in a few minutes.');
     } else if (status === 500) {
       // Server Error
-      toast.error('Server error. Please try again later.');
+      console.error('Server Error Details:', error.response?.data);
+      toast.error(message || 'Server error. Please try again later.');
+    } else if (status === 503) {
+      // Service Unavailable
+      toast.error('Service temporarily unavailable. Please try again later.');
     } else if (!error.response) {
       // Network Error
-      toast.error('Network error. Check your connection.');
+      console.error('Network Error:', error.message);
+      toast.error('Network error. Check your connection and API URL.');
     } else {
       // Other errors (400, 404, etc.)
       toast.error(message);
