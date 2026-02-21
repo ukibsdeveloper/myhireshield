@@ -88,7 +88,7 @@ const Home = () => {
             <div className="animate-on-scroll z-10 text-center lg:text-left w-full lg:w-3/5">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#dd8d88]/20 text-[#dd8d88] text-xs font-black uppercase tracking-[0.25em] mb-8 shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#dd8d88] animate-pulse"></span>
-                Verify. Score. Decide. Hire.
+                Veify. Score. Decide. Hire.
               </div>
 
               <h1 className="text-[32px] sm:text-5xl md:text-6xl lg:text-[76px] font-black text-[#496279] mb-6 sm:mb-8 leading-[1.1] tracking-[-0.03em]">
