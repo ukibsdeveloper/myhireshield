@@ -116,10 +116,10 @@ const Home = () => {
                   </Link>
 
                   <Link
-                    to="/register/employee"
+                    to="/login"
                     className="w-full sm:w-auto px-10 py-5 bg-white text-[#496279] border border-slate-200 rounded-2xl font-bold text-xs tracking-[0.2em] hover:bg-slate-50 transition-all shadow-sm hover:shadow-md active:scale-95"
                   >
-                    I am an Employee
+                    Employee Login
                   </Link>
                 </div>
 

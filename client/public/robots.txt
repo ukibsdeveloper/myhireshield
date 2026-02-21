@@ -2,7 +2,6 @@ User-agent: *
 Allow: /
 Allow: /login
 Allow: /register/company
-Allow: /register/employee
 Allow: /terms
 Allow: /privacy
 Allow: /consent

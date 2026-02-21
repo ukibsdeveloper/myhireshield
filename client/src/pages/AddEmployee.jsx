@@ -4,6 +4,7 @@ import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import DateInput from '../components/DateInput';
+import toast from 'react-hot-toast';
 
 const AddEmployee = () => {
   const navigate = useNavigate();
@@ -12,11 +13,14 @@ const AddEmployee = () => {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '', // Ab yahan real number aayega
+    phone: '',
     dateOfBirth: '',
     gender: 'male',
     designation: '',
-    department: 'General'
+    department: 'General',
+    employmentType: 'permanent',
+    dateOfJoining: new Date().toISOString().split('T')[0],
+    workLocation: ''
   });
 
   const handleSubmit = async (e) => {
@@ -24,49 +28,47 @@ const AddEmployee = () => {
     setLoading(true);
 
     try {
-      // 1. Phone number validation (6-9 se shuru aur exactly 10 digits)
+      // Phone validation
       if (!/^[6-9]\d{9}$/.test(formData.phone)) {
-        return alert("Error: Indian phone number must start with 6-9 and be exactly 10 digits.");
+        toast.error('Phone number must start with 6-9 and be 10 digits');
+        return;
       }
 
-      // 2. Age check (Frontend safety)
+      // Age check
       const birthDate = new Date(formData.dateOfBirth);
       const age = (new Date() - birthDate) / (1000 * 60 * 60 * 24 * 365.25);
-      if (age < 18) {
-        return alert("Error: Employee must be at least 18 years old.");
+      if (age < 16) {
+        toast.error('Employee must be at least 16 years old');
+        return;
       }
-
-      const cleanDOB = formData.dateOfBirth.replace(/-/g, ""); // YYYYMMDD for password
 
       const payload = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(),
-        password: cleanDOB,
-        confirmPassword: cleanDOB,
-        dateOfBirth: formData.dateOfBirth, // YYYY-MM-DD format strictly
-        gender: formData.gender.toLowerCase(), // female/male strictly lowercase
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender.toLowerCase(),
         phone: String(formData.phone).trim(),
-        // Backend expects these as top-level fields
-        city: 'Delhi',
-        state: 'Delhi',
-        pincode: '110001'
+        department: formData.department || 'General',
+        designation: formData.designation || 'Employee',
+        employmentType: formData.employmentType || 'permanent',
+        dateOfJoining: formData.dateOfJoining,
+        workLocation: formData.workLocation || 'Not Specified'
       };
 
-      const res = await api.post('/auth/register/employee', payload);
+      const res = await api.post('/employees/create', payload);
 
-      // Success check based on status code 201
-      if (res.status === 201 || res.status === 200 || res.data.success) {
-        alert("Employee Account Created Successfully! ✅");
+      if (res.data.success) {
+        toast.success(res.data.message || 'Employee added successfully!');
         navigate('/dashboard/company');
       }
 
     } catch (err) {
       const backendErrors = err.response?.data?.errors;
       if (backendErrors && backendErrors.length > 0) {
-        alert(`Validation Failed: ${backendErrors[0].field} - ${backendErrors[0].message}`);
+        toast.error(`${backendErrors[0].field}: ${backendErrors[0].message}`);
       } else {
-        alert("Error: " + (err.response?.data?.message || "Please check your inputs"));
+        toast.error(err.response?.data?.message || 'Failed to add employee');
       }
     } finally {
       setLoading(false);
@@ -103,28 +105,28 @@ const AddEmployee = () => {
           <form onSubmit={handleSubmit} className="space-y-10 group relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className={labelClass}>First Name</label>
-                <input type="text" placeholder="REQUIRED" className={inputClass} value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} required />
+                <label className={labelClass}>First Name *</label>
+                <input type="text" placeholder="e.g. Rahul" className={inputClass} value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <label className={labelClass}>Last Name</label>
-                <input type="text" placeholder="REQUIRED" className={inputClass} value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} required />
+                <label className={labelClass}>Last Name *</label>
+                <input type="text" placeholder="e.g. Sharma" className={inputClass} value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} required />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className={labelClass}>Work Email</label>
-              <input type="email" placeholder="email@company.com" className={inputClass} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+              <label className={labelClass}>Work Email *</label>
+              <input type="email" placeholder="employee@company.com" className={inputClass} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className={labelClass}>Phone Number</label>
-                <input type="tel" placeholder="10 DIGIT MOBILE" className={inputClass} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required maxLength="10" />
+                <label className={labelClass}>Phone Number *</label>
+                <input type="tel" placeholder="10 digit mobile" className={inputClass} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required maxLength="10" />
               </div>
               <div className="space-y-2">
                 <DateInput
-                  label="Date of Birth"
+                  label="Date of Birth *"
                   value={formData.dateOfBirth}
                   onChange={(val) => setFormData(prev => ({ ...prev, dateOfBirth: val }))}
                   required
@@ -134,17 +136,44 @@ const AddEmployee = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className={labelClass}>Designation</label>
-                <input type="text" placeholder="ROLE / TITLE" className={inputClass} value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} required />
+                <label className={labelClass}>Designation *</label>
+                <input type="text" placeholder="e.g. Software Engineer" className={inputClass} value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <label className={labelClass}>Gender</label>
+                <label className={labelClass}>Department</label>
+                <input type="text" placeholder="e.g. Engineering" className={inputClass} value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="space-y-2">
+                <label className={labelClass}>Gender *</label>
                 <select className={inputClass} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </select>
               </div>
+              <div className="space-y-2">
+                <label className={labelClass}>Employment Type</label>
+                <select className={inputClass} value={formData.employmentType} onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}>
+                  <option value="permanent">Permanent</option>
+                  <option value="contract">Contract</option>
+                  <option value="intern">Intern</option>
+                  <option value="probation">Probation</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className={labelClass}>Work Location</label>
+                <input type="text" placeholder="e.g. Mumbai" className={inputClass} value={formData.workLocation} onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="p-5 bg-[#4c8051]/5 rounded-2xl border border-[#4c8051]/10">
+              <p className="text-xs font-bold text-[#4c8051] leading-relaxed tracking-wider">
+                <i className="fas fa-info-circle mr-2"></i>
+                The employee will receive an email with login instructions. They can log in using their <strong>First Name</strong> and <strong>Date of Birth</strong>.
+              </p>
             </div>
 
             <div className="pt-8">

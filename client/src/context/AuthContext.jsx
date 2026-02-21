@@ -104,27 +104,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const registerEmployee = async (data) => {
-    try {
-      const response = await api.post('/auth/register/employee', data);
-
-      if (!response.data.success) {
-        console.error('Employee registration failed:', response.data.message);
-        return {
-          success: false,
-          error: response.data.message || 'Registration failed'
-        };
-      }
-
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      console.error('Registration error:', error.response?.data || error.message);
-      return {
-        success: false,
-        error: error.response?.data?.message || 'An error occurred during registration'
-      };
-    }
-  };
 
   const setPaymentStatus = (status) => {
     if (user) setUser({ ...user, isPaid: status });
@@ -177,7 +156,6 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     registerCompany,
-    registerEmployee,
     updateProfile,
     changePassword,
     resendVerification,

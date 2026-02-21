@@ -13,6 +13,8 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    firstName: '',
+    dateOfBirth: '',
     rememberMe: false
   });
   const [loading, setLoading] = useState(false);
@@ -42,7 +44,6 @@ const Login = () => {
     const loadingToast = toast.loading('Authenticating...');
 
     try {
-      // Step 1: Backend ke naye AuthContext function ke hisaab se payload taiyaar karna
       let credentials = {};
 
       if (role === 'company') {
@@ -51,35 +52,26 @@ const Login = () => {
           password: formData.password
         };
       } else {
-        // Employee login: Email + Password (secure authentication)
+        // Employee login: firstName + dateOfBirth (no password)
         credentials = {
-          email: formData.email,
-          password: formData.password
+          firstName: formData.firstName,
+          dateOfBirth: formData.dateOfBirth
         };
       }
 
-      // Step 2: Login call
       const result = await login(credentials, role);
 
       if (result.success) {
-        const displayName = result.user.profile?.firstName || result.user.profile?.companyName || (result.user.role === 'company' ? 'Company' : 'User');
-        toast.success(`Welcome back, ${displayName}! 🎉`, {
-          id: loadingToast,
-        });
-        // Navigation handled by useEffect, but adding fallback
-        if (result.user.role === 'admin') navigate('/admin/verify-reviews');
-        else if (result.user.role === 'company') navigate('/dashboard/company');
+        toast.success('Welcome back! 🎉', { id: loadingToast });
+        if (user?.role === 'admin') navigate('/admin/dashboard');
+        else if (role === 'company') navigate('/dashboard/company');
         else navigate('/dashboard/employee');
       } else {
-        toast.error(result.error || 'Identity credentials mismatch', {
-          id: loadingToast,
-        });
-        setError(result.error || 'Identity credentials mismatch');
+        toast.error(result.error || 'Login failed. Please check your details.', { id: loadingToast });
+        setError(result.error || 'Login failed. Please check your details.');
       }
     } catch (err) {
-      toast.error('Connection failed. Please try again.', {
-        id: loadingToast,
-      });
+      toast.error('Connection failed. Please try again.', { id: loadingToast });
       setError('Connection failed. Please try again.');
     } finally {
       setLoading(false);

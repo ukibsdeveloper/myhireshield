@@ -1,7 +1,6 @@
 import express from 'express';
 import {
   registerCompany,
-  registerEmployee,
   login,
   logout,
   getMe,
@@ -17,7 +16,6 @@ import {
 import { protect } from '../middleware/auth.middleware.js';
 import {
   validateCompanyRegistration,
-  validateEmployeeRegistration,
   validateLogin,
   validatePasswordChange,
   validatePasswordReset,
@@ -35,8 +33,7 @@ const router = express.Router();
 // Company Registration (Rate limited + Validated)
 router.post('/register/company', registerLimiter, validateCompanyRegistration, registerCompany);
 
-// Employee Registration (Rate limited + Validated)
-router.post('/register/employee', registerLimiter, validateEmployeeRegistration, registerEmployee);
+// NOTE: Employee registration removed — employees are created by companies via POST /api/employees/create
 
 // Login (Rate limited + Validated)
 router.post('/login', loginLimiter, validateLogin, login);

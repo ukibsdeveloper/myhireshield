@@ -12,7 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import RegisterCompany from './pages/RegisterCompany';
-import RegisterEmployee from './pages/RegisterEmployee';
+// RegisterEmployee removed — employees are created by companies, not self-registered
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
@@ -117,7 +117,6 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
               <Route path="/register/company" element={<PublicRoute><RegisterCompany /></PublicRoute>} />
-              <Route path="/register/employee" element={<PublicRoute><RegisterEmployee /></PublicRoute>} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/verify-email/:token" element={<VerifyEmail />} />

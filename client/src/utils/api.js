@@ -54,16 +54,14 @@ api.interceptors.response.use(
     if (status === 401) {
       // Unauthorized - clear token and redirect to login
       localStorage.removeItem('token');
-      localStorage.removeItem('user'); // Also clear user data if any
+      localStorage.removeItem('user');
 
-      // Only redirect if not already on login page (avoids refresh loop on failed login)
+      // Only redirect and toast if NOT on login page (login page handles its own errors)
       if (window.location.pathname !== '/login') {
         toast.error('Session expired. Please login again.');
         setTimeout(() => {
           window.location.href = '/login';
         }, 1000);
-      } else {
-        toast.error(message);
       }
     } else if (status === 403) {
       // Forbidden - Permission denied
@@ -95,9 +93,8 @@ api.interceptors.response.use(
 
 // Authentication
 export const authAPI = {
-  login: (email, password, role) => api.post('/auth/login', { email, password, role }),
+  login: (data) => api.post('/auth/login', data),
   registerCompany: (data) => api.post('/auth/register/company', data),
-  registerEmployee: (data) => api.post('/auth/register/employee', data),
   getMe: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
   verifyEmail: (token) => api.get(`/auth/verify-email/${token}`),
@@ -111,6 +108,7 @@ export const authAPI = {
 
 // Employee APIs
 export const employeeAPI = {
+  create: (data) => api.post('/employees/create', data),
   search: (params) => api.get('/employees/search', { params }),
   getById: (id) => api.get(`/employees/${id}`),
   getProfile: () => api.get('/employees/profile'),

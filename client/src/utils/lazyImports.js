@@ -9,7 +9,7 @@ export const lazyLoad = (importFunc) => {
 export const Home = lazyLoad(() => import('../pages/Home'));
 export const Login = lazyLoad(() => import('../pages/Login'));
 export const RegisterCompany = lazyLoad(() => import('../pages/RegisterCompany'));
-export const RegisterEmployee = lazyLoad(() => import('../pages/RegisterEmployee'));
+// RegisterEmployee removed — employees are created by companies, not self-registered
 export const ForgotPassword = lazyLoad(() => import('../pages/ForgotPassword'));
 export const ResetPassword = lazyLoad(() => import('../pages/ResetPassword'));
 export const VerifyEmail = lazyLoad(() => import('../pages/VerifyEmail'));

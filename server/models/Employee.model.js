@@ -10,23 +10,22 @@ const employeeSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
-    required: true,
-    index: true // Improve lookup performance for Company Dashboard
+    index: true
   },
   // Employment Information
   employeeId: {
     type: String,
     unique: true,
-    required: true,
+    sparse: true,
     index: true
   },
   department: {
     type: String,
-    required: true
+    default: 'General'
   },
   designation: {
     type: String,
-    required: true
+    default: 'Employee'
   },
   employmentType: {
     type: String,
@@ -40,14 +39,14 @@ const employeeSchema = new mongoose.Schema({
   },
   dateOfJoining: {
     type: Date,
-    required: true
+    default: Date.now
   },
   dateOfLeaving: {
     type: Date
   },
   workLocation: {
     type: String,
-    required: true
+    default: 'Not Specified'
   },
   reportingManager: {
     type: mongoose.Schema.Types.ObjectId,

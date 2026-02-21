@@ -3,7 +3,6 @@
   <url><loc>https://myhireshield.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://myhireshield.com/login</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://myhireshield.com/register/company</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://myhireshield.com/register/employee</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://myhireshield.com/terms</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://myhireshield.com/privacy</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://myhireshield.com/consent</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>

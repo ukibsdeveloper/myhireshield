@@ -92,17 +92,19 @@ export const validateEmployeeRegistration = [
  */
 export const validateLogin = [
   body('role').isIn(['company', 'employee', 'admin']).withMessage('Role is required'),
-  body('password').notEmpty().withMessage('Password is required')
-    .isLength({ max: 128 }).withMessage('Password too long'),
 
-  // Company ke liye email zaroori hai
+  // Company/Admin: email + password required
   body('email').if(body('role').equals('company')).isEmail().withMessage('Email required for company login'),
   body('email').if(body('role').equals('admin')).isEmail().withMessage('Email required for admin login'),
+  body('password').if(body('role').equals('company')).notEmpty().withMessage('Password is required')
+    .isLength({ max: 128 }).withMessage('Password too long'),
+  body('password').if(body('role').equals('admin')).notEmpty().withMessage('Password is required')
+    .isLength({ max: 128 }).withMessage('Password too long'),
 
-  // Employee ke liye Name aur DOB zaroori hai
+  // Employee: firstName + DOB only (no password)
   body('firstName').if(body('role').equals('employee')).notEmpty().withMessage('First name required for employee login')
     .isLength({ max: 50 }).withMessage('Name too long'),
-  body('dateOfBirth').if(body('role').equals('employee')).isISO8601().withMessage('Valid DOB (YYYY-MM-DD) required'),
+  body('dateOfBirth').if(body('role').equals('employee')).isISO8601().withMessage('Valid date of birth required (YYYY-MM-DD)'),
 
   validate
 ];

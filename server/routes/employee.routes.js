@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  createEmployee,
   searchEmployees,
   getEmployeeById,
   getMyProfile,
@@ -17,40 +18,26 @@ import { validateEmployeeSearch, validateIdParam } from '../middleware/validatio
 const router = express.Router();
 
 /**
- * --- PUBLIC ROUTES ---
- * Ye routes bina login ke bhi access ho sakte hain (Filters & View Only)
+ * --- PROTECTED: Company creates employees ---
  */
-
-// Search with Filters & Rate Limiting
-router.get('/search', searchLimiter, validateEmployeeSearch, searchEmployees);
-
-// Public Profile View
-router.get('/:id', validateIdParam('id'), getEmployeeById);
-
-// Public Stats (Ratings & Scores)
-router.get('/:id/stats', validateIdParam('id'), getEmployeeStats);
+router.post('/create', protect, authorize('company'), createEmployee);
 
 /**
- * --- PROTECTED ROUTES (Employee Only) ---
- * In routes ke liye Token aur 'employee' role hona zaroori hai
+ * --- PROTECTED: Employee's own routes ---
+ * IMPORTANT: These must come BEFORE /:id to avoid treating 'profile', 'search', etc. as MongoDB IDs
  */
-
-// Get Logged-in Employee's own profile
 router.get('/profile', protect, authorize('employee'), getMyProfile);
-
-// Update Profile Details
 router.put('/profile', protect, authorize('employee'), updateProfile);
-
-// Privacy: Toggle Profile Visibility (Public/Private)
+router.delete('/profile', protect, authorize('employee'), deleteAccount);
 router.put('/visibility', protect, authorize('employee'), updateVisibility);
-
-// GDPR: Provide or Withdraw Data Consent
 router.post('/consent', protect, authorize('employee'), giveConsent);
-
-// GDPR: Download all personal data
 router.get('/export', protect, authorize('employee'), exportData);
 
-// GDPR: Deactivate/Delete Account
-router.delete('/profile', protect, authorize('employee'), deleteAccount);
+/**
+ * --- PUBLIC / SEMI-PUBLIC ROUTES ---
+ */
+router.get('/search', searchLimiter, validateEmployeeSearch, searchEmployees);
+router.get('/:id', validateIdParam('id'), getEmployeeById);
+router.get('/:id/stats', validateIdParam('id'), getEmployeeStats);
 
 export default router;

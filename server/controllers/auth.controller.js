@@ -74,10 +74,8 @@ export const registerCompany = async (req, res) => {
 
     // Send Welcome Email to Company
     try {
-      await sendEmail(emailTemplates.welcome(companyName, 'Company') ? {
-        to: email,
-        ...emailTemplates.welcome(companyName, 'Company')
-      } : {});
+      const welcomeTemplate = emailTemplates.welcome(companyName, 'Company');
+      await sendEmail({ to: email, ...welcomeTemplate });
     } catch (mailError) {
       console.error('Welcome email failed:', mailError);
     }
@@ -141,69 +139,97 @@ export const registerEmployee = async (req, res) => {
   }
 };
 
-// @desc    Login user (Email + Password for both roles)
+// @desc    Login user
+// Company/Admin: email + password
+// Employee: firstName + dateOfBirth (no password needed)
 export const login = async (req, res) => {
   try {
-    const { role, password, email } = req.body;
+    const { role, password, email, firstName, dateOfBirth } = req.body;
 
-    if (!role || !password || !email) {
-      return res.status(400).json({ success: false, message: 'Email and password required' });
+    if (!role) {
+      return res.status(400).json({ success: false, message: 'Role is required' });
     }
 
     let user;
     let profileData;
 
-    // Unified authentication: email + password for both roles
-    user = await User.findOne({ email, role }).select('+password');
+    // ─── EMPLOYEE LOGIN: Name + DOB ───────────────────────
+    if (role === 'employee') {
+      if (!firstName || !dateOfBirth) {
+        return res.status(400).json({ success: false, message: 'First name and date of birth are required' });
+      }
 
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
-
-    // Get profile data based on role
-    if (role === 'company') {
-      profileData = await Company.findOne({ userId: user._id });
-    } else if (role === 'employee') {
-      profileData = await Employee.findOne({ userId: user._id });
-    }
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      await user.incLoginAttempts();
-      // Audit log failed login attempt
-      try {
-        await AuditLog.createLog({
-          userId: user._id, userEmail: user.email, userRole: user.role,
-          eventType: 'login_failed', ...getDeviceInfo(req), status: 'failure',
-          details: `Failed login attempt #${(user.loginAttempts || 0) + 1}`
-        });
-      } catch (e) { /* silent */ }
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
-
-    // Check if account is locked after failed attempts
-    if (user.lockUntil && user.lockUntil > Date.now()) {
-      return res.status(423).json({
-        success: false,
-        message: 'Account is temporarily locked due to multiple failed login attempts. Please try again later.'
+      // Find employee by uppercase firstName + DOB
+      const searchName = firstName.trim().toUpperCase();
+      const employee = await Employee.findOne({
+        firstName: searchName,
+        dateOfBirth: dateOfBirth,
+        isActive: true
       });
+
+      if (!employee) {
+        return res.status(401).json({ success: false, message: 'No employee found with these details. Please contact your company HR.' });
+      }
+
+      // Get linked User account
+      user = await User.findById(employee.userId);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ success: false, message: 'Account is not active. Please contact your company HR.' });
+      }
+
+      if (user.isSuspended) {
+        return res.status(403).json({ success: false, message: `Account suspended. Reason: ${user.suspensionReason || 'Terms violation'}` });
+      }
+
+      profileData = employee;
+
+    // ─── COMPANY / ADMIN LOGIN: Email + Password ─────────
+    } else {
+      if (!email || !password) {
+        return res.status(400).json({ success: false, message: 'Email and password are required' });
+      }
+
+      user = await User.findOne({ email, role }).select('+password');
+      if (!user) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+
+      // Check if account is locked
+      if (user.lockUntil && user.lockUntil > Date.now()) {
+        return res.status(423).json({
+          success: false,
+          message: 'Account is temporarily locked due to multiple failed login attempts. Please try again later.'
+        });
+      }
+
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        await user.incLoginAttempts();
+        try {
+          await AuditLog.createLog({
+            userId: user._id, userEmail: user.email, userRole: user.role,
+            eventType: 'login_failed', ...getDeviceInfo(req), status: 'failure',
+            details: `Failed login attempt #${(user.loginAttempts || 0) + 1}`
+          });
+        } catch (e) { /* silent */ }
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+
+      if (role === 'company') {
+        profileData = await Company.findOne({ userId: user._id });
+      }
     }
 
+    // ─── COMMON: Issue token & respond ────────────────────
     await user.updateOne({ $set: { loginAttempts: 0, lastLogin: Date.now() }, $unset: { lockUntil: 1 } });
     const token = generateToken(user._id);
-
-    if (!profileData) {
-      profileData = role === 'company'
-        ? await Company.findOne({ userId: user._id })
-        : await Employee.findOne({ userId: user._id });
-    }
 
     res.status(200).json({
       success: true, token,
       user: { id: user._id, email: user.email, role: user.role, profile: profileData }
     });
 
-    // Audit log successful login
+    // Audit log
     try {
       await AuditLog.createLog({
         userId: user._id, userEmail: user.email, userRole: user.role,

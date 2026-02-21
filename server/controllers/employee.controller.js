@@ -3,7 +3,108 @@ import Review from '../models/Review.model.js';
 import Document from '../models/Document.model.js';
 import AuditLog from '../models/AuditLog.model.js';
 import User from '../models/User.model.js';
+import Company from '../models/Company.model.js';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import { sendEmail, emailTemplates } from '../utils/email.js';
+
+// @desc    Create employee (by company)
+// @route   POST /api/employees/create
+// @access  Private (Company only)
+export const createEmployee = async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, dateOfBirth, gender, department, designation, employmentType, dateOfJoining, workLocation } = req.body;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !phone || !dateOfBirth || !gender) {
+      return res.status(400).json({ success: false, message: 'First name, last name, email, phone, date of birth, and gender are required' });
+    }
+
+    // Check if email already registered
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'An account with this email already exists' });
+    }
+
+    // Get the company that is creating this employee
+    const company = await Company.findOne({ userId: req.user._id });
+    if (!company) {
+      return res.status(404).json({ success: false, message: 'Company profile not found' });
+    }
+
+    // Generate employee ID: HS-XXXXX
+    const empCount = await Employee.countDocuments();
+    const employeeId = `HS-${String(empCount + 1).padStart(5, '0')}`;
+
+    // Password = DOB without dashes (YYYYMMDD)
+    const rawPassword = dateOfBirth.replace(/-/g, '');
+
+    // Create User account for the employee
+    const user = new User({
+      email: email.toLowerCase().trim(),
+      password: rawPassword,
+      role: 'employee',
+      isActive: true,
+      emailVerified: false
+    });
+    await user.save();
+
+    // Create Employee profile
+    const employee = await Employee.create({
+      userId: user._id,
+      createdBy: company._id,
+      employeeId,
+      firstName: firstName.trim().toUpperCase(),
+      lastName: lastName.trim().toUpperCase(),
+      email: email.toLowerCase().trim(),
+      phone: String(phone).trim(),
+      dateOfBirth,
+      gender: gender.toLowerCase(),
+      department: department || 'General',
+      designation: designation || 'Employee',
+      employmentType: employmentType || 'permanent',
+      dateOfJoining: dateOfJoining || new Date(),
+      workLocation: workLocation || 'Not Specified',
+      address: { city: 'Not Specified', state: 'Not Specified', pincode: '000000', country: 'India' }
+    });
+
+    // Link profileId back to User
+    user.profileId = employee._id;
+    user.firstName = firstName.trim().toUpperCase();
+    user.dateOfBirth = dateOfBirth;
+    await user.save();
+
+    // Audit log
+    await AuditLog.createLog({
+      userId: req.user._id, userEmail: req.user.email, userRole: 'company',
+      eventType: 'employee_creation_by_company',
+      eventData: { employeeId, employeeName: `${firstName} ${lastName}`, companyName: company.companyName },
+      ipAddress: req.ip, userAgent: req.headers['user-agent'], status: 'success'
+    });
+
+    // Send welcome email to employee
+    try {
+      const template = emailTemplates.employeeNodeCreated(
+        `${firstName} ${lastName}`,
+        company.companyName,
+        dateOfBirth
+      );
+      await sendEmail({ to: email, ...template });
+    } catch (mailError) {
+      console.error('Employee welcome email failed:', mailError);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Employee ${firstName} ${lastName} added successfully! Login credentials sent to ${email}.`,
+      data: { employeeId, firstName, lastName, email }
+    });
+
+  } catch (error) {
+    console.error('Create employee error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to create employee' });
+  }
+};
 
 // @desc    Search employees with filters
 // @route   GET /api/employees/search

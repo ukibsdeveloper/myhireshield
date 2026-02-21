@@ -67,7 +67,7 @@ const Footer = () => {
               For Employees
             </h4>
             <ul className="space-y-3.5">
-              <li><Link to="/register/employee" className="footer-link">I am an Employee</Link></li>
+              <li><Link to="/login" className="footer-link">Employee Login</Link></li>
               <li><Link to="/dashboard/employee" className="footer-link">Check My Score</Link></li>
               <li><Link to="/verify/documents" className="footer-link">My Documents</Link></li>
               <li><Link to="/consent" className="footer-link">Privacy Settings</Link></li>
