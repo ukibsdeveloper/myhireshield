@@ -24,7 +24,6 @@ const stripXSS = (value) => {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#x27;')
-            .replace(/\//g, '&#x2F;')
             // Remove script tags and event handlers
             .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
             .replace(/on\w+\s*=\s*"[^"]*"/gi, '')
@@ -185,11 +184,11 @@ export const sanitizeFilePath = (filePath) => {
 export const safeError = (error, defaultMsg = 'An error occurred') => {
     // Always log the real error for debugging
     console.error('⚠️ Error Details:', {
-      message: error.message,
-      name: error.name,
-      stack: error.stack ? error.stack.split('\n').slice(0, 3) : null
+        message: error.message,
+        name: error.name,
+        stack: error.stack ? error.stack.split('\n').slice(0, 3) : null
     });
-    
+
     if (process.env.NODE_ENV === 'production') {
         return defaultMsg;
     }

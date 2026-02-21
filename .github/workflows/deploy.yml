@@ -33,7 +33,7 @@ jobs:
             cp -r dist/* ../
             
             # 3. Backend Setup
-            cd ../backend
+            cd ../server
             npm install
             pm2 restart hireshield-api
             

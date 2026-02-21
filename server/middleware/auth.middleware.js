@@ -17,7 +17,7 @@ export const protect = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Aap is route ke liye authorized nahi hain. Please login karein.'
+        message: 'Authentication required. Please log in to continue.'
       });
     }
 
@@ -32,7 +32,7 @@ export const protect = async (req, res, next) => {
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'User account nahi mila. Please phir se login karein.'
+          message: 'User account not found. Please log in again.'
         });
       }
 
@@ -40,14 +40,14 @@ export const protect = async (req, res, next) => {
       if (!user.isActive) {
         return res.status(401).json({
           success: false,
-          message: 'Aapka account deactivate kar diya gaya hai.'
+          message: 'Your account has been deactivated. Please contact support.'
         });
       }
 
       if (user.isSuspended) {
         return res.status(403).json({
           success: false,
-          message: `Account suspend hai. Reason: ${user.suspensionReason || 'Terms violation'}`
+          message: `Your account has been suspended. Reason: ${user.suspensionReason || 'Terms violation'}`
         });
       }
 
@@ -55,7 +55,7 @@ export const protect = async (req, res, next) => {
       if (user.lockUntil && user.lockUntil > Date.now()) {
         return res.status(403).json({
           success: false,
-          message: 'Security ki wajah se account locked hai. Kuch der baad try karein.'
+          message: 'Account temporarily locked for security. Please try again later.'
         });
       }
 
@@ -65,8 +65,8 @@ export const protect = async (req, res, next) => {
 
     } catch (error) {
       const msg = error.name === 'TokenExpiredError' 
-        ? 'Aapka session khatam ho gaya hai. Please login karein.' 
-        : 'Invalid token. Security verification failed.';
+        ? 'Your session has expired. Please log in again.' 
+        : 'Invalid token. Please log in again.';
       
       return res.status(401).json({ success: false, message: msg });
     }
@@ -124,18 +124,17 @@ export const requireEmailVerification = (req, res, next) => {
   if (!req.user.emailVerified) {
     return res.status(403).json({
       success: false,
-      message: 'Resource access karne se pehle email verify karna zaroori hai.'
+      message: 'Please verify your email address before accessing this resource.'
     });
   }
   next();
 };
 
 export const require2FA = (req, res, next) => {
-  // Check if 2FA is on but session is not verified
   if (req.user.twoFactorEnabled && !req.session?.twoFactorVerified) {
     return res.status(403).json({
       success: false,
-      message: 'Two-factor authentication verified hona zaroori hai.',
+      message: 'Two-factor authentication verification is required.',
       require2FA: true
     });
   }

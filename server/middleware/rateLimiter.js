@@ -11,7 +11,7 @@ export const apiLimiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // Default: 100 requests
   message: {
     success: false,
-    message: 'Bohot zyada requests! Please thodi der baad try karein.'
+    message: 'Too many requests. Please wait a moment and try again.'
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -21,10 +21,10 @@ export const apiLimiter = rateLimit({
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // Max 10 failed attempts
-  skipSuccessfulRequests: true, 
+  skipSuccessfulRequests: true,
   message: {
     success: false,
-    message: 'Bohot zyada failed attempts! Please 15 minute baad try karein.'
+    message: 'Too many failed attempts. Please try again after 15 minutes.'
   }
 });
 
@@ -34,7 +34,7 @@ export const registerLimiter = rateLimit({
   max: 20, // 20 registrations per hour per IP
   message: {
     success: false,
-    message: 'Registration attempts limit exceed ho gayi hai. Please 1 ghante baad try karein.'
+    message: 'Registration attempt limit exceeded. Please try again after 1 hour.'
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -46,7 +46,7 @@ export const loginLimiter = rateLimit({
   max: 30, // 30 login attempts (Balanced for dev/prod)
   message: {
     success: false,
-    message: 'Bohot saare login attempts! Please 15 minute baad koshish karein.'
+    message: 'Too many login attempts. Please try again after 15 minutes.'
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -55,10 +55,10 @@ export const loginLimiter = rateLimit({
 // 5. Document upload rate limiter (Prevents server storage spam)
 export const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20, 
+  max: 20,
   message: {
     success: false,
-    message: 'File upload limit exceed ho gayi hai. Please thodi der baad try karein.'
+    message: 'File upload limit exceeded. Please try again later.'
   }
 });
 
@@ -68,7 +68,7 @@ export const reviewLimiter = rateLimit({
   max: 50, // 50 reviews per day per entity
   message: {
     success: false,
-    message: 'Aapne daily review submission ki limit reach kar li hai.'
+    message: 'You have reached the daily review submission limit.'
   }
 });
 
@@ -78,7 +78,7 @@ export const searchLimiter = rateLimit({
   max: 30, // 30 searches per minute
   message: {
     success: false,
-    message: 'Bohot tez search kar rahe hain! Please thoda slow down karein.'
+    message: 'You are searching too fast. Please slow down a bit.'
   }
 });
 
@@ -88,6 +88,6 @@ export const emailLimiter = rateLimit({
   max: 15, // 15 emails per hour per IP
   message: {
     success: false,
-    message: 'Email requests ki limit exceed ho gayi hai. Please thodi der baad try karein.'
+    message: 'Email request limit exceeded. Please try again later.'
   }
 });

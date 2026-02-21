@@ -53,7 +53,7 @@ const RegisterCompany = () => {
     const domain = formData.email.split('@')[1];
     if (personalDomains.includes(domain)) { setError('Please use company email, not personal email'); return false; }
 
-    if (formData.password.length < 6) { setError('Password must be at least 6 characters'); return false; }
+    if (formData.password.length < 8) { setError('Password must be at least 8 characters'); return false; }
     if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return false; }
     if (!formData.industry) { setError('Please select an industry'); return false; }
     if (!formData.companySize) { setError('Please select company size'); return false; }

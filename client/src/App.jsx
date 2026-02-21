@@ -1,6 +1,5 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from './context/AuthContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import SkipLink from './components/SkipLink';
@@ -41,15 +40,7 @@ const Disclaimer = lazy(() => import('./pages/Disclaimer'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 
-/* CONFIGURATION */
-const isLocalhost = window.location.hostname === 'localhost';
-axios.defaults.baseURL = isLocalhost ? 'http://localhost:5000' : 'https://myhireshield.com';
-
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+/* NOTE: API base URL is configured in utils/api.js — do not set axios.defaults here */
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-[#fcfaf9]" aria-label="Loading">

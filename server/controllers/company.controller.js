@@ -110,7 +110,7 @@ export const getEmployees = asyncHandler(async (req, res, next) => {
 
   const [employees, total] = await Promise.all([
     Employee.find({ createdBy: company._id })
-      .select('firstName lastName email currentDesignation createdAt')
+      .select('firstName lastName email currentDesignation designation department overallScore totalReviews employeeId createdAt isActive')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
@@ -31,12 +31,66 @@ const serviceJsonLd = {
   areaServed: { '@type': 'Country', name: 'India' },
 };
 
+// ─── Animated Counter Hook ──────────────────────────
+const useCountUp = (end, duration = 2000, startOnView = true) => {
+  const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef(null);
+
+  const startCounting = useCallback(() => {
+    if (hasStarted) return;
+    setHasStarted(true);
+    const startTime = performance.now();
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * end));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [end, duration, hasStarted]);
+
+  useEffect(() => {
+    if (!startOnView || !ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) startCounting(); },
+      { threshold: 0.5 }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [startCounting, startOnView]);
+
+  return { count, ref };
+};
+
+// ─── Floating Badge Component ─────────────────────
+const FloatingBadge = ({ icon, text, color, className = '' }) => (
+  <div className={`absolute flex items-center gap-2.5 px-4 py-2.5 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 text-xs font-bold animate-float ${className}`}
+    style={{ color }}>
+    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}12` }}>
+      <i className={`fas ${icon} text-xs`}></i>
+    </div>
+    <span className="tracking-wide">{text}</span>
+  </div>
+);
+
 const Home = () => {
   const { isAuthenticated, user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
+  const [heroVisible, setHeroVisible] = useState(false);
+
+  // Animated counters for stats
+  const stat1 = useCountUp(98, 2500);
+  const stat2 = useCountUp(500, 3000);
+  const stat3 = useCountUp(24, 2000);
 
   useEffect(() => {
+    // Trigger hero animation after mount
+    const timer = setTimeout(() => setHeroVisible(true), 100);
+
     const handleScroll = () => setScrolled(window.scrollY > 30);
     window.addEventListener('scroll', handleScroll);
 
@@ -56,6 +110,7 @@ const Home = () => {
     });
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
     };
@@ -73,91 +128,114 @@ const Home = () => {
 
       <Navbar scrolled={scrolled} isAuthenticated={isAuthenticated} user={user} />
 
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-16 md:pt-24 lg:pt-28 lg:pb-32 overflow-hidden bg-gradient-to-b from-[#fef8f7] to-white">
+      {/* ───────── HERO SECTION ───────── */}
+      <section className="relative pt-16 pb-16 md:pt-24 lg:pt-28 lg:pb-32 overflow-hidden bg-gradient-to-b from-[#fef8f7] via-white to-[#fcfaf9]">
         {/* Background Blobs */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
-          <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-[#dd8d88]/15 rounded-full blur-[100px]"></div>
-          <div className="absolute bottom-[10%] left-[-5%] w-[35%] h-[35%] bg-[#4c8051]/10 rounded-full blur-[100px]"></div>
+          <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-[#dd8d88]/15 rounded-full blur-[100px] animate-blob"></div>
+          <div className="absolute bottom-[10%] left-[-5%] w-[35%] h-[35%] bg-[#4c8051]/10 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+          <div className="absolute top-[40%] right-[20%] w-[20%] h-[20%] bg-[#496279]/5 rounded-full blur-[80px] animate-blob animation-delay-4000"></div>
         </div>
 
         <div className="container mx-auto px-5 sm:px-6 max-w-7xl">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
 
             {/* Left Content */}
-            <div className="animate-on-scroll z-10 text-center lg:text-left w-full lg:w-3/5">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#dd8d88]/20 text-[#dd8d88] text-xs font-black uppercase tracking-[0.25em] mb-8 shadow-sm">
+            <div className={`z-10 text-center lg:text-left w-full lg:w-3/5 transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#dd8d88]/20 text-[#dd8d88] text-xs font-black uppercase tracking-[0.25em] mb-8 shadow-sm hover:shadow-md transition-shadow">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#dd8d88] animate-pulse"></span>
                 Verify. Score. Decide. Hire.
               </div>
 
               <h1 className="text-[32px] sm:text-5xl md:text-6xl lg:text-[76px] font-black text-[#496279] mb-6 sm:mb-8 leading-[1.1] tracking-[-0.03em]">
                 Smarter Hiring Starts with<br className="hidden md:block" />
-                <span className="text-[#4c8051] relative">
+                <span className="text-[#4c8051] relative inline-block">
                   Verified Employee.
-                  <svg className="absolute -bottom-2 left-0 w-full h-2 text-[#4c8051]/20" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 25 0, 50 5 T 100 5" stroke="currentColor" strokeWidth="4" fill="none" /></svg>
+                  <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#4c8051]/30" viewBox="0 0 200 12" preserveAspectRatio="none">
+                    <path d="M0 6 Q 50 0, 100 6 T 200 6" stroke="currentColor" strokeWidth="3" fill="none" className="animate-draw" />
+                  </svg>
                 </span>
               </h1>
 
               <p className="text-sm sm:text-base md:text-xl text-slate-500/90 mb-8 sm:mb-10 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-bold border-l-4 border-[#4c8051]/20 pl-4 sm:pl-6">
-                Verify employees' history, measure trustworthiness, and track past employment patterns using HR verified data. These insights help employers to gain clarity on candidate credibility, and hire a responsible person that protect their company’s reputation.
+                Verify employees' history, measure trustworthiness, and track past employment patterns using HR verified data. These insights help employers to gain clarity on candidate credibility, and hire a responsible person that protects their company's reputation.
               </p>
 
-              {/* New Action Buttons & Stats Wrapper */}
+              {/* Action Buttons & Stats Wrapper */}
               <div className="flex flex-col gap-12 mt-10">
-                {/* Updated Action Buttons */}
+                {/* Action Buttons with hover glow */}
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5">
                   <Link
                     to="/register/company"
-                    className="group w-full sm:w-auto px-10 py-5 bg-[#496279] text-white rounded-2xl font-bold text-xs tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#3a4e61] transition-all shadow-[0_20px_40px_rgba(73,98,121,0.2)] hover:-translate-y-1 active:scale-95"
+                    className="group w-full sm:w-auto px-10 py-5 bg-[#496279] text-white rounded-2xl font-bold text-xs tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#3a4e61] transition-all shadow-[0_20px_40px_rgba(73,98,121,0.2)] hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(73,98,121,0.3)] active:scale-95 relative overflow-hidden"
                   >
-                    I am a Company
-                    <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <span className="relative z-10 flex items-center gap-3">
+                      I am a Company
+                      <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                   </Link>
 
                   <Link
                     to="/login"
-                    className="w-full sm:w-auto px-10 py-5 bg-white text-[#496279] border border-slate-200 rounded-2xl font-bold text-xs tracking-[0.2em] hover:bg-slate-50 transition-all shadow-sm hover:shadow-md active:scale-95"
+                    className="group w-full sm:w-auto px-10 py-5 bg-white text-[#496279] border border-slate-200 rounded-2xl font-bold text-xs tracking-[0.2em] hover:bg-slate-50 transition-all shadow-sm hover:shadow-md active:scale-95 hover:-translate-y-0.5"
                   >
-                    Employee Login
+                    <span className="flex items-center justify-center gap-3">
+                      <i className="fas fa-user-circle text-[#4c8051] text-xs"></i>
+                      Employee Login
+                    </span>
                   </Link>
                 </div>
 
-                {/* Updated Structured Stats */}
+                {/* Animated Stats */}
                 <div className="inline-grid grid-cols-3 gap-3 sm:gap-4 md:gap-10 py-6 sm:py-8 px-2 border-t border-slate-100 max-w-lg mx-auto lg:mx-0">
-                  {[
-                    { n: '98%', l: 'Accuracy Rate', color: '#4c8051' },
-                    { n: '<2 Min', l: 'Avg. Check Time', color: '#dd8d88' },
-                    { n: '24/7', l: 'Support', color: '#496279' }
-                  ].map((stat, idx) => (
-                    <div key={stat.l} className={`relative ${idx !== 0 ? 'pl-4 md:pl-8' : ''}`}>
-                      {idx !== 0 && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[1px] h-8 bg-slate-200"></div>
-                      )}
-                      <p className="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter leading-none" style={{ color: stat.color }}>
-                        {stat.n}
-                      </p>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 whitespace-nowrap">
-                        {stat.l}
-                      </p>
-                    </div>
-                  ))}
+                  <div ref={stat1.ref}>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter leading-none text-[#4c8051]">
+                      {stat1.count}%
+                    </p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 whitespace-nowrap">
+                      Accuracy Rate
+                    </p>
+                  </div>
+                  <div className="relative pl-4 md:pl-8" ref={stat2.ref}>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[1px] h-8 bg-slate-200"></div>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter leading-none text-[#dd8d88]">
+                      {stat2.count}+
+                    </p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 whitespace-nowrap">
+                      Verifications
+                    </p>
+                  </div>
+                  <div className="relative pl-4 md:pl-8" ref={stat3.ref}>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[1px] h-8 bg-slate-200"></div>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter leading-none text-[#496279]">
+                      {stat3.count}/7
+                    </p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 whitespace-nowrap">
+                      Support
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Side: Dashboard Mockup */}
-            <div className="relative animate-on-scroll w-full lg:w-2/5 flex justify-center lg:justify-end">
+            {/* Right Side: Dashboard Mockup with floating badges */}
+            <div className={`relative w-full lg:w-2/5 flex justify-center lg:justify-end transition-all duration-1000 delay-300 ease-[cubic-bezier(0.19,1,0.22,1)] ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
               <div className="relative w-full max-w-[460px] group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#4c8051]/20 to-[#dd8d88]/20 rounded-[2rem] blur-xl opacity-50"></div>
+                {/* Floating Badges */}
+                <FloatingBadge icon="fa-shield-halved" text="256-bit Encrypted" color="#4c8051" className="top-4 -left-8 sm:-left-16 z-20 hidden sm:flex" />
+                <FloatingBadge icon="fa-clock" text="<2 Min Checks" color="#dd8d88" className="bottom-20 -right-4 sm:-right-12 z-20 hidden sm:flex animation-delay-1000" />
+
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#4c8051]/20 to-[#dd8d88]/20 rounded-[2rem] blur-xl opacity-50 group-hover:opacity-70 transition-opacity duration-700"></div>
                 <div className="relative bg-white border border-slate-200 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.08)] overflow-hidden p-6 sm:p-8 md:p-10 transition-transform duration-700 group-hover:scale-[1.02] flex flex-col items-center">
 
-                  {/* Top: Logo (w-64 h-64 - Dugni Size) */}
+                  {/* Top: Logo */}
                   <div className="w-40 h-40 sm:w-52 sm:h-52 md:w-64 md:h-64 rounded-3xl overflow-hidden border-2 border-slate-50 shadow-xl mb-6 sm:mb-8 transition-transform duration-500 group-hover:rotate-3 bg-white">
                     <img
                       src="/logo.jpg"
                       alt="HireShield Logo"
                       className="w-full h-full object-cover"
+                      loading="eager"
                     />
                   </div>
 
@@ -171,7 +249,7 @@ const Home = () => {
                   {/* Stats Grid */}
                   <div className="grid grid-cols-3 gap-4 mb-8 w-full">
                     {[{ v: 95, l: 'History' }, { v: 88, l: 'Conduct' }, { v: 90, l: 'Tenure' }].map((item, i) => (
-                      <div key={i} className="bg-[#fcfaf9] border border-slate-100 p-4 rounded-2xl text-center shadow-sm">
+                      <div key={i} className="bg-[#fcfaf9] border border-slate-100 p-4 rounded-2xl text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
                         <p className="text-xl font-black text-[#496279]">{item.v}</p>
                         <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1">{item.l}</p>
                       </div>
@@ -194,12 +272,32 @@ const Home = () => {
         </div>
       </section>
 
-      {/* About/Value Section */}
-      <section className="py-20 bg-white border-y border-slate-100">
+      {/* ───────── TRUST BAR ───────── */}
+      <section className="py-6 bg-white border-y border-slate-100 overflow-hidden">
+        <div className="container mx-auto px-5 max-w-7xl">
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 text-slate-400">
+            {[
+              { icon: 'fa-shield-halved', text: 'SSL Protected' },
+              { icon: 'fa-lock', text: 'GDPR Compliant' },
+              { icon: 'fa-database', text: 'Encrypted Storage' },
+              { icon: 'fa-user-shield', text: 'Privacy First' },
+              { icon: 'fa-certificate', text: 'HR Verified' },
+            ].map((badge, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase opacity-60 hover:opacity-100 transition-opacity">
+                <i className={`fas ${badge.icon} text-[#4c8051]`}></i>
+                <span>{badge.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── ABOUT/VALUE SECTION ───────── */}
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-5 max-w-5xl text-center animate-on-scroll">
           <h2 className="text-3xl md:text-4xl font-black text-[#496279] mb-8 tracking-tight">Everything You Need to Hire With Confidence</h2>
           <p className="text-slate-500 font-bold leading-relaxed mb-6">
-            In today’s challenging era, every company faces attrition and sudden exits by their employees that cause financial loss, reduced productivity, and damage to the company’s reputation. Therefore, before hiring, the employer must conduct a record check. Traditional methods to check credibility are very limited or outdated.
+            In today's challenging era, every company faces attrition and sudden exits by their employees that cause financial loss, reduced productivity, and damage to the company's reputation. Therefore, before hiring, the employer must conduct a record check. Traditional methods to check credibility are very limited or outdated.
           </p>
           <p className="text-slate-500 font-bold leading-relaxed italic border-t pt-6 border-slate-100">
             Thus, MyHireShield contributes to giving you an authentic and HR-verified employment history, credibility insight, and a structured trust score.
@@ -207,7 +305,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* ───────── FEATURES SECTION ───────── */}
       <section id="features" className="py-24 md:py-32 bg-[#fcfaf9] relative overflow-hidden">
         <div className="container mx-auto px-5 max-w-7xl relative">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-20 animate-on-scroll">
@@ -229,37 +327,44 @@ const Home = () => {
               { icon: 'fa-bolt', title: 'Hire Faster, Hire Smarter', d: 'Convert insight into instant and trusted decisions, simplify screening.', color: '#dd8d88' },
               { icon: 'fa-users-gear', title: 'Build a Trusted Workforce', d: 'Stronger team trust helps to build transparency and accountability by hiring professionals.', color: '#496279' }
             ].map((f, i) => (
-              <div key={i} className="group p-8 rounded-2xl bg-white border border-slate-100 hover:border-[#496279] transition-all duration-300 animate-on-scroll hover:shadow-[0_10px_40px_rgba(0,0,0,0.04)]">
-                <div className="w-12 h-12 mb-8 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:bg-[#496279] group-hover:text-white" style={{ backgroundColor: `${f.color}10`, color: f.color }}>
-                  <i className={`fas ${f.icon} text-lg`}></i>
+              <div key={i} className="group p-8 rounded-2xl bg-white border border-slate-100 hover:border-[#496279]/30 transition-all duration-500 animate-on-scroll hover:shadow-[0_10px_40px_rgba(0,0,0,0.06)] relative overflow-hidden">
+                {/* Hover gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10">
+                  <div className="w-14 h-14 mb-8 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3" style={{ backgroundColor: `${f.color}10`, color: f.color }}>
+                    <i className={`fas ${f.icon} text-lg`}></i>
+                  </div>
+                  <h3 className="text-lg font-black text-[#496279] mb-4 tracking-tight group-hover:text-[#4c8051] transition-colors">{f.title}</h3>
+                  <p className="text-slate-500 text-sm font-bold leading-relaxed opacity-75">{f.d}</p>
                 </div>
-                <h3 className="text-lg font-black text-[#496279] mb-4 tracking-tight">{f.title}</h3>
-                <p className="text-slate-500 text-sm font-bold leading-relaxed opacity-75">{f.d}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Workflow Section */}
+      {/* ───────── WORKFLOW SECTION ───────── */}
       <section id="process" className="py-24 md:py-32 bg-white relative overflow-hidden">
         <div className="container mx-auto px-5 max-w-7xl text-center">
           <div className="max-w-3xl mx-auto mb-24 animate-on-scroll">
-            <h2 className="text-4xl md:text-5xl font-black text-[#496279] tracking-tighter mb-6">How MyHire Shield Works?</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-[#496279] tracking-tighter mb-6">How MyHireShield Works?</h2>
             <div className="w-16 h-1.5 bg-[#4c8051] mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-16">
+          <div className="grid md:grid-cols-3 gap-16 relative">
+            {/* Connection line between steps */}
+            <div className="hidden md:block absolute top-[7.5rem] left-[20%] right-[20%] h-[2px] bg-gradient-to-r from-[#dd8d88]/20 via-[#4c8051]/20 to-[#496279]/20 z-0"></div>
+
             {[
               { step: 'Level 1', title: 'Integration', color: '#dd8d88', d: 'Integrate direct HR-verified data of the employee to the portal MyHireShield by the Employer.' },
               { step: 'Level 2', title: 'Verification', color: '#4c8051', d: 'Uploaded data goes under a multi-layer verification process to identify employee year gap, credibility, and inconsistencies.' },
               { step: 'Level 3', title: 'Finalization', color: '#496279', d: 'Once the verification is complete, the data is turned into a structured employee trust score and actionable hiring insights.' }
             ].map((s, i) => (
-              <div key={i} className="group text-center animate-on-scroll">
+              <div key={i} className="group text-center animate-on-scroll relative z-10">
                 <p className="text-xs font-black tracking-[0.4em] mb-8" style={{ color: s.color }}>{s.step}</p>
                 <div className="relative w-24 h-24 mx-auto mb-10">
-                  <div className="absolute inset-0 border-2 border-dashed border-slate-200 rounded-full group-hover:rotate-45 transition-transform duration-1000"></div>
-                  <div className="absolute inset-2 bg-white border border-slate-100 rounded-full shadow-lg flex items-center justify-center text-xl font-black text-[#496279]">
+                  <div className="absolute inset-0 border-2 border-dashed border-slate-200 rounded-full group-hover:rotate-[360deg] transition-transform duration-[2000ms]"></div>
+                  <div className="absolute inset-2 bg-white border border-slate-100 rounded-full shadow-lg flex items-center justify-center text-xl font-black group-hover:shadow-xl transition-shadow" style={{ color: s.color }}>
                     {i + 1}
                   </div>
                 </div>
@@ -271,7 +376,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* ───────── FAQ SECTION ───────── */}
       <section id="faq" className="py-24 bg-[#fcfaf9]">
         <div className="container mx-auto px-5 max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-black text-[#496279] mb-12 text-center">Common Questions</h2>
@@ -282,16 +387,16 @@ const Home = () => {
               { q: "What is Employee Trust Score?", a: "According to MyHireshield, the employee trust score is >60. This score shows that the employee is credible." },
               { q: "How long does the verification process take?", a: "At MyHire Shield ths verification process takes <2 min to gather the right and authentic data after submitting the employee's details, such as the employee's name and DOB." },
               { q: "Why should employers use My Hireshield?", a: "To hire credible and trustworthy employees for their company, employers must use MyHireShield." },
-              { q: "How is an employee's history collected by the My Hiresheild?", a: "An employee’s history is collected through the HR-verified employer records, especially from the official database. This is a reliable & structured data history that helps with accurate hiring decisions." },
+              { q: "How is an employee's history collected by the My Hiresheild?", a: "An employee's history is collected through the HR-verified employer records, especially from the official database. This is a reliable & structured data history that helps with accurate hiring decisions." },
               { q: "What does the employee trust reflect?", a: "Via credibility score on the basis of the employee background history, consistency records, and HR-validation the employee trust score reflects." },
               { q: "How does My Hireshield ensure fairness?", a: "By using a standardized verification procedure, consent-based data collection, an unbiased trust score, and HR-verified data assure every candidate is evaluated transparently." },
               { q: "Can My Hireshield identify fake experience or inconsistencies?", a: "Yes, My Hireshield is a structured & high-tech platform that easily identifies fake experiences or inconsistencies by thoroughly checking employment records and helps in making trustworthy hiring decisions." },
               { q: "Can I view or request my employment data?", a: "Yes, of course. If you are an employee and want to check your employment data and score, you can easily do so from My Hireshield. You need to put your name and DOB, and you will get your score and data in front of you." }
             ].map((faq, idx) => (
-              <div key={idx} className="bg-white border border-slate-200 rounded-xl overflow-hidden animate-on-scroll">
+              <div key={idx} className="bg-white border border-slate-200 rounded-xl overflow-hidden animate-on-scroll hover:shadow-sm transition-shadow">
                 <button
                   onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                  className="w-full p-6 text-left flex justify-between items-center hover:bg-slate-50 transition-colors"
+                  className="w-full p-6 text-left flex justify-between items-center hover:bg-slate-50/50 transition-colors"
                 >
                   <span className="font-black text-[#496279] text-sm tracking-tight pr-4">{faq.q}</span>
                   <i className={`fas fa-chevron-down text-[#dd8d88] text-xs transition-transform duration-300 flex-shrink-0 ${activeFaq === idx ? 'rotate-180' : ''}`}></i>
@@ -309,11 +414,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* ───────── CTA SECTION ───────── */}
       <section className="py-20 md:py-32 px-5 bg-white">
         <div className="container mx-auto max-w-6xl">
-          <div className="relative bg-[#496279] rounded-[1.5rem] sm:rounded-[2.5rem] p-8 sm:p-12 md:p-24 text-center overflow-hidden border-4 sm:border-[12px] border-slate-50 shadow-2xl">
+          <div className="relative bg-[#496279] rounded-[1.5rem] sm:rounded-[2.5rem] p-8 sm:p-12 md:p-24 text-center overflow-hidden border-4 sm:border-[12px] border-slate-50 shadow-2xl group">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#4c8051] rounded-full blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 -mr-32 -mt-32"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#dd8d88] rounded-full blur-[100px] opacity-15 -ml-20 -mb-20"></div>
             <div className="relative z-10 animate-on-scroll">
               <h2 className="text-3xl sm:text-4xl md:text-7xl font-black text-white mb-6 sm:mb-8 tracking-tighter leading-none">
                 Hire Faster. <br /> Check Easier.
@@ -322,8 +429,11 @@ const Home = () => {
                 Simplified hiring for everyone.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link to="/register/company" className="px-12 py-5 bg-[#4c8051] text-white rounded-xl font-black text-xs tracking-[0.2em] shadow-xl hover:-translate-y-1 transition-all active:scale-95">Get Started</Link>
-                <a href="mailto:ukibsdeveloper786@gmail.com" className="px-12 py-5 border-2 border-white/20 text-white rounded-xl font-black text-xs tracking-[0.2em] hover:bg-white/10 transition-all active:scale-95">Contact Us</a>
+                <Link to="/register/company" className="group px-12 py-5 bg-[#4c8051] text-white rounded-xl font-black text-xs tracking-[0.2em] shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all active:scale-95 relative overflow-hidden">
+                  <span className="relative z-10">Get Started</span>
+                  <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                </Link>
+                <a href="mailto:ukibsdeveloper786@gmail.com" className="px-12 py-5 border-2 border-white/20 text-white rounded-xl font-black text-xs tracking-[0.2em] hover:bg-white/10 hover:border-white/40 transition-all active:scale-95">Contact Us</a>
               </div>
             </div>
           </div>
@@ -331,6 +441,32 @@ const Home = () => {
       </section>
 
       <Footer />
+
+      {/* ───────── GLOBAL STYLES ───────── */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animation-delay-1000 { animation-delay: 1s; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(20px, -30px) scale(1.1); }
+          66% { transform: translate(-10px, 15px) scale(0.9); }
+        }
+        .animate-blob { animation: blob 8s ease-in-out infinite; }
+
+        @keyframes draw {
+          from { stroke-dasharray: 0, 500; }
+          to { stroke-dasharray: 500, 0; }
+        }
+        .animate-draw { animation: draw 2s ease-out forwards; animation-delay: 0.5s; stroke-dasharray: 0, 500; }
+      `}} />
     </div>
   );
 };

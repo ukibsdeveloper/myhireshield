@@ -1,27 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { analyticsAPI, reviewAPI } from '../utils/api';
+import { analyticsAPI, reviewAPI, companyAPI } from '../utils/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
+import AnalogGauge from '../components/AnalogGauge';
 import { formatDateDDMMYYYY } from '../utils/helpers';
 
 const CompanyDashboard = () => {
   const { user, logout } = useAuth();
   const [stats, setStats] = useState(null);
   const [allReviews, setAllReviews] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [empSearch, setEmpSearch] = useState('');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [analyticsRes, reviewsRes] = await Promise.all([
+        const [analyticsRes, reviewsRes, empRes] = await Promise.all([
           analyticsAPI.getCompanyAnalytics(),
-          reviewAPI.getByCompany()
+          reviewAPI.getByCompany(),
+          companyAPI.getEmployees()
         ]);
         if (analyticsRes.data.success) setStats(analyticsRes.data.data);
         if (reviewsRes.data.success) setAllReviews(reviewsRes.data.data || []);
+        if (empRes.data.success) setAllEmployees(empRes.data.data || []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -77,7 +82,7 @@ const CompanyDashboard = () => {
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                 </Link>
 
-                <Link to="/add-employee" className="group flex items-center justify-center gap-4 bg-white/5 backdrop-blur-xl text-white border border-white/10 px-6 sm:px-10 md:px-12 py-5 sm:py-7 rounded-[1.5rem] sm:rounded-[2rem] font-black text-xs tracking-[0.2em] hover:bg-white hover:text-[#3a4e61] hover:-translate-y-1 active:translate-y-0 transition-all duration-500 shadow-xl whitespace-nowrap">
+                <Link to="/employee/add" className="group flex items-center justify-center gap-4 bg-white/5 backdrop-blur-xl text-white border border-white/10 px-6 sm:px-10 md:px-12 py-5 sm:py-7 rounded-[1.5rem] sm:rounded-[2rem] font-black text-xs tracking-[0.2em] hover:bg-white hover:text-[#3a4e61] hover:-translate-y-1 active:translate-y-0 transition-all duration-500 shadow-xl whitespace-nowrap">
                   <i className="fas fa-user-plus text-xs transition-transform group-hover:rotate-12"></i>
                   <span>Add Employee</span>
                 </Link>
@@ -213,59 +218,135 @@ const CompanyDashboard = () => {
           </div>
         </div>
 
-        {/* SECTION 3.5: ALL REVIEWED EMPLOYEES - HR can click any to modify/delete without searching */}
+        {/* SECTION 3.5: ALL EMPLOYEES — HR Management Panel */}
         <div className="mb-24">
-          <h2 className="text-[11px] font-black text-slate-400 tracking-[0.6em] ml-6 flex items-center gap-6 uppercase mb-8">
-            <span className="h-px w-16 bg-gradient-to-r from-slate-200 to-transparent"></span>
-            All Reviewed Employees
-          </h2>
-          <p className="text-slate-500 text-xs mb-8 ml-6 max-w-2xl">Click on any employee to manage their review (edit or delete) or view their profile. No need to search.</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h2 className="text-[11px] font-black text-slate-400 tracking-[0.6em] ml-6 flex items-center gap-6 uppercase">
+                <span className="h-px w-16 bg-gradient-to-r from-slate-200 to-transparent"></span>
+                All Registered Employees
+              </h2>
+              <p className="text-slate-400 text-xs mt-2 ml-6">
+                Manage all employees — view profiles, submit or edit reviews without searching.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+                <input
+                  type="text"
+                  placeholder="Filter employees..."
+                  value={empSearch}
+                  onChange={e => setEmpSearch(e.target.value)}
+                  className="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-600 outline-none focus:border-[#4c8051] focus:ring-2 focus:ring-[#4c8051]/10 transition-all w-48"
+                />
+              </div>
+              <Link
+                to="/employee/add"
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#4c8051] text-white rounded-xl text-xs font-black tracking-wider hover:bg-[#3d6641] transition-all shadow-md"
+              >
+                <i className="fas fa-user-plus"></i>
+                Add Employee
+              </Link>
+            </div>
+          </div>
+
           <div className="bg-white border border-slate-100 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[4rem] p-4 sm:p-8 md:p-12 shadow-sm overflow-hidden">
             {loading ? (
               <div className="flex justify-center py-16"><i className="fas fa-circle-notch fa-spin text-3xl text-[#4c8051]"></i></div>
-            ) : allReviews.length === 0 ? (
-              <div className="py-16 text-center text-slate-400">
-                <i className="fas fa-user-friends text-4xl mb-4 opacity-30"></i>
-                <p className="text-xs font-black tracking-widest">No reviews yet. Submit your first review from the button above.</p>
-                <Link to="/review/submit" className="inline-block mt-4 text-[#4c8051] font-black text-xs">Submit Review</Link>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left min-w-[600px]">
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="pb-6 pt-2 px-4 text-xs font-black text-slate-300 tracking-[0.4em]">Employee</th>
-                      <th className="pb-6 pt-2 px-4 text-xs font-black text-slate-300 tracking-[0.4em]">Designation</th>
-                      <th className="pb-6 pt-2 px-4 text-xs font-black text-slate-300 tracking-[0.4em]">Date (DD-MM-YYYY)</th>
-                      <th className="pb-6 pt-2 px-4 text-xs font-black text-slate-300 tracking-[0.4em] text-center">Rating</th>
-                      <th className="pb-6 pt-2 px-4 text-xs font-black text-slate-300 tracking-[0.4em] text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {allReviews.map((r) => (
-                      <tr key={r._id} className="hover:bg-slate-50/50 transition-all">
-                        <td className="py-6 px-4">
-                          <span className="font-black text-[#3a4e61]">{r.employeeId?.firstName} {r.employeeId?.lastName}</span>
-                        </td>
-                        <td className="py-6 px-4 text-xs font-bold text-slate-500">{r.employmentDetails?.designation || '—'}</td>
-                        <td className="py-6 px-4 text-xs font-bold text-slate-500">{formatDateDDMMYYYY(r.createdAt)}</td>
-                        <td className="py-6 px-4 text-center">
-                          <span className="text-2xl font-black text-[#4c8051]">{Math.round((r.averageRating || 0) * 10) / 10}</span>
-                          <span className="text-slate-300 text-xs">/10</span>
-                        </td>
-                        <td className="py-6 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2 flex-wrap">
-                            <Link to={`/review/edit/${r._id}`} className="px-4 py-2 bg-[#496279] text-white rounded-xl text-xs font-black tracking-widest hover:bg-[#4c8051] transition-all">Edit Review</Link>
-                            <Link to={`/employee/${r.employeeId?._id}`} className="px-4 py-2 bg-white border border-slate-200 text-[#496279] rounded-xl text-xs font-black tracking-widest hover:border-[#4c8051] hover:text-[#4c8051] transition-all">View Profile</Link>
-                            <Link to="/review/manage" className="px-4 py-2 text-[#dd8d88] rounded-xl text-xs font-black tracking-widest hover:bg-[#dd8d88]/10 transition-all">Manage</Link>
-                          </div>
-                        </td>
+            ) : (() => {
+              const filtered = allEmployees.filter(e =>
+                !empSearch || `${e.firstName} ${e.lastName} ${e.email} ${e.currentDesignation || ''}`.toLowerCase().includes(empSearch.toLowerCase())
+              );
+              return filtered.length === 0 ? (
+                <div className="py-16 text-center text-slate-400">
+                  <i className="fas fa-user-friends text-4xl mb-4 opacity-30 block"></i>
+                  {allEmployees.length === 0 ? (
+                    <>
+                      <p className="text-xs font-black tracking-widest">No employees registered yet.</p>
+                      <Link to="/employee/add" className="inline-flex items-center gap-2 mt-4 text-[#4c8051] font-black text-xs">
+                        <i className="fas fa-user-plus"></i> Add Your First Employee
+                      </Link>
+                    </>
+                  ) : (
+                    <p className="text-xs font-black tracking-widest">No employees match your search.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left min-w-[700px]">
+                    <thead>
+                      <tr className="border-b border-slate-100">
+                        <th className="pb-5 pt-2 px-4 text-[10px] font-black text-slate-300 tracking-[0.4em] uppercase">Employee</th>
+                        <th className="pb-5 pt-2 px-4 text-[10px] font-black text-slate-300 tracking-[0.4em] uppercase">Designation / Dept</th>
+                        <th className="pb-5 pt-2 px-4 text-[10px] font-black text-slate-300 tracking-[0.4em] uppercase text-center">Trust Score</th>
+                        <th className="pb-5 pt-2 px-4 text-[10px] font-black text-slate-300 tracking-[0.4em] uppercase text-center">Reviews</th>
+                        <th className="pb-5 pt-2 px-4 text-[10px] font-black text-slate-300 tracking-[0.4em] uppercase text-right">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {filtered.map((emp) => {
+                        const score = emp.overallScore || 0;
+                        const scoreColor = score >= 67 ? '#4c8051' : score >= 34 ? '#d4a017' : '#da8b86';
+                        const scoreLabel = score >= 67 ? 'Excellent' : score >= 34 ? 'Average' : (score === 0 ? 'No Reviews' : 'Poor');
+                        return (
+                          <tr key={emp._id} className="hover:bg-slate-50/40 transition-all group">
+                            <td className="py-5 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-[#496279] transition-all flex items-center justify-center text-xs font-black text-[#496279] group-hover:text-white flex-shrink-0">
+                                  {emp.firstName?.charAt(0) || 'E'}
+                                </div>
+                                <div>
+                                  <p className="font-black text-[#3a4e61] text-sm">{emp.firstName} {emp.lastName}</p>
+                                  <p className="text-xs text-slate-400 font-medium truncate max-w-[140px]">{emp.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-5 px-4">
+                              <p className="text-xs font-bold text-slate-600">{emp.currentDesignation || emp.designation || '—'}</p>
+                              <p className="text-xs text-slate-400">{emp.department || ''}</p>
+                            </td>
+                            <td className="py-5 px-4 text-center">
+                              <div className="flex flex-col items-center gap-1">
+                                <div className="flex items-baseline gap-1">
+                                  <span className="text-2xl font-black" style={{ color: scoreColor }}>{score}</span>
+                                  <span className="text-slate-300 text-xs">/100</span>
+                                </div>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${scoreColor}15`, color: scoreColor }}>
+                                  {scoreLabel}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-5 px-4 text-center">
+                              <span className="text-sm font-black text-[#496279]">{emp.totalReviews || 0}</span>
+                            </td>
+                            <td className="py-5 px-4 text-right">
+                              <div className="flex items-center justify-end gap-2 flex-wrap">
+                                <Link
+                                  to={`/employee/${emp._id}`}
+                                  className="px-3 py-1.5 bg-white border border-slate-200 text-[#496279] rounded-lg text-xs font-black hover:border-[#496279] hover:bg-[#496279] hover:text-white transition-all"
+                                >
+                                  View
+                                </Link>
+                                <Link
+                                  to={`/review/submit?employeeId=${emp._id}`}
+                                  className="px-3 py-1.5 bg-[#4c8051] text-white rounded-lg text-xs font-black hover:bg-[#3d6641] transition-all"
+                                >
+                                  Review
+                                </Link>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <p className="mt-4 text-xs text-slate-400 text-right pr-4">
+                    Showing {filtered.length} of {allEmployees.length} employee{allEmployees.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
         </div>
 

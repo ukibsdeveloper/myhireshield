@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import EmailVerificationBanner from '../components/EmailVerificationBanner';
+import AnalogGauge from '../components/AnalogGauge';
 import { formatDateDDMMYYYY } from '../utils/helpers';
 
 const EmployeeDashboard = () => {
@@ -66,12 +67,12 @@ const EmployeeDashboard = () => {
                   <p className="text-white/40 font-bold text-xs tracking-[0.3em] uppercase">{user?.firstName} {user?.lastName} // Verified Account</p>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[3rem] border border-white/10 text-center min-w-[200px]">
-                  <p className="text-xs font-black opacity-50 mb-2 uppercase">Trust Score</p>
+                <div className="bg-white/8 backdrop-blur-xl p-8 rounded-[3rem] border border-white/10 text-center min-w-[220px] flex flex-col items-center">
+                  <p className="text-[10px] font-black text-white/50 mb-4 uppercase tracking-[0.3em]">Trust Score</p>
                   {loading ? (
-                    <div className="h-16 w-32 bg-white/10 animate-pulse rounded-2xl mx-auto"></div>
+                    <div className="h-32 w-32 bg-white/10 animate-pulse rounded-full mx-auto"></div>
                   ) : (
-                    <p className="text-7xl font-black text-[#4c8051] tracking-tighter leading-none">{shieldScore}%</p>
+                    <AnalogGauge score={shieldScore} size={180} label="" animate={true} />
                   )}
                 </div>
               </div>
@@ -132,22 +133,31 @@ const EmployeeDashboard = () => {
                 { label: 'Behavior', key: 'behavior' },
                 { label: 'Teamwork', key: 'teamwork' },
                 { label: 'Communication', key: 'communication' },
-                { label: 'Skills', key: 'technicalSkills' }
-              ].map((metric, i) => (
-                <div key={i} className="space-y-3">
-                  <div className="flex justify-between items-end">
-                    <span className="text-xs font-black text-[#496279] uppercase tracking-widest">{metric.label}</span>
-                    {loading ? (
-                      <div className="h-3 w-10 bg-slate-100 animate-pulse rounded"></div>
-                    ) : (
-                      <span className="text-xs font-black text-[#4c8051] tracking-tighter">{(stats?.scoreBreakdown?.[metric.key] || 0) / 10} / 10</span>
-                    )}
+                { label: 'Technical Skills', key: 'technicalSkills' }
+              ].map((metric, i) => {
+                const rawVal = stats?.scoreBreakdown?.[metric.key] || 0;
+                const displayVal = Math.round(rawVal / 10 * 10) / 10;
+                const pct = Math.min(rawVal, 100);
+                const barColor = pct >= 70 ? '#4c8051' : pct >= 35 ? '#d4a017' : '#da8b86';
+                return (
+                  <div key={i} className="space-y-3">
+                    <div className="flex justify-between items-end">
+                      <span className="text-xs font-black text-[#496279] uppercase tracking-widest">{metric.label}</span>
+                      {loading ? (
+                        <div className="h-3 w-10 bg-slate-100 animate-pulse rounded"></div>
+                      ) : (
+                        <span className="text-xs font-black tracking-tighter" style={{ color: barColor }}>{displayVal} / 10</span>
+                      )}
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-1000"
+                        style={{ width: loading ? '0%' : `${pct}%`, backgroundColor: barColor }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="h-1 w-full bg-slate-50 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-slate-200 to-[#4c8051] rounded-full transition-all duration-1000" style={{ width: loading ? '0%' : `${stats?.scoreBreakdown?.[metric.key] || 0}%` }}></div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

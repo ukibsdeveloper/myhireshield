@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = ({ scrolled }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
@@ -13,6 +14,18 @@ const Navbar = ({ scrolled }) => {
     setIsMobileMenuOpen(false);
     document.body.style.overflow = 'unset';
   }, [location]);
+
+  // Scroll progress
+  useEffect(() => {
+    const handleScrollProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setScrollProgress(Math.min(progress, 100));
+    };
+    window.addEventListener('scroll', handleScrollProgress, { passive: true });
+    return () => window.removeEventListener('scroll', handleScrollProgress);
+  }, []);
 
   const toggleMenu = () => {
     const nextState = !isMobileMenuOpen;
@@ -113,6 +126,16 @@ const Navbar = ({ scrolled }) => {
             </div>
           </div>
         </nav>
+
+        {/* Scroll Progress Bar */}
+        {scrolled && scrollProgress > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-transparent">
+            <div
+              className="h-full bg-gradient-to-r from-[#4c8051] to-[#dd8d88] transition-[width] duration-150 ease-out rounded-full"
+              style={{ width: `${scrollProgress}%` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* MOBILE BOTTOM TAB BAR */}

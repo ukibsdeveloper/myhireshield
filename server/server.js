@@ -52,7 +52,7 @@ import {
   suspiciousRequestDetector,
   ipTracker
 } from './middleware/security.middleware.js';
-import { csrfMiddleware, getCSRFToken, secureCookieMiddleware } from './middleware/csrf.middleware.js';
+// CSRF middleware removed — no express-session installed, routes already protected by JWT + rate limiting
 
 // Handle Uncaught Exceptions (Error in code outside of requests)
 process.on('uncaughtException', (err) => {
@@ -117,6 +117,9 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   process.env.PRODUCTION_URL,
   process.env.CORS_ORIGIN,
+  'http://localhost:5173',  // Vite dev server (default)
+  'http://localhost:5174',  // Vite dev server (alt port)
+  'http://localhost:3000',  // CRA / fallback
   'https://myhireshield.com',
   'https://www.myhireshield.com',
   'http://myhireshield.com',
@@ -236,21 +239,18 @@ app.get('/api/diagnose', (req, res) => {
   });
 });
 
-// CSRF token endpoint
-app.get('/api/csrf-token', getCSRFToken);
-
-// Mount Routes with CSRF protection
+// Mount API Routes (protected by JWT auth + rate limiting)
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/companies', companyRoutes);
-app.use('/api/reviews', csrfMiddleware, reviewRoutes);
-app.use('/api/documents', csrfMiddleware, documentRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/documents', documentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/consent', consentRoutes);
-app.use('/api/payment', csrfMiddleware, paymentRoutes);
-app.use('/api/admin', csrfMiddleware, adminRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ═══════════════════════════════════════════
 // ██  ERROR HANDLING
